@@ -1,0 +1,156 @@
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.loginToViewDocumentsContainer {
+  border: #eee 1px solid;
+  border-radius: 0.5rem;
+  min-height: 10rem;
+
+  .titleContainer {
+    border-radius: 0.5rem 0.5rem 0 0;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.9rem;
+    color: #696969;
+  }
+
+  .loginContent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .loginLink {
+      text-decoration: none;
+      color: #42a5f5;
+      border-radius: 0.5rem;
+      border: none;
+      font-size: 1rem;
+      background-color: #eee;
+      padding: 0.5rem;
+      margin-top: 1.5rem;
+    }
+  }
+
+  .content {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Creates 3 equal-width columns */
+    gap: 1rem; /* Adds spacing between columns */
+    padding: 1rem; /* Adds padding around the container */
+    align-items: stretch;
+
+    a {
+      text-decoration: none;
+      color: #42a5f5;
+      border-radius: 0.5rem;
+      border: 1px solid #bdbdbd;
+    }
+
+    .document {
+      display: flex;
+      flex-flow: column nowrap;
+      align-items: center;
+      gap: 0.5rem;
+      height: 100%;
+      padding: 0.5rem;
+
+      img {
+        height: 2.5rem;
+        width: 2.5rem;
+      }
+
+      p {
+        margin-top: 0;
+        margin-bottom: 0;
+        text-align: center;
+        font-size: 0.9rem;
+        color: #000;
+      }
+    }
+  }
+}
+
+.container {
+  .identityInformation {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    background-color: #f5f5f5;
+    padding: 1rem;
+    border-radius: 1rem;
+    margin-top: 1rem;
+    padding-bottom: 2rem;
+
+    .photo {
+      border-radius: 50%;
+      height: 10rem;
+      width: 10rem;
+      background-color: #696969;
+      object-fit: contain;
+    }
+
+    .fullName {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .role {
+      font-size: 1rem;
+      margin-top: 0rem;
+      margin-bottom: 0;
+      text-align: center;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .division {
+      font-size: 1rem;
+      margin-top: 0.3rem;
+      text-align: center;
+    }
+  }
+
+  .labelYo {
+    font-weight: 600;
+  }
+
+  .documents {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 1rem;
+
+    a {
+      text-decoration: none;
+    }
+
+    .document {
+      display: flex;
+      flex-flow: column nowrap;
+      align-items: center;
+      border: 1px solid #42a5f5;
+      gap: 0.5rem;
+      border-radius: 0.5rem;
+      width: 5rem;
+      padding: 0.5rem;
+
+      img {
+        height: 2.5rem;
+        width: 2.5rem;
+      }
+
+      p {
+        margin-top: 0;
+        margin-bottom: 0;
+        text-align: center;
+        font-size: 0.9rem;
+        color: #000;
+      }
+    }
+  }
+}

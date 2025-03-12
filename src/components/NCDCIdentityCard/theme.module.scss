@@ -1,0 +1,240 @@
+$card-height: 1620px;
+$card-width: 2568px;
+
+.container {
+  h1,
+  h2,
+  p,
+  div,
+  span {
+    font-family: 'Maven Pro', sans-serif !important;
+  }
+
+  .page {
+    width: $card-width;
+    height: $card-height;
+    margin: 3px * 30 auto;
+    position: relative;
+
+    .background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      height: $card-height;
+      width: $card-width;
+    }
+
+    .heading {
+      position: absolute;
+      top: 2px * 30;
+      left: 12.5px * 30;
+      font-size: 3.4px * 30;
+      margin-top: -1px * 30;
+      margin-bottom: 0;
+      font-family: 'Maven Pro', sans-serif !important;
+      font-weight: 700;
+      color: #000;
+    }
+
+    .subHeading {
+      position: absolute;
+      top: 5px * 30;
+      left: 12.5px * 30;
+      font-size: 2.6px * 30;
+      margin-top: 0;
+      margin-bottom: 1.5px * 30;
+      font-weight: 400;
+      color: #000;
+    }
+
+    .photo {
+      position: absolute;
+      top: 13px * 30;
+      left: 3px * 30;
+      height: 28.6px * 30;
+      width: 22.24px * 30;
+      object-fit: cover;
+      border-radius: 1px * 30;
+    }
+
+    .cardNumberFront {
+      position: absolute;
+      bottom: 5px * 30;
+      left: 62px * 30;
+      // width: $card-width - 6px * 30;
+      color: #000;
+      font-size: 3.8px * 30;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .information {
+      position: absolute;
+      display: flex;
+      flex-flow: column nowrap;
+      top: 13px * 30;
+      left: 3px * 30 + 22.24px * 30 + 2px * 30;
+
+      .row {
+        margin-bottom: 0px * 30;
+
+        .label {
+          font-size: 1.5px * 30;
+          margin-top: 0;
+          margin-bottom: 0px * 30;
+          font-weight: 400;
+        }
+
+        .value {
+          font-size: 2.4px * 30;
+          font-weight: 500;
+          margin-top: -0.3px * 30;
+          margin-bottom: 0;
+          text-transform: uppercase;
+          max-width: 46px * 30;
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+
+      .columns {
+        display: flex;
+        flex-flow: row nowrap;
+        gap: 6px * 30;
+      }
+    }
+
+    .signatureBack {
+      position: absolute;
+      bottom: 4px * 30;
+      left: 69px * 30;
+      display: flex;
+      flex-flow: column nowrap;
+      align-items: center;
+
+      .signature {
+        font-size: 3.2px * 30;
+        font-weight: 500;
+        margin-bottom: 0;
+        font-family: 'Dancing Script', cursive !important;
+      }
+
+      .label {
+        font-size: 1.6px * 30;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-top: 1px solid #000;
+        min-width: 14px * 30;
+        text-align: center;
+        font-weight: 500;
+      }
+    }
+
+    .signaturesContainer {
+      position: absolute;
+      bottom: 2px * 30;
+      left: 3px * 30;
+      right: 3px * 30;
+      width: $card-width - 6px * 30;
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: space-between;
+      align-items: flex-end;
+
+      .signature {
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: center;
+
+        .signatureImage {
+          height: 6px * 30;
+        }
+
+        .label {
+          font-size: 1.6px * 30;
+          margin-top: 0;
+          margin-bottom: 0;
+          border-top: 1px solid #000;
+          min-width: 20px * 30;
+          text-align: center;
+          font-weight: 400;
+        }
+      }
+    }
+
+    &.back {
+      .photo {
+        position: absolute;
+        right: 25px * 30;
+        top: 3px * 30;
+        left: auto;
+        height: 7.47px * 30;
+        width: 5.8px * 30;
+        filter: grayscale(100%) opacity(50%) brightness(90%) contrast(0.9) sepia(100%)
+          hue-rotate(200deg);
+      }
+
+      .qrCodeContainer {
+        position: absolute;
+        top: 3px * 30;
+        right: 3px * 30;
+        width: 20px * 30;
+        height: 20px * 30;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #fff;
+        border-radius: 1px * 30;
+      }
+
+      .information {
+        position: absolute;
+        bottom: 1.5px * 30;
+        left: 3px * 30;
+        flex-flow: column nowrap;
+        justify-content: flex-end;
+      }
+    }
+
+    &.hidden {
+      .photo {
+        position: absolute;
+        right: calc($card-width / 2 - 22.24px * 30 / 2);
+        top: calc($card-height / 2 - 28.6px * 30 / 2);
+        left: auto;
+        height: 28.6px * 30;
+        width: 22.24px * 30;
+        object-fit: cover;
+      }
+    }
+  }
+}
+
+@page {
+  size: $card-width $card-height;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    width: $card-width;
+    height: $card-height;
+  }
+
+  .page {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none;
+    border-radius: none;
+    width: $card-width;
+    height: $card-height;
+    box-shadow: none;
+    // background: initial;
+    page-break-after: avoid;
+  }
+}

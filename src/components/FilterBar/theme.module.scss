@@ -1,0 +1,26 @@
+.filtersContainer {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+
+  .filter {
+    padding: 0.4rem 0.5rem;
+    border-radius: 0.5rem;
+    color: #212121;
+    font-size: 0.9rem;
+    border: 1px solid #eee;
+    cursor: pointer;
+    font-size: 0.9rem;
+
+    &:hover {
+      background-color: #eee;
+    }
+
+    &.active {
+      background-color: #ffe0b2;
+      color: #212121;
+    }
+  }
+}

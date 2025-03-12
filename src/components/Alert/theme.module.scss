@@ -1,0 +1,30 @@
+.container {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+
+  .row {
+    padding: 0.3rem 0.8rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .info {
+    background-color: rgba($color: #dcdcdc, $alpha: 0.7);
+  }
+
+  .warning {
+    background-color: rgba($color: #fbdc2d, $alpha: 0.7);
+  }
+
+  .success {
+    background-color: rgba($color: #2dfb4c, $alpha: 0.7);
+  }
+
+  .error {
+    background-color: rgba($color: #fb2626, $alpha: 0.7);
+  }
+}

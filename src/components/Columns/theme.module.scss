@@ -1,0 +1,23 @@
+.container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin: 0;
+
+  .column {
+    flex: 1;
+  }
+
+  &.bordered {
+    border-bottom: 1px solid #eee;
+
+    .column {
+      border-right: 1px solid #eee;
+
+      &:last-child {
+        border-right: none;
+      }
+    }
+  }
+}
