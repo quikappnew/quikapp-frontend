@@ -299,14 +299,16 @@ const FormInput: FC<FormInputProps> = ({
       case 'select_with_search':
         return (
           <>
-            <Autocomplete
-              fullWidth={fullWidth}
-              placeholder={placeholder}
-              onSelect={e => handleChange((e.target as HTMLInputElement).value)}
+            <Autocomplete<{ label: string; value: string }>
+              fullWidth
               disablePortal
               size="small"
-              options={options ? options : []}
-              renderInput={params => <TextField {...params} />}
+              options={options || []}
+              getOptionLabel={option => option.label}
+              onChange={(_, newValue) => handleChange(newValue?.value || '')}
+              renderInput={params => (
+                <TextField {...params} placeholder={placeholder} size="small" />
+              )}
             />
             <p className={theme.helperTextError}>
               {formState.errors && formState.errors[fieldName]}
