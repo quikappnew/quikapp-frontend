@@ -1,38 +1,34 @@
-import { useMutation } from '@apollo/client';
-import { gql } from '__generated__';
-import { UserStatusEnumType } from '__generated__/graphql';
-import { FC } from 'react';
+import { FC, useState } from 'react';
+import { UserStatusEnum } from '../../../types/api';
+import { updateUserStatus } from '../../../services/api';
+import { FormInput, FormPanelWithReadMode } from '../../../components/FormPanel';
 
-import { FormInput, FormPanelWithReadMode } from 'components/FormPanel';
-
-const UPDATE_USER_MUTATION = gql(`
-  mutation UpdateUserStatus($id: ID!, $status: UserStatusEnumType!) {
-    updateUserStatus(id: $id, status: $status) {
-      id
-      status
-      updatedAt
-    }
-  }
-`);
-
-const UpdateUserStatus: FC<{
+interface UpdateUserStatusProps {
   id: string;
-  status: UserStatusEnumType;
-}> = ({ id, status }) => {
-  const [updateUser, { loading, error }] = useMutation(UPDATE_USER_MUTATION);
+  status: UserStatusEnum;
+}
+
+const UpdateUserStatus: FC<UpdateUserStatusProps> = ({ id, status }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const handleSubmit = async (data: { status: UserStatusEnum }) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await updateUserStatus(id, data.status);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <FormPanelWithReadMode
       loading={loading}
       error={error}
-      onSubmit={data => {
-        updateUser({
-          variables: {
-            id,
-            status: data.status,
-          },
-        });
-      }}
+      onSubmit={handleSubmit}
       title="Status"
     >
       <FormInput
@@ -40,7 +36,7 @@ const UpdateUserStatus: FC<{
         fieldName="status"
         label="Status"
         defaultValue={status}
-        statusOptions={[UserStatusEnumType.Active, UserStatusEnumType.Inactive]}
+        statusOptions={[UserStatusEnum.ACTIVE, UserStatusEnum.INACTIVE]}
       />
     </FormPanelWithReadMode>
   );

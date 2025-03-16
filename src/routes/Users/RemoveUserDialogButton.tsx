@@ -1,56 +1,43 @@
-import { gql, useMutation } from '@apollo/client';
-import { FC } from 'react';
-import { useParams } from 'react-router';
+import { FC, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import ConfirmButton from 'components/ConfirmButton';
+import ConfirmButton from '../../components/ConfirmButton';
+import { deleteUser } from '../../services/api';
+import { ApiError } from '../../types/api';
 
-type RemoveUserMutationResponse = {
-  removeUser: {
-    id: string;
-  };
-};
-
-type RemoveUserMutationVariables = {
+interface Props {
   id: string;
-};
+  onComplete: () => void;
+}
 
-const REMOVE_USER_MUTATION = gql`
-  mutation RemoveUser($id: ID!) {
-    removeUser(id: $id) {
-      id
+const RemoveUserDialogButton: FC<Props> = ({ id, onComplete }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<ApiError | undefined>(undefined);
+  const navigate = useNavigate();
+
+  const handleRemoveUser = async () => {
+    try {
+      setLoading(true);
+      await deleteUser(id);
+      onComplete();
+      navigate('/users');
+    } catch (err) {
+      setError(err as ApiError);
+    } finally {
+      setLoading(false);
     }
-  }
-`;
-
-const RemoveUserDialogButton: FC<{ id: string; onComplete: () => void }> = ({ id, onComplete }) => {
-  const { provinceId } = useParams<{ provinceId: string }>();
-
-  const [removeUser, { loading, error }] = useMutation<
-    RemoveUserMutationResponse,
-    RemoveUserMutationVariables
-  >(REMOVE_USER_MUTATION, {
-    variables: {
-      id,
-    },
-    update(cache, { data }) {
-      if (!data) return;
-      const { removeUser } = data;
-      cache.modify({
-        id: `ProvinceType:${provinceId}`,
-        fields: {
-          users(existingUsersRef, { readField }) {
-            return existingUsersRef.filter(userRef => removeUser.id !== readField('id', userRef));
-          },
-        },
-      });
-    },
-    onCompleted: onComplete,
-  });
+  };
 
   return (
-    <ConfirmButton onConfirm={removeUser} loading={loading} error={error}>
-      Remove User
-    </ConfirmButton>
+    <ConfirmButton
+      onConfirm={handleRemoveUser}
+      loading={loading}
+      error={error}
+      title="Remove User"
+      description="Are you sure you want to remove this user? This action cannot be undone."
+      buttonText="Remove User"
+      color="error"
+    />
   );
 };
 

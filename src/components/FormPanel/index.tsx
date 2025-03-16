@@ -1,5 +1,4 @@
 import EditIcon from '@mui/icons-material/Edit';
-import { DateRangePicker } from '@mui/lab';
 import {
   Autocomplete,
   Box,
@@ -17,6 +16,7 @@ import {
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker';
 import classNames from 'classnames';
 import dayjs, { Dayjs } from 'dayjs';
 import React, {
@@ -359,14 +359,17 @@ const FormInput: FC<FormInputProps> = ({
         return (
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
-              value={formState.data[fieldName] ? formState.data[fieldName] : null}
-              onChange={newValue => {
-                handleChange(newValue);
-              }}
+              value={formState.data[fieldName]}
+              onChange={newValue => handleChange(newValue)}
               minDate={minDate}
               maxDate={maxDate}
-              renderInput={params => <TextField fullWidth={fullWidth} size="small" {...params} />}
-              inputFormat="DD/MM/YYYY"
+              slotProps={{
+                textField: {
+                  fullWidth: fullWidth,
+                  size: "small"
+                }
+              }}
+              format="DD/MM/YYYY"
             />
             <p className={theme.helperTextError}>
               {formState.errors && formState.errors[fieldName]}
@@ -379,19 +382,18 @@ const FormInput: FC<FormInputProps> = ({
             <DateRangePicker
               value={formState.data[fieldName]}
               onChange={newValue => handleChange(newValue)}
-              PopperProps={{
-                placement: 'bottom-start',
+              slotProps={{
+                textField: {
+                  fullWidth: fullWidth,
+                  size: "small"
+                },
+                popper: {
+                  placement: 'bottom-start'
+                }
               }}
               minDate={minDate}
               maxDate={maxDate}
-              renderInput={(startProps, endProps) => (
-                <React.Fragment>
-                  <TextField fullWidth={fullWidth} {...startProps} label={undefined} />
-                  <Box sx={{ mx: 2 }}> to </Box>
-                  <TextField fullWidth={fullWidth} {...endProps} label={undefined} />
-                </React.Fragment>
-              )}
-              inputFormat="DD/MM/YYYY"
+              format="DD/MM/YYYY"
             />
             <p className={theme.helperTextError}>
               {formState.errors && formState.errors[fieldName]}

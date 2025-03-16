@@ -1,62 +1,47 @@
-import { useQuery } from '@apollo/client';
-import { gql } from '__generated__';
-import { DocumentStatusEnumType, DocumentTypeEnumType } from '__generated__/graphql';
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import DataTable from 'components/DataTable';
-import ErrorMessage from 'components/ErrorMessage';
-import LoadingIndicator from 'components/LoadingIndicator';
+import DataTable from '../../../components/DataTable';
+import ErrorMessage from '../../../components/ErrorMessage';
+import LoadingIndicator from '../../../components/LoadingIndicator';
+import { getDocuments } from '../../../services/api';
+import type { ApiError, Document } from '../../../types/api';
 
 import CreateDocumentDialogButton from './CreateDocumentDialogButton';
 
-type Document = {
-  id: string;
-  type: DocumentTypeEnumType;
-  name: string;
-  description?: string;
-  file: string;
-  status: DocumentStatusEnumType;
-  createdAt: string;
-};
-
-const USER_DOCUMENTS = gql(`
-  query UserDocuments($userId: ID!) {
-    user(id: $userId) {
-      id
-      documents {
-        id
-        type
-        name
-        description
-        file
-        status
-        createdAt
-      }
-    }
-  }
-`);
-
 const UserDocuments: FC = () => {
   const { userId } = useParams<{ userId: string }>() as { userId: string };
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<ApiError | undefined>(undefined);
+  const [documents, setDocuments] = useState<Document[]>([]);
 
-  const { loading, error, data, refetch } = useQuery(USER_DOCUMENTS, {
-    variables: {
-      userId,
-    },
-  });
+  const fetchDocuments = async () => {
+    if (!userId) return;
+    try {
+      setLoading(true);
+      const data = await getDocuments(userId);
+      setDocuments(data);
+      setError(undefined);
+    } catch (err) {
+      setError(err as ApiError);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (loading && !data) return <LoadingIndicator />;
+  useEffect(() => {
+    fetchDocuments();
+  }, [userId]);
 
-  if (error || !data) return <ErrorMessage error={error} refetch={refetch} />;
+  if (loading && !documents.length) return <LoadingIndicator />;
 
-  const documents = data.user.documents;
+  if (error) return <ErrorMessage error={error} onRetry={fetchDocuments} />;
 
   return (
     <>
       <CreateDocumentDialogButton />
       <DataTable
-        data={documents as Document[]}
+        data={documents}
         columns={[
           {
             label: 'Type',
@@ -75,13 +60,13 @@ const UserDocuments: FC = () => {
           },
           {
             label: 'File',
-            fieldName: 'file',
+            fieldName: 'fileUrl',
             type: 'FILE',
           },
           {
             label: 'Status',
             fieldName: 'status',
-            type: 'STRING',
+            type: 'STATUS',
           },
           {
             label: 'Created At',

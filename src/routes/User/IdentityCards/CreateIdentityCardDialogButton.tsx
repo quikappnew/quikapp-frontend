@@ -1,66 +1,36 @@
-import { useMutation } from '@apollo/client';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
-import { gql } from '__generated__';
 import { FC, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import Button from 'components/Button';
-import { FormInput, FormPanel } from 'components/FormPanel';
+import Button from '../../../components/Button';
+import { FormInput, FormPanel } from '../../../components/FormPanel';
+import { createIdentityCard } from '../../../services/api';
+import { ApiError } from '../../../types/api';
 
-const CREATE_IDENTITY_CARD_MUTATION = gql(`
-  mutation CreateIdentityCard(
-    $userId: ID!
-    $cardNumber: String!
-    $issueDate: String!
-    $expiryDate: String!
-  ) {
-    createIdentityCard(
-      userId: $userId
-      cardNumber: $cardNumber
-      issueDate: $issueDate
-      expiryDate: $expiryDate
-    ) {
-      id
-      cardNumber
-      issueDate
-      expiryDate
-      createdAt
-      updatedAt
-    }
-  }
-`);
+interface CreateIdentityCardData {
+  cardNumber?: string;
+  issueDate?: string;
+  expiryDate?: string;
+}
 
 const CreateIdentityCardDialogButton: FC = () => {
   const [showDialog, toggleDialog] = useState(false);
   const { userId } = useParams<{ userId: string }>() as { userId: string };
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<ApiError | undefined>(undefined);
 
-  const [createIdentityCard, { loading, error }] = useMutation(CREATE_IDENTITY_CARD_MUTATION, {
-    update(cache, { data }) {
-      if (!data) return;
-      cache.modify({
-        id: `UserType:${userId}`,
-        fields: {
-          identityCards(existingIdentityCardsRef) {
-            const newIdentityCardNodeRef = cache.writeFragment({
-              data: data.createIdentityCard,
-              fragment: gql(`
-                fragment NewIdentityCard on IdentityCardType {
-                  id
-                  cardNumber
-                  issueDate
-                  expiryDate
-                  status
-                  updatedAt
-                  createdAt
-                }
-              `),
-            });
-            return [newIdentityCardNodeRef, ...existingIdentityCardsRef];
-          },
-        },
-      });
-    },
-  });
+  const handleSubmit = async (data: CreateIdentityCardData) => {
+    try {
+      setLoading(true);
+      setError(undefined);
+      await createIdentityCard(userId, data);
+      toggleDialog(false);
+    } catch (err) {
+      setError(err as ApiError);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -74,16 +44,7 @@ const CreateIdentityCardDialogButton: FC = () => {
             loading={loading}
             error={error}
             onCancel={() => toggleDialog(false)}
-            onSubmit={data => {
-              createIdentityCard({
-                variables: {
-                  userId,
-                  cardNumber: data.cardNumber,
-                  issueDate: data.issueDate,
-                  expiryDate: data.expiryDate,
-                },
-              }).then(() => toggleDialog(false));
-            }}
+            onSubmit={handleSubmit}
           >
             <FormInput
               fullWidth

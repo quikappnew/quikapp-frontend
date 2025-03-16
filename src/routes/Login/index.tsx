@@ -1,9 +1,10 @@
-import { UserType } from '__generated__/graphql';
 import { FC } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 
 import { FormInput, FormPanel } from 'components/FormPanel';
+import { login } from 'services/api';
+import { User } from 'types/api';
 
 import pngLogo from 'media/pngLogo.png';
 
@@ -14,6 +15,12 @@ const Login: FC = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const redirectTo = searchParams.get('redirectTo');
+
+  const handleSubmit = async (formData: { email: string; password: string }) => {
+    const user = await login(formData.email, formData.password);
+    storeLoginCredentials(user, formData.password);
+    navigate(redirectTo || '/users');
+  };
 
   return (
     <div className="max-w-sm mx-auto mt-4 px-4">
@@ -27,10 +34,7 @@ const Login: FC = () => {
       <FormPanel
         loading={false}
         error={null}
-        onSubmit={formData => {
-          storeLoginCredentials(formData.email as UserType, `Bearer ${formData.password}`);
-          navigate(redirectTo || '/users');
-        }}
+        onSubmit={handleSubmit}
         submitButtonLabel="Login"
       >
         <FormInput fieldName="email" type="string" defaultValue="" label="Email" fullWidth />

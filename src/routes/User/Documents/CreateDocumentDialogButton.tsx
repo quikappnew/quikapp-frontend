@@ -1,71 +1,37 @@
-import { useMutation } from '@apollo/client';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
-import { gql } from '__generated__';
 import { FC, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import Button from 'components/Button';
-import { FormInput, FormPanel } from 'components/FormPanel';
+import Button from '../../../components/Button';
+import { FormInput, FormPanel } from '../../../components/FormPanel';
+import { createDocument } from '../../../services/api';
+import { ApiError, DocumentTypeEnum } from '../../../types/api';
 
-const CREATE_DOCUMENT_MUTATION = gql(`
-  mutation CreateDocument(
-    $userId: ID!
-    $name: String!
-    $description: String
-    $type: DocumentTypeEnumType!
-    $file: Upload!
-  ) {
-    createDocument(
-      userId: $userId
-      name: $name
-      description: $description
-      type: $type
-      file: $file
-    ) {
-      id
-      name
-      description
-      type
-      file
-      status
-      createdAt
-      updatedAt
-    }
-  }
-`);
+interface CreateDocumentData {
+  name: string;
+  description?: string;
+  type: DocumentTypeEnum;
+  file: File;
+}
 
 const CreateDocumentDialogButton: FC = () => {
   const [showDialog, toggleDialog] = useState(false);
   const { userId } = useParams<{ userId: string }>() as { userId: string };
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<ApiError | undefined>(undefined);
 
-  const [createDocument, { loading, error }] = useMutation(CREATE_DOCUMENT_MUTATION, {
-    update(cache, { data }) {
-      if (!data) return;
-      cache.modify({
-        id: `UserType:${userId}`,
-        fields: {
-          documents(existingDocumentsRef) {
-            const newDocumentNodeRef = cache.writeFragment({
-              data: data.createDocument,
-              fragment: gql(`
-                fragment NewDocument on DocumentType {
-                  id
-                  name
-                  description
-                  type
-                  file
-                  status
-                  updatedAt
-                  createdAt
-                }
-              `),
-            });
-            return [newDocumentNodeRef, ...existingDocumentsRef];
-          },
-        },
-      });
-    },
-  });
+  const handleSubmit = async (data: CreateDocumentData) => {
+    try {
+      setLoading(true);
+      setError(undefined);
+      await createDocument(userId, data);
+      toggleDialog(false);
+    } catch (err) {
+      setError(err as ApiError);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -79,17 +45,7 @@ const CreateDocumentDialogButton: FC = () => {
             loading={loading}
             error={error}
             onCancel={() => toggleDialog(false)}
-            onSubmit={data => {
-              createDocument({
-                variables: {
-                  userId,
-                  name: data.name,
-                  description: data.description,
-                  type: data.type,
-                  file: data.file,
-                },
-              }).then(() => toggleDialog(false));
-            }}
+            onSubmit={handleSubmit}
           >
             <FormInput
               fullWidth
@@ -115,11 +71,10 @@ const CreateDocumentDialogButton: FC = () => {
               label="Type"
               defaultValue=""
               options={[
-                { value: 'PAY_SLIP', label: 'Pay Slip' },
-                { value: 'DRIVING_LICENSE', label: 'Driving License' },
-                { value: 'NATIONAL_ID', label: 'National ID' },
-                { value: 'PASSPORT', label: 'Passport' },
-                { value: 'OTHER', label: 'Other' },
+                { value: DocumentTypeEnum.PASSPORT, label: 'Passport' },
+                { value: DocumentTypeEnum.DRIVERS_LICENSE, label: 'Drivers License' },
+                { value: DocumentTypeEnum.BIRTH_CERTIFICATE, label: 'Birth Certificate' },
+                { value: DocumentTypeEnum.OTHER, label: 'Other' },
               ]}
               validators={{
                 required: true,

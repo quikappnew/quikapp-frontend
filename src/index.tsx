@@ -1,76 +1,13 @@
-import { ApolloClient, ApolloProvider, InMemoryCache, from } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
-import { onError } from '@apollo/client/link/error';
-import { createTheme } from '@mui/material';
-import { ThemeProvider } from '@mui/material/styles';
-import { createUploadLink } from 'apollo-upload-client';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-
-import { getToken } from 'utils/auth';
-import paginationHelper from 'utils/pagination-helper';
+import { createTheme } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import App from './routes';
-
-const httpLink = createUploadLink({
-  uri: process.env.REACT_APP_BACKEND,
-});
-
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-  if (graphQLErrors)
-    graphQLErrors.forEach(({ extensions }) => {
-      // if (
-      //   extensions &&
-      //   (extensions.code === 'AUTHENTICATION_ERROR' || extensions.code === 'UNAUTHENTICATED')
-      // ) {
-      //   logout();
-      // }
-    });
-  if (networkError) console.log(`[Network error]: ${networkError}`);
-});
-
-const authLink = setContext((_, { headers }) => {
-  // get the authentication token from local storage if it exists
-  // const token = localStorage.getItem('token');
-  // return the headers to the context so httpLink can read them
-  return {
-    headers: {
-      ...headers,
-      authorization: getToken(),
-      'Apollo-Require-Preflight': 'true',
-    },
-  };
-});
-
-const client = new ApolloClient({
-  link: from([errorLink, authLink.concat(httpLink)]),
-  connectToDevTools: process.env.NODE_ENV !== 'production',
-  cache: new InMemoryCache({
-    typePolicies: {
-      Query: {
-        fields: {
-          users: paginationHelper(),
-          employees: paginationHelper(),
-        },
-      },
-      ProvinceType: {
-        fields: {
-          users: paginationHelper(),
-          identityCards: paginationHelper(),
-          printSessions: paginationHelper(),
-          designations: paginationHelper(),
-        },
-      },
-      IdentityCardType: {
-        fields: {
-          scanAudits: paginationHelper(),
-        },
-      },
-    },
-  }),
-});
 
 const theme = createTheme({
   palette: {
@@ -89,9 +26,9 @@ const root = createRoot(container!);
 root.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
-      <ApolloProvider client={client}>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
         <App />
-      </ApolloProvider>
+      </LocalizationProvider>
     </ThemeProvider>
   </React.StrictMode>
 );

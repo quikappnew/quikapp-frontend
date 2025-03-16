@@ -18,135 +18,137 @@ import UserCards from './User/IdentityCards';
 import UserInformation from './User/Information';
 import AdministrationUsers from './Users';
 
-const router = createBrowserRouter([
-  {
-    path: '*',
-    element: <RouteNotFound />,
-  },
-  {
-    path: '/login',
-    element: <Login />,
-  },
-  {
-    path: '/',
-    element: (
-      <ProtectedRoute>
-        <AdministrationUsers />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/create-user',
-    element: <CreateUserPage />,
-  },
-  {
-    path: '/users',
-    children: [
-      {
-        index: true,
-        element: (
-          <ProtectedRoute>
-            <AdministrationUsers />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: ':userId',
-        element: (
-          <ProtectedRoute>
-            <User />
-          </ProtectedRoute>
-        ),
-        children: [
-          {
-            index: true,
-            element: (
-              <ProtectedRoute>
-                <UserInformation />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: 'documents',
-            element: (
-              <ProtectedRoute>
-                <UserDocuments />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: 'identity-cards',
-            element: (
-              <ProtectedRoute>
-                <UserCards />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: 'activity',
-            element: (
-              <ProtectedRoute>
-                <UserActivity />
-              </ProtectedRoute>
-            ),
-          },
-        ],
-      },
-    ],
-  },
-  {
-    path: '/identities/:identityCardId',
-    element: <IdentityCardPublic />,
-  },
-  {
-    path: '/identity-cards',
-    children: [
-      {
-        path: ':identityCardId',
-        element: (
-          <ProtectedRoute>
-            <IdentityCard />
-          </ProtectedRoute>
-        ),
-        children: [
-          {
-            index: true,
-            element: (
-              <ProtectedRoute>
-                <IdentityCardInformation />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: 'scan-logs',
-            element: (
-              <ProtectedRoute>
-                <ScanAuditLogPage />
-              </ProtectedRoute>
-            ),
-          },
-        ],
-      },
-    ],
-  },
-  {
-    path: '/settings',
-    element: (
-      <ProtectedRoute>
-        <Settings />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/print-sessions/:printSessionId',
-    element: (
-      <ProtectedRoute>
-        <PrintSession />
-      </ProtectedRoute>
-    ),
-  },
-]);
+const App: React.FC = () => {
+  const router = createBrowserRouter([
+    {
+      path: '*',
+      element: <RouteNotFound />,
+    },
+    {
+      path: '/login',
+      element: <Login />,
+    },
+    {
+      path: '/',
+      element: (
+        <ProtectedRoute>
+          <AdministrationUsers />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/create-user',
+      element: <CreateUserPage />,
+    },
+    {
+      path: '/users',
+      children: [
+        {
+          index: true,
+          element: (
+            <ProtectedRoute>
+              <AdministrationUsers />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: ':userId',
+          element: (
+            <ProtectedRoute>
+              <User />
+            </ProtectedRoute>
+          ),
+          children: [
+            {
+              index: true,
+              element: (
+                <ProtectedRoute>
+                  <UserInformation />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'documents',
+              element: (
+                <ProtectedRoute>
+                  <UserDocuments />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'identity-cards',
+              element: (
+                <ProtectedRoute>
+                  <UserCards />
+                </ProtectedRoute>
+              ),
+            },
+            // {
+            //   path: 'activity',
+            //   element: (
+            //     <ProtectedRoute>
+            //       <UserActivity />
+            //     </ProtectedRoute>
+            //   ),
+            // },
+          ],
+        },
+      ],
+    },
+    // {
+    //   path: '/identities/:identityCardId',
+    //   element: <IdentityCardPublic />,
+    // },
+    // {
+    //   path: '/identity-cards',
+    //   children: [
+    //     {
+    //       path: ':identityCardId',
+    //       element: (
+    //         <ProtectedRoute>
+    //           <IdentityCard />
+    //         </ProtectedRoute>
+    //       ),
+    //       children: [
+    //         {
+    //           index: true,
+    //           element: (
+    //             <ProtectedRoute>
+    //               <IdentityCardInformation />
+    //             </ProtectedRoute>
+    //           ),
+    //         },
+    //         {
+    //           path: 'scan-logs',
+    //           element: (
+    //             <ProtectedRoute>
+    //               <ScanAuditLogPage />
+    //             </ProtectedRoute>
+    //           ),
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
+    {
+      path: '/settings',
+      element: (
+        <ProtectedRoute>
+          <Settings />
+        </ProtectedRoute>
+      ),
+    },
+    // {
+    //   path: '/print-sessions/:printSessionId',
+    //   element: (
+    //     <ProtectedRoute>
+    //       <PrintSession />
+    //     </ProtectedRoute>
+    //   ),
+    // },
+  ]);
 
-export default function App() {
   return <RouterProvider router={router} />;
-}
+};
+
+export default App;

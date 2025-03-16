@@ -1,83 +1,51 @@
-import { useMutation } from '@apollo/client';
-import { gql } from '__generated__';
-import { UserType } from '__generated__/graphql';
+import { FC, useState } from 'react';
 import dayjs from 'dayjs';
-import { FC } from 'react';
+import { User } from '../../../types/api';
+import { updateUser } from '../../../services/api';
+import Columns from '../../../components/Columns';
+import { FormInput, FormPanelWithReadMode } from '../../../components/FormPanel';
+import countries from '../../../utils/countries-enum.json';
 
-import Columns from 'components/Columns';
-import { FormInput, FormPanelWithReadMode } from 'components/FormPanel';
+interface UpdateUserData {
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phoneNumber?: string;
+  gender: string;
+  dateOfBirth: string;
+  nationality: string;
+  category: string;
+  provinceOfOrigin?: string;
+  photo?: File;
+}
 
-import countries from 'utils/countries-enum.json';
+const UpdateUser: FC<{ user: User }> = ({ user }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-const UPDATE_USER_MUTATION = gql(`
-  mutation UpdateUser(
-    $id: ID!
-    $firstName: String!
-    $lastName: String!
-    $email: String
-    $phoneNumber: String!
-    $dateOfBirth: String!
-    $gender: GenderEnumType!
-    $nationality: NationalityEnumType!
-    $provinceOfOrigin: String
-    $category: CategoryEnumType!
-    $photo: Upload
-  ) {
-    updateUser(
-      id: $id
-      firstName: $firstName
-      lastName: $lastName
-      email: $email
-      phoneNumber: $phoneNumber
-      gender: $gender
-      dateOfBirth: $dateOfBirth
-      nationality: $nationality
-      category: $category
-      provinceOfOrigin: $provinceOfOrigin
-      photo: $photo
-    ) {
-      id
-      firstName
-      lastName
-      email
-      phoneNumber
-      gender
-      dateOfBirth
-      nationality
-      category
-      provinceOfOrigin
-      photo
+  const handleSubmit = async (data: UpdateUserData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await updateUser(user.id, {
+        ...data,
+        dateOfBirth: dayjs(data.dateOfBirth).format('YYYY-MM-DDTHH:mm:ssZ'),
+      });
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
     }
-  }
-`);
-
-const UpdateUser: FC<{ user: UserType }> = ({ user }) => {
-  const [updateUser, { loading, error }] = useMutation(UPDATE_USER_MUTATION);
+  };
 
   return (
     <FormPanelWithReadMode
       loading={loading}
       error={error}
-      onSubmit={data => {
-        updateUser({
-          variables: {
-            id: user.id,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            email: data.email,
-            phoneNumber: data.phoneNumber,
-            gender: data.gender,
-            dateOfBirth: dayjs(data.dateOfBirth).format('YYYY-MM-DDTHH:mm:ssZ'),
-            nationality: data.nationality,
-            category: data.category,
-            provinceOfOrigin: data.provinceOfOrigin,
-            ...(data.photo instanceof File ? { photo: data.photo } : {}),
-          },
-        });
-      }}
+      onSubmit={handleSubmit}
       title="User Information"
     >
-      <Columns number={3} bordered>
+      <Columns number={2} bordered>
         <FormInput
           fullWidth
           type="string"
@@ -87,13 +55,6 @@ const UpdateUser: FC<{ user: UserType }> = ({ user }) => {
           validators={{
             required: true,
           }}
-        />
-        <FormInput
-          fullWidth
-          type="string"
-          fieldName="middleName"
-          label="Middle Name"
-          defaultValue={user.middleName || ''}
         />
         <FormInput
           fullWidth

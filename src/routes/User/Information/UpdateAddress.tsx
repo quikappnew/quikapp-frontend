@@ -1,64 +1,40 @@
-import { useMutation } from '@apollo/client';
-import { gql } from '__generated__';
-import { AddressType } from '__generated__/graphql';
-import { FC } from 'react';
+import { FC, useState } from 'react';
+import { Address } from '../../../types/api';
+import { updateAddress } from '../../../services/api';
+import Columns from '../../../components/Columns';
+import { FormInput, FormPanelWithReadMode } from '../../../components/FormPanel';
+import countries from '../../../utils/countries-enum.json';
 
-import Columns from 'components/Columns';
-import { FormInput, FormPanelWithReadMode } from 'components/FormPanel';
+interface UpdateAddressData {
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
 
-import countries from 'utils/countries-enum.json';
+const UpdateAddress: FC<{ address: Address }> = ({ address }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-const UPDATE_ADDRESS_MUTATION = gql(`
-  mutation UpdateAddress(
-    $id: ID!
-    $line1: String!
-    $line2: String
-    $city: String!
-    $postalCode: String!
-    $state: String!
-    $country: String!
-  ) {
-    updateAddress(
-      id: $id
-      line1: $line1
-      line2: $line2
-      city: $city
-      postalCode: $postalCode
-      state: $state
-      country: $country
-    ) {
-      id
-      line1
-      line2
-      city
-      state
-      postalCode
-      country
+  const handleSubmit = async (data: UpdateAddressData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await updateAddress(address.id, data);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
     }
-  }
-`);
-
-const UpdateAddress: FC<{ address: AddressType }> = ({ address }) => {
-  const [updateAddress, { loading: updateLoading, error: updateError }] =
-    useMutation(UPDATE_ADDRESS_MUTATION);
+  };
 
   return (
     <FormPanelWithReadMode
-      loading={updateLoading}
-      error={updateError}
-      onSubmit={data => {
-        updateAddress({
-          variables: {
-            id: address.id,
-            line1: data.line1,
-            line2: data.line2,
-            city: data.city,
-            postalCode: data.postalCode,
-            state: data.state,
-            country: data.country,
-          },
-        });
-      }}
+      loading={loading}
+      error={error}
+      onSubmit={handleSubmit}
       title="Address"
     >
       <FormInput

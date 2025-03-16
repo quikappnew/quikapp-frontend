@@ -1,4 +1,3 @@
-import { ApolloError } from '@apollo/client';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
@@ -18,6 +17,7 @@ import { FC, Fragment, ReactNode, useState } from 'react';
 import Button from 'components/Button';
 import ErrorMessage from 'components/ErrorMessage';
 import LoadingIndicator from 'components/LoadingIndicator';
+import { ApiError } from '../../types/api';
 
 import binocularsIcon from 'media/icons/binoculars.svg';
 import searchOutline from 'media/icons/search-outline.svg';
@@ -176,7 +176,7 @@ const DataTableCell: FC<{
   }
 };
 
-const DataTable: FC<{
+interface DataTableProps {
   data: any[];
   columns: Column[];
   searchFields?: string[];
@@ -190,14 +190,16 @@ const DataTable: FC<{
     icon?: ReactNode;
     action: (selectedItems: any[]) => Promise<any>;
     loading?: boolean;
-    error?: ApolloError;
+    error?: ApiError;
   }[];
   onSelect?: (selectedItems: any[]) => void;
   emptyListImage?: string;
   emptyListTitle?: string;
   emptyListDescription?: string;
   totalCount?: number;
-}> = ({
+}
+
+const DataTable: FC<DataTableProps> = ({
   data,
   columns,
   searchFields,

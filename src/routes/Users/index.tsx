@@ -1,54 +1,62 @@
-import { gql, useQuery } from '@apollo/client';
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import SidebarLayout from 'layouts/SidebarLayout';
+import Button from '@mui/material/Button';
+import DataTable from '../../components/DataTable';
+import ErrorMessage from '../../components/ErrorMessage';
+import LoadingIndicator from '../../components/LoadingIndicator';
+import Navbar from '../../components/Navbar';
+import SidebarLayout from '../../layouts/SidebarLayout';
+import { getUsers } from '../../services/api';
+import { ApiError, User } from '../../types/api';
 
-import Button from 'components/Button';
-import DataTable from 'components/DataTable';
-import ErrorMessage from 'components/ErrorMessage';
-import LoadingIndicator from 'components/LoadingIndicator';
-import Navbar from 'components/Navbar';
-
-const USERS_QUERY = gql`
-  query AdministrationUsers($limit: Int, $cursor: ID, $filters: UserFilterInputType) {
-    users(limit: $limit, cursor: $cursor, filters: $filters) {
-      nodes {
-        id
-        fullName
-        category
-        province {
-          id
-          name
-        }
-        status
-        createdAt
-      }
-      pageInfo {
-        cursor
-        totalCount
-        hasNextPage
-      }
-    }
-  }
-`;
+interface PageInfo {
+  cursor: string;
+  totalCount: number;
+  hasNextPage: boolean;
+}
 
 const AdministrationUsers: FC = () => {
   const navigate = useNavigate();
-
-  const { loading, error, data, refetch, fetchMore } = useQuery(USERS_QUERY, {
-    variables: {
-      limit: 30,
-    },
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<ApiError | undefined>(undefined);
+  const [users, setUsers] = useState<User[]>([]);
+  const [pageInfo, setPageInfo] = useState<PageInfo>({
+    cursor: '',
+    totalCount: 0,
+    hasNextPage: false,
   });
 
+  const fetchUsers = async (cursor?: string) => {
+    try {
+      setLoading(true);
+      const response = await getUsers({ limit: 30, cursor });
+      if (cursor) {
+        setUsers(prevUsers => [...prevUsers, ...response.data]);
+      } else {
+        setUsers(response.data);
+      }
+      setPageInfo({
+        cursor: response.cursor,
+        totalCount: response.total,
+        hasNextPage: response.hasNextPage,
+      });
+      setError(undefined);
+    } catch (err) {
+      setError(err as ApiError);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   function renderContent() {
-    if (loading && !data) return <LoadingIndicator />;
+    if (loading && !users.length) return <LoadingIndicator />;
 
-    if (error || !data) return <ErrorMessage error={error} refetch={refetch} />;
-
-    const users = data.users.nodes;
-    const pageInfo = data.users.pageInfo;
+    if (error) return <ErrorMessage error={error} onRetry={() => fetchUsers()} />;
 
     return (
       <>
@@ -84,13 +92,7 @@ const AdministrationUsers: FC = () => {
           ]}
           hasNextPage={pageInfo.hasNextPage}
           paginationLoading={loading}
-          onLoadMore={() =>
-            fetchMore({
-              variables: {
-                cursor: pageInfo.cursor,
-              },
-            })
-          }
+          onLoadMore={() => fetchUsers(pageInfo.cursor)}
           totalCount={pageInfo.totalCount}
         />
       </>

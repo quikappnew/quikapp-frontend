@@ -1,40 +1,44 @@
-import { useQuery } from '@apollo/client';
-import { gql } from '__generated__';
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 
-import SidebarLayout from 'layouts/SidebarLayout';
-
-import ErrorMessage from 'components/ErrorMessage';
-import HorizontalTabs from 'components/HorizontalTabs';
-import LoadingIndicator from 'components/LoadingIndicator';
-import Navbar from 'components/Navbar';
-
-const USER_QUERY = gql(`
-  query getUser($userId: ID!) {
-    user(id: $userId) {
-      id
-      fullName
-    }
-  }
-`);
+import ErrorMessage from '../../components/ErrorMessage';
+import HorizontalTabs from '../../components/HorizontalTabs';
+import LoadingIndicator from '../../components/LoadingIndicator';
+import Navbar from '../../components/Navbar';
+import SidebarLayout from '../../layouts/SidebarLayout';
+import { getUser } from '../../services/api';
+import { ApiError, User } from '../../types/api';
 
 const UserPage: FC = () => {
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<ApiError | undefined>(undefined);
+  const [user, setUser] = useState<User | null>(null);
 
-  const { loading, error, data, refetch } = useQuery(USER_QUERY, {
-    variables: {
-      userId: userId as string,
-    },
-  });
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!userId) return;
+      try {
+        setLoading(true);
+        const data = await getUser(userId);
+        setUser(data);
+        setError(undefined);
+      } catch (err) {
+        setError(err as ApiError);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [userId]);
 
   function renderContent() {
-    if (loading && !data) return <LoadingIndicator />;
+    if (loading && !user) return <LoadingIndicator />;
 
-    if (error || !data) return <ErrorMessage error={error} refetch={refetch} />;
-
-    const user = data.user;
+    if (error) return <ErrorMessage error={error} onRetry={() => navigate(0)} />;
+    if (!user) return <ErrorMessage error={{ message: 'User not found', code: 404, status: 'Not Found' }} />;
 
     const tabs = [
       {

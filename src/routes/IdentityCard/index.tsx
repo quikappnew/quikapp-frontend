@@ -1,73 +1,45 @@
-import { useQuery } from '@apollo/client';
-import { gql } from '__generated__';
 import { FC } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
-
-import SidebarLayout from 'layouts/SidebarLayout';
+import { useState, useEffect } from 'react';
 
 import ErrorMessage from 'components/ErrorMessage';
-import HorizontalTabs from 'components/HorizontalTabs';
 import LoadingIndicator from 'components/LoadingIndicator';
-import Navbar from 'components/Navbar';
-
-const IDENTITY_CARD_QUERY = gql(`
-  query IdentityCard($identityCardId: ID!) {
-    identityCard(id: $identityCardId) {
-      id
-      cardNumber
-    }
-  }
-`);
+import { getIdentityCard } from 'services/api';
+import { IdentityCard } from 'types/api';
 
 const IdentityCardPage: FC = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { identityCardId } = useParams<{ identityCardId: string }>();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [identityCard, setIdentityCard] = useState<IdentityCard | null>(null);
 
-  const { loading, error, data, refetch } = useQuery(IDENTITY_CARD_QUERY, {
-    variables: {
-      identityCardId: identityCardId as string,
-    },
-  });
-
-  const renderContent = () => {
-    if (loading) return <LoadingIndicator />;
-
-    if (error || !data) return <ErrorMessage error={error} refetch={refetch} />;
-
-    const identityCard = data.identityCard;
-
-    const tabs = [
-      {
-        key: 'identity card',
-        label: 'Identity Card Information',
-        route: `/identity-cards/${identityCardId}`,
-        exact: true,
-      },
-      // {
-      //   key: 'identityCardScanLogs',
-      //   label: 'Identity Card Scan Logs',
-      //   route: `/identity-cards/${identityCardId}/scan-logs`,
-      // },
-    ];
-
-    return (
-      <>
-        <Navbar
-          title={`${identityCard.cardNumber}`}
-          subTitle="Identity Card"
-          onBackButtonClick={() => navigate(-1)}
-        />
-
-        <HorizontalTabs tabs={tabs} />
-      </>
-    );
+  const fetchIdentityCard = async () => {
+    if (!id) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getIdentityCard(id);
+      setIdentityCard(data);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    fetchIdentityCard();
+  }, [id]);
+
+  if (loading) return <LoadingIndicator />;
+  if (error) return <ErrorMessage error={error} onRetry={fetchIdentityCard} />;
+  if (!identityCard) return null;
+
   return (
-    <SidebarLayout>
-      {renderContent()}
-      <Outlet />
-    </SidebarLayout>
+    <div>
+      <Outlet context={{ identityCard }} />
+    </div>
   );
 };
 
