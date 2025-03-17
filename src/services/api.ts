@@ -15,7 +15,7 @@ import type {
 } from 'types/api';
 
 const api: AxiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: process.env.REACT_APP_BACKEND,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -418,6 +418,21 @@ export const markPrintSessionAsCancelled = async (id: string): Promise<void> => 
     await api.post(`/print-sessions/${id}/mark-as-cancelled`);
   } catch (error) {
     throw ApiError.fromAxiosError(error, 'Failed to mark print session as cancelled');
+  }
+};
+
+interface RegisterData {
+  phone_number: string;
+  full_name: string;
+  email?: string;
+}
+
+export const register = async (data: RegisterData): Promise<User> => {
+  try {
+    const response = await api.post('/users/auth/register/', data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Registration failed');
   }
 };
 
