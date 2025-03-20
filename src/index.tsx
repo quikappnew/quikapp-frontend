@@ -8,6 +8,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import App from './routes';
+import { FormProvider } from 'context/FormContext';
+
 
 const theme = createTheme({
   palette: {
@@ -27,7 +29,9 @@ root.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <App />
+      <FormProvider>
+      <App />
+    </FormProvider>
       </LocalizationProvider>
     </ThemeProvider>
   </React.StrictMode>

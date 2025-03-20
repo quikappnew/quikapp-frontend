@@ -340,9 +340,9 @@ export const getIdentityCardPublic = async (id: string): Promise<IdentityCard> =
   }
 };
 
-export const login = async (email: string, password: string): Promise<User> => {
+export const login = async (phone_number: string): Promise<any> => {
   try {
-    const response = await api.post<User>('/auth/login', { email, password });
+    const response = await api.post<User>('users/auth/request-otp/', { phone_number });
     return response.data;
   } catch (error) {
     throw ApiError.fromAxiosError(error, 'Failed to login');
@@ -427,13 +427,23 @@ interface RegisterData {
   email?: string;
 }
 
-export const register = async (data: RegisterData): Promise<User> => {
+export const register = async (data: RegisterData): Promise<any> => {
   try {
     const response = await api.post('/users/auth/register/', data);
     return response.data;
   } catch (error) {
     throw ApiError.fromAxiosError(error, 'Registration failed');
   }
+};
+
+interface VerifyOTPData {
+  phone_number: string;
+  otp: string;
+}
+
+export const verifyOTP = async (data: VerifyOTPData): Promise<{ success: boolean; token: string }> => {
+  const response = await api.post('/users/auth/verify-otp', data);
+  return response.data;
 };
 
 export default api; 
