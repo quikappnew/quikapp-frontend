@@ -1,33 +1,31 @@
 import { Box } from '@mui/material';
-import { FC } from 'react';
-
+import { FC, ReactNode } from 'react';
 import Sidebar from 'components/Sidebar';
-
-import getSidebarTabsForProfile from 'utils/sidebar-tabs';
-
+import getSidebarTabs from 'utils/sidebar-tabs';
 import theme from './theme.module.scss';
 
-const SidebarLayout: FC<{ children: any }> = props => {
-  const renderContent = () => {
-    return (
-      <>
-        <div className={theme.sidebarContainer}>
-          <Sidebar tabs={getSidebarTabsForProfile()} />
-        </div>
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            p: 2,
-          }}
-        >
-          <div>{props.children}</div>
-        </Box>
-      </>
-    );
-  };
+interface SidebarLayoutProps {
+  children: ReactNode;
+}
 
-  return <Box sx={{ display: 'flex' }}>{renderContent()}</Box>;
+const SidebarLayout: FC<SidebarLayoutProps> = ({ children }) => {
+  return (
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <div className={theme.sidebarContainer}>
+        <Sidebar tabs={getSidebarTabs()} />
+      </div>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          backgroundColor: '#f5f5f5',
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
+  );
 };
 
 export default SidebarLayout;
