@@ -11,7 +11,16 @@ import UserDocuments from './User/Documents';
 import UserCards from './User/IdentityCards';
 import UserInformation from './User/Information';
 import AdministrationUsers from './Users';
-
+import Vehicle from './Vehicle';
+import Dashboard from './Dashboard';
+import Locations from './Locations';
+import Trips from './Trips';
+import Reports from './Reports';
+import DriverPaymentRequests from './DriverPaymentRequests';
+import AccountsPayable from './AccountsPayable';
+import Vendor from './Vendor';
+import Client from './Client';
+import Drivers from './Drivers';
 const App: React.FC = () => {
   const router = createBrowserRouter([
     {
@@ -30,7 +39,71 @@ const App: React.FC = () => {
       path: '/dashboard',
       element: (
         <ProtectedRoute>
-          <AdministrationUsers />
+          <Dashboard />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/locations',
+      element: (
+        <ProtectedRoute>
+          <Locations />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/trips',
+      element: (
+        <ProtectedRoute>
+          <Trips />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/reports',
+      element: (
+        <ProtectedRoute>
+          <Reports />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/driver-payment-requests',
+      element: (
+        <ProtectedRoute>
+          <DriverPaymentRequests />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/accounts-payable',
+      element: (
+        <ProtectedRoute>
+          <AccountsPayable />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/vendor',
+      element: (
+        <ProtectedRoute>
+          <Vendor />
+        </ProtectedRoute>
+      ),
+    },  
+    {
+      path: '/client',
+      element: (
+        <ProtectedRoute>
+          <Client />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/drivers',
+      element: (
+        <ProtectedRoute>
+          <Drivers />
         </ProtectedRoute>
       ),
     },
@@ -100,7 +173,15 @@ const App: React.FC = () => {
           <Settings />
         </ProtectedRoute>
       ),
-    }
+    },
+    {
+      path: '/vehicle',
+      element: (
+        <ProtectedRoute>
+          <Vehicle />
+        </ProtectedRoute>
+      ),
+    },
   ]);
 
   return <RouterProvider router={router} />;

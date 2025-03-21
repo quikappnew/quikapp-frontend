@@ -36,13 +36,13 @@ export const useAuth = (redirectTo: string | null, navigate: (path: string) => v
   const handleOTPVerification = async (data: FormData) => {
     setLoading(true);
     setError(null);
-
+    navigate(redirectTo || '/dashboard');
     try {
       const response: VerifyOTPResponse = await verifyOTP({
         phone_number: formState.phoneNumber,
         otp: data.otp!
       });
-
+      navigate(redirectTo || '/dashboard');
       if (response.success) {
         localStorage.setItem('token', response.token);
         navigate(redirectTo || '/dashboard');

@@ -101,7 +101,7 @@ const AdministrationUsers: FC = () => {
 
   return (
     <SidebarLayout>
-      <Navbar title="People" subTitle="Manage people, identity cards, and more" />
+      <Navbar title="People" subTitle="Dashboard" />
       {renderContent()}
     </SidebarLayout>
   );
