@@ -6,7 +6,7 @@ import { FormContext } from 'context/FormContext';
 import { LoginForm, OTPForm, RegisterForm } from './component';
 import { useAuth } from './hooks';
 
-export const pngLogo = 'https://d1x4ga22txmryo.cloudfront.net/static/image_assets/newlogo.png';
+export const pngLogo = 'https://d32f2yg5omsqjr.cloudfront.net/static/image_assets/newlogo.png';
 
 const Login: FC = () => {
   const navigate = useNavigate();
