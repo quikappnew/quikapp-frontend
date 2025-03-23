@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { getToken } from 'utils/auth';
 import type {
   ApiError as ApiErrorInterface,
@@ -13,12 +13,15 @@ import type {
   IdentityCard,
   DocumentTypeEnum
 } from 'types/api';
+import { VerifyOTPResponse } from 'routes/Login/types';
+import { TokenService } from './tokenService';
 
 const api: AxiosInstance = axios.create({
   baseURL: process.env.REACT_APP_BACKEND,
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
-  },
+  }
 });
 
 export class ApiError extends Error implements ApiErrorInterface {
@@ -48,26 +51,27 @@ export class ApiError extends Error implements ApiErrorInterface {
 
 // Add request interceptor to add auth token
 api.interceptors.request.use(
-  config => {
-    const token = getToken();
+  (config: InternalAxiosRequestConfig) => {
+    const token = TokenService.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  error => {
+  (error: AxiosError) => {
     return Promise.reject(error);
   }
 );
 
 // Add response interceptor to handle errors
 api.interceptors.response.use(
-  response => response,
-  error => {
-    if (axios.isAxiosError(error)) {
-      throw ApiError.fromAxiosError(error, 'An error occurred');
+  (response) => response,
+  async (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      TokenService.removeToken();
+      window.location.href = '/login';
     }
-    throw error;
+    return Promise.reject(error);
   }
 );
 
@@ -441,9 +445,10 @@ interface VerifyOTPData {
   otp: string;
 }
 
-export const verifyOTP = async (data: VerifyOTPData): Promise<{ success: boolean; token: string }> => {
-  const response = await api.post('/users/auth/verify-otp', data);
+export const verifyOTP = async (data: VerifyOTPData): Promise< VerifyOTPResponse> => {
+  const response = await api.post('/users/auth/verify-otp/', data);
   return response.data;
-};
+  };
+
 
 export default api; 

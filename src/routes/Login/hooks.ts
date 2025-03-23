@@ -3,6 +3,7 @@ import { useContext } from 'react';
 import { FormContext } from 'context/FormContext';
 import { login, register, verifyOTP } from 'services/api';
 import { FormData, LoginResponse, RegisterResponse, VerifyOTPResponse } from './types';
+import { TokenService } from 'services/tokenService';
 
 export const useAuth = (redirectTo: string | null, navigate: (path: string) => void) => {
   const { state: formState, dispatch } = useContext(FormContext);
@@ -33,28 +34,41 @@ export const useAuth = (redirectTo: string | null, navigate: (path: string) => v
     }
   };
 
-  const handleOTPVerification = async (data: FormData) => {
-    setLoading(true);
-    setError(null);
-    navigate(redirectTo || '/dashboard');
-    try {
-      const response: VerifyOTPResponse = await verifyOTP({
-        phone_number: formState.phoneNumber,
-        otp: data.otp!
-      });
-      navigate(redirectTo || '/dashboard');
-      if (response.success) {
-        localStorage.setItem('token', response.token);
+// src/routes/Login/hooks.ts
+const handleOTPVerification = async (data: FormData) => {
+  setLoading(true);
+  setError(null);
+  
+  try {
+    const response: VerifyOTPResponse = await verifyOTP({
+      phone_number: formState.phoneNumber,
+      otp: data.otp!
+    });
+
+    if (response.success && response.data?.user?.token) {
+      const token = response.data.user.token;
+      TokenService.setToken(token);
+      
+      // Verify token was set
+      const storedToken = TokenService.getToken();
+      await new Promise(resolve => setTimeout(resolve, 100));
+    
+      if (TokenService.isAuthenticated()) {
         navigate(redirectTo || '/dashboard');
       } else {
-        setError(new Error('Invalid OTP. Please try again.'));
+        throw new Error('Failed to store token');
       }
-    } catch (err) {
-      setError(err as Error);
-    } finally {
-      setLoading(false);
+      
+    } else {
+      setError(new Error('Invalid OTP or missing token'));
     }
-  };
+  } catch (err) {
+    console.error('OTP verification error:', err);
+    setError(err as Error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleRegister = async (data: FormData) => {
     setLoading(true);

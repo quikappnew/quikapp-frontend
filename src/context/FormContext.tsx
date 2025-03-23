@@ -37,7 +37,6 @@ type ActionType =
 
 // Create a reducer function
 const reducer = (state: FormState, action: ActionType) => {
-    console.log("Action", action, state)
   switch (action.type) {
     case 'SET_PHONE_NUMBER':
       return { ...state, phoneNumber: action.payload };
