@@ -20,6 +20,38 @@ const theme = createTheme({
   typography: {
     fontFamily: `'Inter', sans-serif`,
   },
+  components: {
+    MuiButton: {
+      defaultProps: {
+        size: 'small',
+      },
+      styleOverrides: {
+        root: {
+          textTransform: 'capitalize',
+        },
+      },
+    },
+    MuiTextField: {
+      defaultProps: {
+        size: 'small',
+      },
+    },
+    MuiFormControl: {
+      defaultProps: {
+        size: 'small',
+      },
+    },
+    MuiInputBase: {
+      defaultProps: {
+        size: 'small',
+      },
+    },
+    MuiMenuItem: {
+      defaultProps: {
+        dense: true,
+      },
+    },
+  },
 });
 
 const container = document.getElementById('root');

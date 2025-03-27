@@ -1,108 +1,164 @@
-import { FC, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Box, Button, Grid } from '@mui/material';
+import Navbar from 'components/Navbar';
+import SidebarLayout from 'layouts/SidebarLayout';
+import { useState } from 'react';
+import UserModal from './userModal';
+import BasicCard from 'components/Card';
+import DataTable from 'components/DataTable';
+import ConfirmDeactivateModal from './ConfirmDeactivateModal';
 
-import Button from '@mui/material/Button';
-import DataTable from '../../components/DataTable';
-import ErrorMessage from '../../components/ErrorMessage';
-import LoadingIndicator from '../../components/LoadingIndicator';
-import Navbar from '../../components/Navbar';
-import SidebarLayout from '../../layouts/SidebarLayout';
-import { getUsers } from '../../services/api';
-import { ApiError, User } from '../../types/api';
-
-interface PageInfo {
-  cursor: string;
-  totalCount: number;
-  hasNextPage: boolean;
+interface User {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  role: string;
+  status: string;
+  capacity?: number;
 }
 
-const AdministrationUsers: FC = () => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<ApiError | undefined>(undefined);
-  const [users, setUsers] = useState<User[]>([]);
-  const [pageInfo, setPageInfo] = useState<PageInfo>({
-    cursor: '',
-    totalCount: 0,
-    hasNextPage: false,
-  });
+const AdministrationUsers = () => {
+  const client = 'Sowmya';
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [confirmDeactivate, setConfirmDeactivate] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const fetchUsers = async (cursor?: string) => {
-    try {
-      setLoading(true);
-      const response = await getUsers({ limit: 30, cursor });
-      if (cursor) {
-        setUsers(prevUsers => [...prevUsers, ...response.data]);
-      } else {
-        setUsers(response.data);
-      }
-      setPageInfo({
-        cursor: response.cursor,
-        totalCount: response.total,
-        hasNextPage: response.hasNextPage,
-      });
-      setError(undefined);
-    } catch (err) {
-      setError(err as ApiError);
-    } finally {
-      setLoading(false);
-    }
+  const handleOpen = () => {
+    setEditUser(null);
+    setModalOpen(true);
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const handleClose = () => {
+    setModalOpen(false);
+    setEditUser(null);
+  };
 
-  function renderContent() {
-    if (loading && !users.length) return <LoadingIndicator />;
+  const handleDeactivateClick = (user: User) => {
+    setSelectedUser(user);
+    setConfirmDeactivate(true);
+  };
 
-    if (error) return <ErrorMessage error={error} onRetry={() => fetchUsers()} />;
+  const handleDeactivate = () => {
+    // Implement deactivation logic here
+    console.log('Deactivating user:', selectedUser);
+    setConfirmDeactivate(false);
+    setSelectedUser(null);
+  };
 
-    return (
-      <>
-        <Button variant="contained" onClick={() => navigate('/create-user')}>
-          Add Person
+  const handleEdit = (user: User) => {
+    setEditUser(user);
+    setModalOpen(true);
+  };
+
+  const columns = [
+    { label: 'First Name', fieldName: 'firstName', width: 200 },
+    { label: 'Last Name', fieldName: 'lastName', width: 150 },
+    { label: 'Email', fieldName: 'email', width: 150 },
+    { label: 'Phone Number', fieldName: 'phoneNumber', width: 150 },
+    { label: 'Password', fieldName: 'password', width: 150 },
+    { label: 'Role', fieldName: 'role', width: 150 },
+    { label: 'Actions', fieldName: 'actions', width: 200 },
+  ];
+
+  const data = [
+    {
+      id: 1,
+      firstName: 'Test Client',
+      lastName: 'Active',
+      email: 'GST123',
+      phoneNumber: 'PAN123',
+      password: 'John Doe',
+      role: 'John Doe',
+      status: 'Active'
+    },
+    {
+      id: 2,
+      firstName: 'Test Client1',
+      lastName: 'Active',
+      email: 'GST123',
+      phoneNumber: 'PAN123',
+      password: 'John Doe',
+      role: 'John Doe',
+      status: 'Active',
+      capacity: 1000,
+    },
+    {
+      id: 3,
+      firstName: 'Test Client2',
+      lastName: 'Active',
+      email: 'GST123',
+      phoneNumber: 'PAN123',
+      password: 'John Doe',
+      role: 'John Doe',
+      status: 'Active',
+      capacity: 1000,
+    },
+    {
+      id: 4,
+      firstName: 'Test Client3',
+      lastName: 'Active',
+      email: 'GST123',
+      phoneNumber: 'PAN123',
+      password: 'John Doe',
+      role: 'John Doe',
+      status: 'Active',
+      capacity: 1000,
+    },
+  ].map(item => ({
+    ...item,
+    actions: (
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => handleEdit(item)}
+        >
+          Edit
         </Button>
-        <DataTable
-          data={users}
-          onClick={user => navigate(`/users/${user.id}`)}
-          columns={[
-            {
-              label: 'Full Name',
-              fieldName: 'fullName',
-            },
-            {
-              label: 'Category',
-              fieldName: 'category',
-            },
-            {
-              label: 'Province',
-              fieldName: 'province.name',
-            },
-            {
-              label: 'Created At',
-              fieldName: 'createdAt',
-              type: 'DATETIME',
-            },
-            {
-              label: 'Status',
-              fieldName: 'status',
-              type: 'STATUS',
-            },
-          ]}
-          hasNextPage={pageInfo.hasNextPage}
-          paginationLoading={loading}
-          onLoadMore={() => fetchUsers(pageInfo.cursor)}
-          totalCount={pageInfo.totalCount}
-        />
-      </>
-    );
-  }
+        {item.status === 'Active' && (
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => handleDeactivateClick(item)}
+          >
+            Deactivate
+          </Button>
+        )}
+      </Box>
+    ),
+  }));
 
   return (
     <SidebarLayout>
-      <Navbar title="People" subTitle="Dashboard" />
-      {renderContent()}
+      {/* <Navbar title="Client" subTitle="Client" /> */}
+      <h2 style={{ marginBottom: '20px' }}>Welcome {client}</h2>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleOpen}
+        style={{ marginBottom: '20px' }}
+      >
+        Add User
+      </Button>
+  
+      <DataTable data={data} columns={columns} />
+      <UserModal 
+        open={modalOpen} 
+        onClose={handleClose} 
+        user={editUser}
+      />
+      <ConfirmDeactivateModal
+        open={confirmDeactivate}
+        onClose={() => {
+          setConfirmDeactivate(false);
+          setSelectedUser(null);
+        }}
+        onConfirm={handleDeactivate}
+        userName={selectedUser ? `${selectedUser.firstName} ${selectedUser.lastName}` : ''}
+      />
     </SidebarLayout>
   );
 };

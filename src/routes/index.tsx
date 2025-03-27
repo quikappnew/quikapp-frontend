@@ -10,7 +10,6 @@ import User from './User';
 import UserDocuments from './User/Documents';
 import UserCards from './User/IdentityCards';
 import UserInformation from './User/Information';
-import AdministrationUsers from './Users';
 import Vehicle from './Vehicle';
 import Dashboard from './Dashboard';
 import Locations from './Locations';
@@ -21,6 +20,7 @@ import AccountsPayable from './AccountsPayable';
 import Vendor from './Vendor';
 import Client from './Client';
 import Drivers from './Drivers';
+import AdministrationUsers from './Users';
 const App: React.FC = () => {
   const router = createBrowserRouter([
     {
