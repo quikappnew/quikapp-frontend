@@ -101,6 +101,10 @@ $border-color: #eee;
   }
 }
 
+img{
+  height: 1rem;
+}
+
 .emptyList {
   display: flex;
   flex-flow: column nowrap;

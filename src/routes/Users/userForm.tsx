@@ -74,7 +74,7 @@ export const UserForm: React.FC<UserFormProps> = ({ onSubmit, user, onClose }) =
         <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
-            label="First Name*"
+            label="First Name"
             name="firstName"
             variant="outlined"
             value={formData.firstName}
@@ -86,7 +86,7 @@ export const UserForm: React.FC<UserFormProps> = ({ onSubmit, user, onClose }) =
         <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
-            label="Last Name*"
+            label="Last Name"
             name="lastName"
             variant="outlined"
             value={formData.lastName}
@@ -98,7 +98,7 @@ export const UserForm: React.FC<UserFormProps> = ({ onSubmit, user, onClose }) =
         <Grid item xs={12}>
           <TextField
             fullWidth
-            label="Email*"
+            label="Email"
             name="email"
             type="email"
             variant="outlined"
@@ -111,7 +111,7 @@ export const UserForm: React.FC<UserFormProps> = ({ onSubmit, user, onClose }) =
         <Grid item xs={12}>
           <TextField
             fullWidth
-            label="Phone Number*"
+            label="Phone Number"
             name="phoneNumber"
             variant="outlined"
             value={formData.phoneNumber}
@@ -124,7 +124,7 @@ export const UserForm: React.FC<UserFormProps> = ({ onSubmit, user, onClose }) =
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
-              label="Password*"
+              label="Password"
               name="password"
               type="password"
               variant="outlined"
@@ -139,7 +139,7 @@ export const UserForm: React.FC<UserFormProps> = ({ onSubmit, user, onClose }) =
           <Select
             fullWidth
             name="role"
-            label="Role*"
+            label="Role"
             variant="outlined"
             value={formData.role}
             onChange={(e) => handleChange(e as React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>)}
@@ -155,7 +155,7 @@ export const UserForm: React.FC<UserFormProps> = ({ onSubmit, user, onClose }) =
             <Select
               fullWidth
               name="status"
-              label="Status*"
+              label="Status"
               variant="outlined"
               value={formData.status}
               onChange={(e) => handleChange(e as React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>)}

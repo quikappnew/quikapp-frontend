@@ -36,7 +36,7 @@ const ConfirmDeactivateModal: React.FC<ConfirmDeactivateModalProps> = ({
           Are you sure you want to deactivate {userName}? This action can be reversed later.
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-          <Button variant="outlined" onClick={onClose}>
+          <Button variant="outlined" onClick={onClose} >
             Cancel
           </Button>
           <Button variant="contained" color="error" onClick={onConfirm}>

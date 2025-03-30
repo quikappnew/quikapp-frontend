@@ -18,6 +18,7 @@ import Button from 'components/Button';
 import ErrorMessage from 'components/ErrorMessage';
 import LoadingIndicator from 'components/LoadingIndicator';
 import { ApiError } from '../../types/api';
+import ConfirmButton from '../ConfirmButton';
 
 import binocularsIcon from 'media/icons/binoculars.svg';
 import searchOutline from 'media/icons/search-outline.svg';
