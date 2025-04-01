@@ -52,24 +52,24 @@ const getSidebarTabs = (): TabItem[] => {
         },
       ],
     },
-    {
-      key: 'reports',
-      label: 'Reports',
-      icon: dashboardIcon,
-      route: '/reports',
-    },
-    {
-      key: 'driver-payment',
-      label: 'Driver Payment Requests',
-      icon: dashboardIcon,
-      route: '/driver-payment-requests',
-    },
-    {
-      key: 'accounts-payable',
-      label: 'Accounts Payable',
-      icon: dashboardIcon,
-      route: '/accounts-payable',
-    },
+    // {
+    //   key: 'reports',
+    //   label: 'Reports',
+    //   icon: dashboardIcon,
+    //   route: '/reports',
+    // },
+    // {
+    //   key: 'driver-payment',
+    //   label: 'Driver Payment Requests',
+    //   icon: dashboardIcon,
+    //   route: '/driver-payment-requests',
+    // },
+    // {
+    //   key: 'accounts-payable',
+    //   label: 'Accounts Payable',
+    //   icon: dashboardIcon,
+    //   route: '/accounts-payable',
+    // },
     {
       key: 'vendor',
       label: 'Vendor',

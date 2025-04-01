@@ -67,9 +67,10 @@ const DataTableHead: FC<{
   columns: Column[];
   isSelected: boolean;
   onSelectAll: (value: any) => void;
-}> = ({ columns, isSelected, onSelectAll }) => (
+  showAccordion?: boolean;
+}> = ({ columns, isSelected, onSelectAll, showAccordion = false }) => (
   <TableHead>
-    <TableRow>
+    <TableRow sx={{ width: '100%' }}>
       {columns.map(c => (
         <TableCell key={c.fieldName + c.label} align={'left'} style={{ width: c.width }}>
           {c.type === 'SELECT' ? (
@@ -87,6 +88,11 @@ const DataTableHead: FC<{
           )}
         </TableCell>
       ))}
+      {showAccordion && (
+        <TableCell align="left" style={{ width: 150 }}>
+          Actions
+        </TableCell>
+      )}
     </TableRow>
   </TableHead>
 );
@@ -321,8 +327,8 @@ const DataTable: FC<DataTableProps> = ({
           />
         </Box>
       )}
-      <TableContainer>
-        <Table stickyHeader>
+      <TableContainer sx={{ width: '100%' }}>
+        <Table stickyHeader sx={{ width: '100%' }}>
           <DataTableHead
             columns={columns}
             isSelected={selectedItems.length === data.length}
@@ -333,6 +339,7 @@ const DataTable: FC<DataTableProps> = ({
                 updateSelectedItems([]);
               }
             }}
+            showAccordion={showAccordion}
           />
           <TableBody>
             {paginatedData.map((row, index) => (

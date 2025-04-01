@@ -14,6 +14,7 @@ import Vehicle from './Vehicle';
 import Dashboard from './Dashboard';
 import Locations from './Locations';
 import Trips from './Trips';
+import ViewTrip from './Trips/ViewTrip';
 import Reports from './Reports';
 import DriverPaymentRequests from './DriverPaymentRequests';
 import AccountsPayable from './AccountsPayable';
@@ -53,11 +54,24 @@ const App: React.FC = () => {
     },
     {
       path: '/trips',
-      element: (
-        <ProtectedRoute>
-          <Trips />
-        </ProtectedRoute>
-      ),
+      children: [
+        {
+          index: true,
+          element: (
+            <ProtectedRoute>
+              <Trips />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: ':tripId/view',
+          element: (
+            <ProtectedRoute>
+              <ViewTrip />
+            </ProtectedRoute>
+          ),
+        },
+      ],
     },
     {
       path: '/reports',
