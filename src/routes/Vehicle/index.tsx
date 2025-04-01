@@ -1,37 +1,46 @@
 import { Box, Button, Grid } from '@mui/material';
 import Navbar from 'components/Navbar';
 import SidebarLayout from 'layouts/SidebarLayout';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import VehicleModal from './vehicalModal';
 import BasicCard from 'components/Card';
 import DataTable from 'components/DataTable';
 import { getRandomColor } from 'utils/randomColorGenerator';
+
+const initialList = [
+  {
+    count: 4,
+    description: 'Total Vehicles',
+  },
+  {
+    count: 10,
+    description: 'Own fleet',
+  },
+  {
+    count: 20,
+    description: 'Maret fleet',
+  },
+  {
+    count: 10,
+    description: 'Active fleet',
+  },
+];
+
 const Vehicle = () => {
   const client = 'Sowmya';
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleOpen = () => setModalOpen(true);
   const handleClose = () => setModalOpen(false);
-  const list = [
-    {
-      count: 4,
-      description: 'Total Vehicles',
-    },
-    {
-      count: 10,
-      description: 'Own fleet',
-    },
-    {
-      count: 20,
-      description: 'Maret fleet',
-    },
-    {
-      count: 10,
-      description: 'Active fleet',
-    },
-  ];
+
+  const listWithColors = useMemo(() => {
+    return initialList.map(item => ({
+      ...item,
+      bgColor: getRandomColor(),
+    }));
+  }, []);
+
   const handleViewTrips = (vehicleNumber: string) => {
-    // Implement the logic to view trips for the selected client
     console.log(`Viewing trips for ${vehicleNumber}`);
   };
 
@@ -49,43 +58,43 @@ const Vehicle = () => {
   const data = [
     {
       id: 1,
-      vehicleNumber: 'Test Client',
+      vehicleNumber: 'AP39AB1234',
       status: 'Active',
-      model: 'GST123',
-      chassisNumber: 'PAN123',
-      tripCount: 'John Doe',
-      latestOdometerReading: 'John Doe',
+      model: 'Tata Ace',
+      chassisNumber: 'CHAS123XYZ',
+      tripCount: 15,
+      latestOdometerReading: 12500,
       capacity: 1000,
     },
     {
       id: 2,
-      vehicleNumber: 'Test Client1',
-      status: 'Active',
-      model: 'GST123',
-      chassisNumber: 'PAN123',
-      tripCount: 'John Doe',
-      latestOdometerReading: 'John Doe',
-      capacity: 1000,
+      vehicleNumber: 'TS07CD5678',
+      status: 'Inactive',
+      model: 'Ashok Leyland Dost',
+      chassisNumber: 'CHAS456ABC',
+      tripCount: 8,
+      latestOdometerReading: 8800,
+      capacity: 1250,
     },
     {
       id: 3,
-      vehicleNumber: 'Test Client2',
-      status: 'Active',
-      model: 'GST123',
-      chassisNumber: 'PAN123',
-      tripCount: 'John Doe',
-      latestOdometerReading: 'John Doe',
-      capacity: 1000,
+      vehicleNumber: 'KA01EF9012',
+      status: 'Maintenance',
+      model: 'Mahindra Bolero Pickup',
+      chassisNumber: 'CHAS789DEF',
+      tripCount: 22,
+      latestOdometerReading: 21300,
+      capacity: 1500,
     },
     {
       id: 4,
-      vehicleNumber: 'Test Client3',
+      vehicleNumber: 'TN22GH3456',
       status: 'Active',
-      model: 'GST123',
-      chassisNumber: 'PAN123',
-      tripCount: 'John Doe',
-      latestOdometerReading: 'John Doe',
-      capacity: 1000,
+      model: 'Tata Intra V30',
+      chassisNumber: 'CHAS101GHI',
+      tripCount: 11,
+      latestOdometerReading: 15100,
+      capacity: 1300,
     },
   ].map(item => ({
     ...item,
@@ -94,7 +103,10 @@ const Vehicle = () => {
         variant="contained"
         color="info"
         size="small"
-        onClick={() => handleViewTrips(item.vehicleNumber)}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleViewTrips(item.vehicleNumber);
+        }}
       >
         View Details
       </Button>
@@ -115,14 +127,23 @@ const Vehicle = () => {
       </Button>
       <Box display="flex" justifyContent="space-between" marginBottom="20px">
         <Grid container spacing={2}>
-          {list.map(item => (
-            <Grid item xs={12} md={6} lg={3} key={item.count}>
-              <BasicCard key={item.count} count={item.count} description={item.description} bgColor={getRandomColor()} />
+          {listWithColors.map(item => (
+            <Grid item xs={12} md={6} lg={3} key={item.description}>
+              <BasicCard
+                key={item.description}
+                count={item.count}
+                description={item.description}
+                bgColor={item.bgColor}
+              />
             </Grid>
           ))}
         </Grid>
       </Box>
-      <DataTable data={data} columns={columns} />
+      <DataTable
+        data={data}
+        columns={columns}
+        searchFields={['vehicleNumber', 'model', 'status', 'chassisNumber']}
+      />
       <VehicleModal open={modalOpen} onClose={handleClose} />
     </SidebarLayout>
   );

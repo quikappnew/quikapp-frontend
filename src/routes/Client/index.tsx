@@ -1,7 +1,7 @@
 import { Box, Button, Grid } from "@mui/material";
 import Navbar from "components/Navbar";
 import SidebarLayout from "layouts/SidebarLayout"
-import { useState, Fragment } from "react";
+import { useState, Fragment, useMemo } from "react";
 import ClientModal from "./clientModal";
 import BasicCard from "components/Card";
 import DataTable from "components/DataTable";
@@ -9,6 +9,17 @@ import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TableRow, TableCell } from "@mui/material";
 import { getRandomColor } from "utils/randomColorGenerator";
+
+const initialList = [
+    {
+        count: 4,
+        description: "Total Number Clients"
+    },
+    {
+        count: 10,
+        description: "TotalNumber of Trips"  
+    },
+];
 
 const Client = () => {
     const client = "Sowmya";
@@ -26,18 +37,13 @@ const Client = () => {
         );
     };
 
-  
-
-    const list = [
-        {
-            count: 4,
-            description: "Total Number Clients"
-        },
-        {
-            count: 10,
-            description: "TotalNumber of Trips"  
-        },
-    ]
+    // Memoize the list with random colors
+    const listWithColors = useMemo(() => {
+        return initialList.map(item => ({
+            ...item,
+            bgColor: getRandomColor(),
+        }));
+    }, []); // Empty dependency array means this runs once
 
     const handleViewTrips = (clientName: string) => {
         console.log(`Viewing trips for ${clientName}`);
@@ -88,10 +94,10 @@ const Client = () => {
                                 }
                             }}
                         >
-                            {row[column.fieldName]}
+                            {column.fieldName === 'action' ? row.action : row[column.fieldName]}
                         </TableCell>
                     ))}
-                    <TableCell>
+                    <TableCell align="right">
                         <ExpandMoreIcon 
                             sx={{ 
                                 transform: isExpanded ? 'rotate(180deg)' : 'none',
@@ -102,8 +108,8 @@ const Client = () => {
                 </TableRow>
                 {isExpanded && (
                     <TableRow>
-                        <TableCell colSpan={columns.length + 1} sx={{ py: 0 }}>
-                            <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
+                        <TableCell colSpan={columns.length + 1} sx={{ py: 0, borderBottom: 'none' }}>
+                            <Box sx={{ p: 2, bgcolor: '#f9f9f9' }}>
                                 <h4>Client Details</h4>
                                 <p>Client ID: {row.id}</p>
                                 <p>Client Name: {row.clientName}</p>
@@ -130,12 +136,12 @@ const Client = () => {
             </Box>
             <Box display="flex" justifyContent="space-between">
                 <Grid container spacing={2} marginBottom="20px">
-                    {list.map((item) => (
+                    {listWithColors.map((item) => (
                         <Grid item xs={12} md={6} lg={6} key={item.description}>
                             <BasicCard 
                                 count={item.count} 
                                 description={item.description} 
-                                bgColor={getRandomColor()} 
+                                bgColor={item.bgColor}
                             />
                         </Grid>
                     ))}
@@ -145,6 +151,7 @@ const Client = () => {
                 data={data} 
                 columns={columns}
                 customRowRender={customRowRender}
+                searchFields={['clientName', 'gstNumber', 'panNumber', 'spocName']}
             />
             <ClientModal open={modalOpen} onClose={handleClose} />
         </SidebarLayout>

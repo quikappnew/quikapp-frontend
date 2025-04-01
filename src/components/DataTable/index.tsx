@@ -19,6 +19,7 @@ import {
 import dayjs from 'dayjs';
 import { FC, Fragment, ReactNode, useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SearchIcon from '@mui/icons-material/Search';
 
 import Button from 'components/Button';
 import ErrorMessage from 'components/ErrorMessage';
@@ -275,33 +276,51 @@ const DataTable: FC<DataTableProps> = ({
     }
   };
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    // Reset to the first page when search term changes
+    if (pagination) {
+      pagination.onPageChange(0);
+    }
+  };
+
+  const filteredData = data.filter(item => {
+    if (!searchFields || searchFields.length === 0 || !searchTerm) {
+      return true; // No search fields or search term, return all data
+    }
+    return searchFields.some(field => {
+      const value = item[field];
+      return value && value.toString().toLowerCase().includes(searchTerm.toLowerCase());
+    });
+  });
+
   const paginatedData = pagination
-    ? data.slice(
+    ? filteredData.slice(
         pagination.page * pagination.rowsPerPage,
         pagination.page * pagination.rowsPerPage + pagination.rowsPerPage
       )
-    : data;
+    : filteredData;
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden', boxShadow: 3 }}>
-      {searchFields && searchFields.length ? (
-        <TextField
-          id="input-with-icon-textfield"
-          size="small"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <img className={theme.logo} src={searchOutline} height={20} alt="search" />
-              </InputAdornment>
-            ),
-          }}
-          variant="outlined"
-          sx={{ margin: '16px', width: 'calc(100% - 32px)' }}
-          placeholder="Search..."
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-        />
-      ) : null}
+      {searchFields && searchFields.length > 0 && (
+        <Box sx={{ p: 2 }}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
+      )}
       <TableContainer>
         <Table stickyHeader>
           <DataTableHead
@@ -434,7 +453,7 @@ const DataTable: FC<DataTableProps> = ({
         <TablePagination
           rowsPerPageOptions={[5, 10, 25, 50]}
           component="div"
-          count={pagination.totalRows}
+          count={filteredData.length}
           rowsPerPage={pagination.rowsPerPage}
           page={pagination.page}
           onPageChange={handleChangePage}
