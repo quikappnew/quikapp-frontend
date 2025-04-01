@@ -47,31 +47,37 @@ const UserDocuments: FC = () => {
             label: 'Type',
             fieldName: 'type',
             type: 'STRING',
+            width: 150,
           },
           {
             label: 'Name',
             fieldName: 'name',
             type: 'STRING',
+            width: 150,
           },
           {
             label: 'Description',
             fieldName: 'description',
             type: 'STRING',
+            width: 150,
           },
           {
             label: 'File',
             fieldName: 'fileUrl',
             type: 'FILE',
+            width: 150,
           },
           {
             label: 'Status',
             fieldName: 'status',
             type: 'STATUS',
+            width: 150,
           },
           {
             label: 'Created At',
             fieldName: 'createdAt',
             type: 'DATETIME',
+            width: 150,
           },
         ]}
       />

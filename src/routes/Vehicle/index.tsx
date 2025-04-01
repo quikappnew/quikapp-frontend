@@ -5,6 +5,7 @@ import { useState } from 'react';
 import VehicleModal from './vehicalModal';
 import BasicCard from 'components/Card';
 import DataTable from 'components/DataTable';
+import { getRandomColor } from 'utils/randomColorGenerator';
 const Vehicle = () => {
   const client = 'Sowmya';
   const [modalOpen, setModalOpen] = useState(false);
@@ -112,11 +113,11 @@ const Vehicle = () => {
       >
         Add Vehicle
       </Button>
-      <Box display="flex" justifyContent="space-between">
+      <Box display="flex" justifyContent="space-between" marginBottom="20px">
         <Grid container spacing={2}>
           {list.map(item => (
-            <Grid item xs={12} md={6} lg={6} key={item.count}>
-              <BasicCard key={item.count} count={item.count} description={item.description} />
+            <Grid item xs={12} md={6} lg={3} key={item.count}>
+              <BasicCard key={item.count} count={item.count} description={item.description} bgColor={getRandomColor()} />
             </Grid>
           ))}
         </Grid>

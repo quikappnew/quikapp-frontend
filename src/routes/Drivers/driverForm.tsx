@@ -2,15 +2,15 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography } from '@mui/material';
 
-const ClientForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) => {
-  const [clientName, setClientName] = useState('');
-  const [gstNumber, setGstNumber] = useState('');
-  const [panNumber, setPanNumber] = useState('');
-  const [spocName, setSpocName] = useState('');
+const DriverForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) => {
+  const [driverName, setDriverName] = useState('');
+  const [district, setDistrict] = useState('');
+  const [state, setState] = useState('');
+  const [pinCode, setPinCode] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ clientName, gstNumber, panNumber, spocName });
+    onSubmit({ driverName, district, state, pinCode });
   };
 
   return (
@@ -18,37 +18,37 @@ const ClientForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) =
 
       <TextField
         fullWidth
-        label="Client Name"
+        label="Driver Name"
         variant="outlined"
-        value={clientName}
-        onChange={(e) => setClientName(e.target.value)}
+        value={driverName}
+        onChange={(e) => setDriverName(e.target.value)}
         required
         sx={{ mb: 2 }}
       />
       <TextField
         fullWidth
-        label="GST Number"
+        label="District"
         variant="outlined"
-        value={gstNumber}
-        onChange={(e) => setGstNumber(e.target.value)}
+        value={district}
+        onChange={(e) => setDistrict(e.target.value)}
         required
         sx={{ mb: 2 }}
       />
       <TextField
         fullWidth
-        label="PAN Number"
+        label="State"
         variant="outlined"
-        value={panNumber}
-        onChange={(e) => setPanNumber(e.target.value)}
+        value={state}
+        onChange={(e) => setState(e.target.value)}
         required
         sx={{ mb: 2 }}
       />
       <TextField
         fullWidth
-        label="SPOC Name"
+        label="Pin Code"
         variant="outlined"
-        value={spocName}
-        onChange={(e) => setSpocName(e.target.value)}
+        value={pinCode}
+          onChange={(e) => setPinCode(e.target.value)}
         required
         sx={{ mb: 2 }}
       />
@@ -59,4 +59,4 @@ const ClientForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) =
   );
 };
 
-export default ClientForm;
+export default DriverForm;

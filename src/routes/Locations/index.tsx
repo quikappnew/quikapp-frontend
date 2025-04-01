@@ -6,6 +6,7 @@ import BasicCard from 'components/Card';
 import DataTable from 'components/DataTable';
 import ConfirmationModal from './confrimationModal';
 import ConfirmButton from 'components/ConfirmButton';
+import { getRandomColor } from 'utils/randomColorGenerator';
 
 const Locations = () => {
   const client = 'Sowmya';
@@ -101,7 +102,7 @@ const Locations = () => {
         <Grid container spacing={2}>
           {list.map(item => (
             <Grid item xs={12} md={6} lg={6} key={item.count}>
-              <BasicCard key={item.count} count={item.count} description={item.description} />
+              <BasicCard key={item.count} count={item.count} description={item.description} bgColor={getRandomColor()} />
             </Grid>
           ))}
         </Grid>

@@ -48,26 +48,31 @@ const UserIdentityCards: FC = () => {
           {
             label: 'Card Number',
             fieldName: 'cardNumber',
+            width: 150,
           },
           {
             label: 'Issue Date',
             fieldName: 'issueDate',
             type: 'DATETIME',
+            width: 150,
           },
           {
             label: 'Expiry Date',
             fieldName: 'expiryDate',
             type: 'DATETIME',
+            width: 150,
           },
           {
             label: 'Status',
             fieldName: 'status',
             type: 'STATUS',
+            width: 150,
           },
           {
             label: 'Created At',
             fieldName: 'createdAt',
             type: 'DATETIME',
+            width: 150,
           },
         ]}
       />

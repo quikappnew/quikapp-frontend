@@ -10,9 +10,15 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Paper,
+  TablePagination,
 } from '@mui/material';
 import dayjs from 'dayjs';
 import { FC, Fragment, ReactNode, useState } from 'react';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import Button from 'components/Button';
 import ErrorMessage from 'components/ErrorMessage';
@@ -45,6 +51,15 @@ interface Column {
     //  | 'FUNDING_SOURCE'
     | 'COUNTRY'
     | 'FILE';
+  width: number;
+}
+
+interface PaginationProps {
+  page: number;
+  rowsPerPage: number;
+  totalRows: number;
+  onPageChange: (newPage: number) => void;
+  onRowsPerPageChange: (newRowsPerPage: number) => void;
 }
 
 const DataTableHead: FC<{
@@ -55,7 +70,7 @@ const DataTableHead: FC<{
   <TableHead>
     <TableRow>
       {columns.map(c => (
-        <TableCell key={c.fieldName + c.label} align={'left'}>
+        <TableCell key={c.fieldName + c.label} align={'left'} style={{ width: c.width }}>
           {c.type === 'SELECT' ? (
             <Checkbox
               size="small"
@@ -198,6 +213,9 @@ interface DataTableProps {
   emptyListTitle?: string;
   emptyListDescription?: string;
   totalCount?: number;
+  customRowRender?: (row: any) => ReactNode;
+  showAccordion?: boolean;
+  pagination?: PaginationProps;
 }
 
 const DataTable: FC<DataTableProps> = ({
@@ -215,9 +233,13 @@ const DataTable: FC<DataTableProps> = ({
   emptyListTitle,
   emptyListDescription,
   totalCount,
+  customRowRender,
+  showAccordion = false,
+  pagination,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
+  const [expandedRows, setExpandedRows] = useState<number[]>([]);
 
   function getValueByFieldName(fieldName, obj) {
     // Example: fieldName "group.name" looks for obj[group][name]
@@ -233,8 +255,35 @@ const DataTable: FC<DataTableProps> = ({
     onSelect && onSelect(items);
   }
 
+  const handleAccordionChange = (rowId: number) => {
+    setExpandedRows(prev => 
+      prev.includes(rowId) 
+        ? prev.filter(id => id !== rowId)
+        : [...prev, rowId]
+    );
+  };
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    if (pagination) {
+      pagination.onPageChange(newPage);
+    }
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (pagination) {
+      pagination.onRowsPerPageChange(parseInt(event.target.value, 10));
+    }
+  };
+
+  const paginatedData = pagination
+    ? data.slice(
+        pagination.page * pagination.rowsPerPage,
+        pagination.page * pagination.rowsPerPage + pagination.rowsPerPage
+      )
+    : data;
+
   return (
-    <Box className={theme.table}>
+    <Paper sx={{ width: '100%', overflow: 'hidden', boxShadow: 3 }}>
       {searchFields && searchFields.length ? (
         <TextField
           id="input-with-icon-textfield"
@@ -247,72 +296,76 @@ const DataTable: FC<DataTableProps> = ({
             ),
           }}
           variant="outlined"
-          sx={{ margin: '8px 0' }}
-          placeholder="Search"
-          onChange={e => setSearchTerm(e.target.value.toLowerCase())}
+          sx={{ margin: '16px', width: 'calc(100% - 32px)' }}
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
         />
       ) : null}
-      <TableContainer className={theme.tableContainer}>
-        <Table size="small">
+      <TableContainer>
+        <Table stickyHeader>
           <DataTableHead
             columns={columns}
-            isSelected={selectedItems.length > 0}
-            onSelectAll={checked => {
-              if (!checked) {
+            isSelected={selectedItems.length === data.length}
+            onSelectAll={value => {
+              if (value) {
+                updateSelectedItems(data.map(item => item.id));
+              } else {
                 updateSelectedItems([]);
-                return;
               }
-              updateSelectedItems(
-                data.map(item => getValueByFieldName(columns[0].fieldName, item))
-              );
             }}
           />
           <TableBody>
-            {!filterLoading &&
-              data
-                .filter(d => {
-                  if (searchFields && searchFields.length) {
-                    return searchFields.some(sf =>
-                      getValueByFieldName(sf, d).toLowerCase().includes(searchTerm)
-                    );
-                  }
-                  return true;
-                })
-                .map(d => (
-                  <TableRow
-                    hover={!!onClick}
-                    onClick={() => (onClick ? onClick(d) : null)}
-                    tabIndex={-1}
-                    key={d.id}
-                  >
-                    {columns.map(c => (
-                      <DataTableCell
-                        key={c.fieldName + c.label}
-                        type={c.type}
-                        value={
-                          c.type === 'SELECT'
-                            ? selectedItems.includes(getValueByFieldName(c.fieldName, d))
-                            : getValueByFieldName(c.fieldName, d)
-                        }
-                        onSelect={checked => {
-                          if (checked) {
-                            const newSelectedItems = [
-                              ...selectedItems,
-                              getValueByFieldName(c.fieldName, d),
-                            ];
-                            updateSelectedItems(newSelectedItems);
-                            return;
-                          }
-
-                          const newSelectedItems = selectedItems.filter(
-                            item => item !== getValueByFieldName(c.fieldName, d)
-                          );
-                          updateSelectedItems(newSelectedItems);
-                        }}
-                      />
-                    ))}
-                  </TableRow>
-                ))}
+            {paginatedData.map((row, index) => (
+              <Fragment key={row.id}>
+                {customRowRender ? (
+                  customRowRender(row)
+                ) : (
+                  <>
+                    <TableRow
+                      hover
+                      onClick={() => onClick && onClick(row)}
+                      sx={{ cursor: onClick ? 'pointer' : 'default' }}
+                    >
+                      {columns.map(column => (
+                        <DataTableCell
+                          key={column.fieldName}
+                          value={getValueByFieldName(column.fieldName, row)}
+                          type={column.type}
+                          onSelect={value => {
+                            if (value) {
+                              updateSelectedItems([...selectedItems, row.id]);
+                            } else {
+                              updateSelectedItems(selectedItems.filter(id => id !== row.id));
+                            }
+                          }}
+                        />
+                      ))}
+                    </TableRow>
+                    {showAccordion && (
+                      <TableRow>
+                        <TableCell colSpan={columns.length + 1} sx={{ py: 0 }}>
+                          <Accordion
+                            expanded={expandedRows.includes(row.id)}
+                            onChange={() => handleAccordionChange(row.id)}
+                            sx={{ boxShadow: 'none' }}
+                          >
+                            <AccordionDetails>
+                              <Box sx={{ p: 2 }}>
+                                <h4>Additional Details</h4>
+                                <p>Client ID: {row.id}</p>
+                                <p>Created Date: {new Date().toLocaleDateString()}</p>
+                                {/* Add more details as needed */}
+                              </Box>
+                            </AccordionDetails>
+                          </Accordion>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
+                )}
+              </Fragment>
+            ))}
           </TableBody>
         </Table>
         {filterLoading ? (
@@ -376,7 +429,19 @@ const DataTable: FC<DataTableProps> = ({
           </LoadingButton>
         </div>
       ) : null}
-    </Box>
+
+      {pagination && (
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25, 50]}
+          component="div"
+          count={pagination.totalRows}
+          rowsPerPage={pagination.rowsPerPage}
+          page={pagination.page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      )}
+    </Paper>
   );
 };
 
