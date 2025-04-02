@@ -15,6 +15,7 @@ import {
   AccordionDetails,
   Paper,
   TablePagination,
+  Chip,
 } from '@mui/material';
 import dayjs from 'dayjs';
 import { FC, Fragment, ReactNode, useState } from 'react';
@@ -33,6 +34,7 @@ import searchOutline from 'media/icons/search-outline.svg';
 import countryCodeToReadable from 'utils/country-code-to-readable';
 // import fundingSourceToReadable from 'utils/funding-source-to-readable';
 import statusEnumToReadable from 'utils/status-enum-to-readable';
+import tripStatusToReadable from 'utils/trip-status-to-readable';
 
 import theme from './theme.module.scss';
 
@@ -49,9 +51,9 @@ interface Column {
     | 'STATUS'
     | 'BOOLEAN'
     | 'SELECT'
-    //  | 'FUNDING_SOURCE'
     | 'COUNTRY'
-    | 'FILE';
+    | 'FILE'
+    | 'TRIP_STATUS';
   width: number;
 }
 
@@ -111,7 +113,8 @@ const DataTableCell: FC<{
     | 'SELECT'
     | 'FUNDING_SOURCE'
     | 'COUNTRY'
-    | 'FILE';
+    | 'FILE'
+    | 'TRIP_STATUS';
   onSelect?: (value: any) => void;
 }> = ({ value, type, onSelect = () => {} }) => {
   switch (type) {
@@ -169,12 +172,12 @@ const DataTableCell: FC<{
     case 'BOOLEAN':
       return <TableCell align="left">{value ? 'TRUE' : 'FALSE'}</TableCell>;
     case 'STATUS':
-      const { label, color } = statusEnumToReadable(value);
+      const { label: statusLabel, color: statusColor } = statusEnumToReadable(value);
       return (
         <TableCell align="left">
           <div className={theme.statusBadge}>
-            <div className={theme.indicator} style={{ backgroundColor: color }} />
-            {label}
+            <div className={theme.indicator} style={{ backgroundColor: statusColor }} />
+            {statusLabel}
           </div>
         </TableCell>
       );
@@ -192,6 +195,25 @@ const DataTableCell: FC<{
           >
             View File
           </a>
+        </TableCell>
+      );
+    case 'TRIP_STATUS':
+      const { label: tripLabel, color: tripColor } = tripStatusToReadable(value);
+      return (
+        <TableCell align="left">
+          <Chip
+            label={tripLabel}
+            sx={{
+              backgroundColor: `${tripColor}20`,
+              color: tripColor,
+              fontSize: '12px',
+              padding: '4px 8px',
+              fontWeight: 500,
+              '& .MuiChip-label': {
+                px: 1,
+              },
+            }}
+          />
         </TableCell>
       );
     default:

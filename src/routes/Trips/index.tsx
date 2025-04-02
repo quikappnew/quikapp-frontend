@@ -8,7 +8,7 @@ import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TableRow, TableCell } from "@mui/material";
 import { getRandomColor } from "utils/randomColorGenerator";
-import TripStatusOverview from 'components/TripStatusOverview';
+import TripStatusOverview from './TripDetails/TripStatusOverview';
 import { useNavigate } from 'react-router-dom';
 
 const initialList = [
@@ -52,18 +52,18 @@ const Trips: FC = () => {
     };
 
     const columns = [
-        { label: 'Trip Name', fieldName: 'tripName', width: 200 },
-        { label: 'Trip Number', fieldName: 'tripNumber', width: 150 },
-        { label: 'Trip Status', fieldName: 'tripStatus', width: 150 },
-        { label: 'Created At', fieldName: 'createdAt', width: 200 },
-        { label: 'Action', fieldName: 'action', width: 150 },
+        { label: 'Trip Name', fieldName: 'tripName', width: 200, type: 'STRING' as const },
+        { label: 'Trip Number', fieldName: 'tripNumber', width: 150, type: 'STRING' as const },
+        { label: 'Trip Status', fieldName: 'tripStatus', width: 150, type: 'TRIP_STATUS' as const },
+        { label: 'Created At', fieldName: 'createdAt', width: 200, type: 'DATE' as const },
+        { label: 'Action', fieldName: 'action', width: 150, type: 'STRING' as const },
     ];
 
     const data = [
         { id: 1, tripName: 'Test Trip', tripNumber: 'Trip123', tripStatus: 'Active', createdAt: '2021-01-01' },
-        { id: 2, tripName: 'Test Trip1', tripNumber: 'Trip123', tripStatus: 'Active', createdAt: '2021-01-01' },
-        { id: 3, tripName: 'Test Trip2', tripNumber: 'Trip123', tripStatus: 'Active', createdAt: '2021-01-01' },
-        { id: 4, tripName: 'Test Trip3', tripNumber: 'Trip123', tripStatus: 'Active', createdAt: '2021-01-01' },
+        { id: 2, tripName: 'Test Trip1', tripNumber: 'Trip123', tripStatus: 'In Transit', createdAt: '2021-01-01' },
+        { id: 3, tripName: 'Test Trip2', tripNumber: 'Trip123', tripStatus: 'Completed', createdAt: '2021-01-01' },
+        { id: 4, tripName: 'Test Trip3', tripNumber: 'Trip123', tripStatus: 'Cancelled', createdAt: '2021-01-01' },
     ].map(item => ({
         ...item,
         action: (
@@ -99,7 +99,7 @@ const Trips: FC = () => {
             <DataTable 
                 data={data} 
                 columns={columns}
-                searchFields={['clientName', 'gstNumber', 'panNumber', 'spocName']}
+                searchFields={['tripName', 'tripNumber', 'tripStatus', 'createdAt']}
             />
         </SidebarLayout>
     )
