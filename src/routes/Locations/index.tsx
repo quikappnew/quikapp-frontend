@@ -34,6 +34,8 @@ const Locations = () => {
     { label: 'District', fieldName: 'district', width: 150 },
     { label: 'State', fieldName: 'state', width: 150 },
     { label: 'Pin Code', fieldName: 'pinCode', width: 200 },
+    { label: 'Created By', fieldName: 'createdBy', width: 150 },
+    { label: 'Created Date', fieldName: 'createdDate', width: 150 },
     { label: 'Action', fieldName: 'action', width: 150 },
   ];
 
@@ -44,6 +46,8 @@ const Locations = () => {
       district: 'District 1',
       state: 'State 1',
       pinCode: '123456',
+      createdBy: 'Admin',
+      createdDate: '2021-01-01',
     },
     {
       id: 2,
@@ -51,13 +55,17 @@ const Locations = () => {
       district: 'District 2',
       state: 'State 2',
       pinCode: '123456',
+      createdBy: 'Admin',
+      createdDate: '2021-01-01',
     },
     {
       id: 3,
       locationName: 'Location 3',
       district: 'District 3',
       state: 'State 3',
-      pinCode: '123456',
+      pinCode: '123456',  
+      createdBy: 'Admin',
+      createdDate: '2021-01-01',
     },
     {
       id: 4,
@@ -65,6 +73,8 @@ const Locations = () => {
       district: 'District 4',
       state: 'State 4',
       pinCode: '123456',
+      createdBy: 'Admin',
+      createdDate: '2021-01-01',
     },
   ].map(item => ({
     ...item,
@@ -98,7 +108,7 @@ const Locations = () => {
       >
         Add Location
       </Button>
-      <Box display="flex" justifyContent="space-between">
+      <Box display="flex" justifyContent="space-between" marginBottom="20px">
         <Grid container spacing={2}>
           {list.map(item => (
             <Grid item xs={12} md={6} lg={6} key={item.count}>
