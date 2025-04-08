@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography, Select, MenuItem, Grid } from '@mui/material';
+import { Box, TextField, Button, Typography, Select, MenuItem, Grid, FormControl, InputLabel } from '@mui/material';
 import ConfirmDeactivateModal from './ConfirmDeactivateModal';
 
 interface User {
@@ -136,35 +136,40 @@ export const UserForm: React.FC<UserFormProps> = ({ onSubmit, user, onClose }) =
           </Grid>
         )}
         <Grid item xs={12} sm={6}>
-          <Select
-            fullWidth
-            name="role"
-            label="Role"
-            variant="outlined"
-            value={formData.role}
-            onChange={(e) => handleChange(e as React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>)}
-            required
-          >
-            <MenuItem value="Admin">Admin</MenuItem>
-            <MenuItem value="User">User</MenuItem>
-            <MenuItem value="Manager">Manager</MenuItem>
-          </Select>
-        </Grid>
-        {user && (
-          <Grid item xs={12} sm={6}>
+          <FormControl fullWidth variant="outlined">
+            <InputLabel id="role-label">Role</InputLabel>
             <Select
               fullWidth
-              name="status"
-              label="Status"
-              variant="outlined"
-              value={formData.status}
+              name="role"
+              labelId="role-label"
+              label="Role"
+              value={formData.role}
               onChange={(e) => handleChange(e as React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>)}
               required
             >
-              <MenuItem value="Active">Active</MenuItem>
-              <MenuItem value="Inactive">Inactive</MenuItem>
-              <MenuItem value="Pending">Pending</MenuItem>
+              <MenuItem value="Admin">Admin</MenuItem>
+              <MenuItem value="User">User</MenuItem>
             </Select>
+          </FormControl>
+        </Grid>
+        {user && (
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth variant="outlined">
+              <InputLabel id="status-label">Status</InputLabel>
+              <Select
+                fullWidth
+                name="status"
+                labelId="status-label"
+                label="Status"
+                value={formData.status}
+                onChange={(e) => handleChange(e as React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>)}
+                required
+              >
+                <MenuItem value="Active">Active</MenuItem>
+                <MenuItem value="Inactive">Inactive</MenuItem>
+                <MenuItem value="Pending">Pending</MenuItem>
+              </Select>
+            </FormControl>
           </Grid>
         )}
         <Grid item xs={12}>

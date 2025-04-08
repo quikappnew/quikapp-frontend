@@ -4,6 +4,7 @@ import { Box, TextField, Button, Typography } from '@mui/material';
 
 const LocationForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) => {
   const [locationName, setLocationName] = useState('');
+  const [nodalLocationName, setNodalLocationName] = useState('');
   const [district, setDistrict] = useState('');
   const [state, setState] = useState('');
   const [pinCode, setPinCode] = useState('');
@@ -65,12 +66,21 @@ const LocationForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit })
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
       <TextField
         fullWidth
+        label="Nodal Location Name"
+        variant="outlined"
+        value={nodalLocationName}
+        onChange={(e) => setNodalLocationName(e.target.value)}
+        required
+        sx={{ mb: 2 }}
+      />
+      <TextField
+        fullWidth
         label="Pin Code"
         variant="outlined"
         value={pinCode}
         onChange={(e) => setPinCode(e.target.value)}
         required
-        sx={{ mb: pinCodeError ? 0 : 2 }}
+        sx={{ mb:  2 }}
         inputProps={{ maxLength: 6 }}
         error={!!pinCodeError}
       />
