@@ -72,7 +72,7 @@ const DataTableHead: FC<{
   showAccordion?: boolean;
 }> = ({ columns, isSelected, onSelectAll, showAccordion = false }) => (
   <TableHead>
-    <TableRow sx={{ width: '100%' }}>
+    <TableRow sx={{ width: '100%', backgroundColor: '#e0e0e0' }}>
       {columns.map(c => (
         <TableCell key={c.fieldName + c.label} align={'left'} style={{ width: c.width }}>
           {c.type === 'SELECT' ? (

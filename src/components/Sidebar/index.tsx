@@ -32,9 +32,9 @@ const MenuItem = ({ tab, level = 0 }: { tab: TabItem; level?: number }) => {
               <span>{tab.label}</span>
             </div>
             {isOpen ? (
-              <ChevronDownIcon className="w-4 h-4" />
+              <ChevronDownIcon className="w-4 h-4 text-black/60" />
             ) : (
-              <ChevronRightIcon className="w-4 h-4" />
+              <ChevronRightIcon className="w-4 h-4 text-black/60" />
             )}
           </>
         ) : (

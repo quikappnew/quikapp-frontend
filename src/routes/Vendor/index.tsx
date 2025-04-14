@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from "@mui/material";
+import { Box, Button, Grid, Table, TableBody } from "@mui/material";
 import Navbar from "components/Navbar";
 import SidebarLayout from "layouts/SidebarLayout"
 import { useState, Fragment, useMemo } from "react";
@@ -63,8 +63,26 @@ const Vendor = () => {
         { id: 4, vendorName: 'Test Vendor3', gstNumber: 'GST123', panNumber: 'PAN123', spocName: 'John Doe' },
     ]
 
+    // Add mock trips data - you can replace this with actual API data later
+    const mockTrips = {
+        1: [
+            { tripId: "T001", source: "Mumbai", destination: "Delhi", date: "2024-03-20", status: "In Progress" },
+            { tripId: "T002", source: "Delhi", destination: "Bangalore", date: "2024-03-21", status: "Completed" }
+        ],
+        2: [
+            { tripId: "T003", source: "Chennai", destination: "Kolkata", date: "2024-03-19", status: "Scheduled" }
+        ],
+        3: [
+            { tripId: "T004", source: "Hyderabad", destination: "Pune", date: "2024-03-22", status: "In Progress" }
+        ],
+        4: [
+            { tripId: "T005", source: "Bangalore", destination: "Mumbai", date: "2024-03-23", status: "Scheduled" }
+        ]
+    };
+
     const customRowRender = (row: any) => {
         const isExpanded = expandedRows.includes(row.id);
+        const vendorTrips = mockTrips[row.id as keyof typeof mockTrips] || [];
         
         return (
             <Fragment key={row.id}>
@@ -100,13 +118,38 @@ const Vendor = () => {
                     <TableRow>
                         <TableCell colSpan={columns.length + 1} sx={{ py: 0, borderBottom: 'none' }}>
                             <Box sx={{ p: 2, bgcolor: '#f9f9f9' }}>
-                                <h4>Vendor Details</h4>
-                                <p>Vendor ID: {row.id}</p>
-                                <p>Vendor Name: {row.vendorName}</p>
-                                <p>GST Number: {row.gstNumber}</p>
-                                <p>PAN Number: {row.panNumber}</p>
-                                <p>SPOC Name: {row.spocName}</p>
-                                <p>Created Date: {new Date().toLocaleDateString()}</p>
+                        
+
+                                <Box>
+                                
+                                    <Table size="small">
+                                        <TableBody>
+                                            <TableRow sx={{ backgroundColor: '#e0e0e0' }}>
+                                                <TableCell sx={{ fontWeight: 'bold' }}>Trip ID</TableCell>
+                                                <TableCell sx={{ fontWeight: 'bold' }}>Source</TableCell>
+                                                <TableCell sx={{ fontWeight: 'bold' }}>Destination</TableCell>
+                                                <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                                                <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+                                            </TableRow>
+                                            {vendorTrips.map((trip, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell>{trip.tripId}</TableCell>
+                                                    <TableCell>{trip.source}</TableCell>
+                                                    <TableCell>{trip.destination}</TableCell>
+                                                    <TableCell>{trip.date}</TableCell>
+                                                    <TableCell>{trip.status}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                            {vendorTrips.length === 0 && (
+                                                <TableRow>
+                                                    <TableCell colSpan={5} align="center">
+                                                        No trips found for this vendor
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </Box>
                             </Box>
                         </TableCell>
                     </TableRow>
