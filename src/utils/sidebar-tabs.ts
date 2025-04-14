@@ -1,12 +1,19 @@
-import settingsIcon from 'media/icons/settings.svg';
-import usersIcon from 'media/icons/team.svg';
-import dashboardIcon from 'media/icons/dashboard.svg';
-import FourKIcon from '@mui/icons-material/FourK';
+import React from 'react';
+import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
+import ExploreOutlinedIcon from '@mui/icons-material/ExploreOutlined';
+import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+
 export interface TabItem {
   key: string;
   label: string;
   route: string;
-  icon?: string;
+  icon?: React.ElementType;
   exact?: boolean;
   children?: TabItem[];
 }
@@ -16,13 +23,13 @@ const getSidebarTabs = (): TabItem[] => {
     {
       key: 'dashboard',
       label: 'Dashboard & Analytics',
-      icon: dashboardIcon,
+      icon: DashboardOutlinedIcon,
       route: '/dashboard',
     },
     {
       key: 'trips',
       label: 'Trip Details',
-      icon: usersIcon,
+      icon: ExploreOutlinedIcon,
       route: '/trips',
       children: [
         {
@@ -73,19 +80,19 @@ const getSidebarTabs = (): TabItem[] => {
     {
       key: 'vendor',
       label: 'Vendor',
-      icon: dashboardIcon,
+      icon: StorefrontOutlinedIcon,
       route: '/vendor',
     },
     {
       key: 'client',
       label: 'Client',
-      icon: dashboardIcon,
+      icon: AccountCircleOutlinedIcon,
       route: '/client',
     },
     {
       key: 'drivers',
       label: 'Drivers',
-      icon: dashboardIcon,
+      icon: PeopleOutlinedIcon,
       route: '/drivers',
       children: [
         {
@@ -105,7 +112,7 @@ const getSidebarTabs = (): TabItem[] => {
     {
       key: 'vehicles',
       label: 'Vehicles',
-      icon: dashboardIcon,
+      icon: LocalShippingOutlinedIcon,
       route: '/vehicle',
       children: [
         {
@@ -124,19 +131,19 @@ const getSidebarTabs = (): TabItem[] => {
     {
       key: 'add-remove-locations',
       label: 'Add/Remove Locations',
-      icon: dashboardIcon,
+      icon: LocationOnOutlinedIcon,
       route: '/locations'
     },
     {
       key: 'manage-users',
       label: 'Manage Users',
-      icon: dashboardIcon,
+      icon: ManageAccountsOutlinedIcon,
       route: '/users'
     },
     {
       key: 'sign-out',
       label: 'Sign Out',
-      icon: dashboardIcon,
+      icon: LogoutOutlinedIcon,
       route: '/dashboard'
     },
   ];

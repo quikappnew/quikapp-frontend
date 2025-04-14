@@ -11,6 +11,7 @@ import UserDocuments from './User/Documents';
 import UserCards from './User/IdentityCards';
 import UserInformation from './User/Information';
 import Vehicle from './Vehicle';
+import VehicleDetails from './Vehicle/vehicleDetails';
 import Dashboard from './Dashboard';
 import Locations from './Locations';
 import Trips from './Trips';
@@ -190,11 +191,24 @@ const App: React.FC = () => {
     },
     {
       path: '/vehicle',
-      element: (
-        <ProtectedRoute>
-          <Vehicle />
-        </ProtectedRoute>
-      ),
+      children: [
+        {
+          index: true,
+          element: (
+            <ProtectedRoute>
+              <Vehicle />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: ':vehicleId',
+          element: (
+            <ProtectedRoute>
+              <VehicleDetails />
+            </ProtectedRoute>
+          ),
+        },
+      ],
     },
   ]);
 

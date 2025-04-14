@@ -28,7 +28,7 @@ const MenuItem = ({ tab, level = 0 }: { tab: TabItem; level?: number }) => {
         {hasChildren ? (
           <>
             <div className="flex items-center gap-2 flex-1">
-              {tab.icon && <img src={tab.icon} alt={tab.label} width={20} height={20} />}
+              {tab.icon && <tab.icon className="w-5 h-5" />}
               <span>{tab.label}</span>
             </div>
             {isOpen ? (
@@ -42,7 +42,7 @@ const MenuItem = ({ tab, level = 0 }: { tab: TabItem; level?: number }) => {
             to={tab.route}
             className="flex items-center gap-2 w-full"
           >
-            {tab.icon && <img src={tab.icon} alt={tab.label} width={20} height={20} />}
+            {tab.icon && <tab.icon className="w-5 h-5 text-black/80" />}
             {tab.label}
           </NavLink>
         )}

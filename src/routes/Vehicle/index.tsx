@@ -6,6 +6,7 @@ import VehicleModal from './vehicalModal';
 import BasicCard from 'components/Card';
 import DataTable from 'components/DataTable';
 import { getRandomColor } from 'utils/randomColorGenerator';
+import { useNavigate } from 'react-router-dom';
 
 const initialList = [
   {
@@ -29,6 +30,7 @@ const initialList = [
 const Vehicle = () => {
   const client = 'Sowmya';
   const [modalOpen, setModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleOpen = () => setModalOpen(true);
   const handleClose = () => setModalOpen(false);
@@ -40,8 +42,8 @@ const Vehicle = () => {
     }));
   }, []);
 
-  const handleViewTrips = (vehicleNumber: string) => {
-    console.log(`Viewing trips for ${vehicleNumber}`);
+  const handleViewDetails = (vehicle: any) => {
+    navigate(`/vehicle/${vehicle.id}`, { state: { vehicle } });
   };
 
   const columns = [
@@ -105,7 +107,7 @@ const Vehicle = () => {
         size="small"
         onClick={(e) => {
           e.stopPropagation();
-          handleViewTrips(item.vehicleNumber);
+          handleViewDetails(item);
         }}
       >
         View Details

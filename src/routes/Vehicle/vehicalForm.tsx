@@ -1,6 +1,6 @@
 // src/components/ClientForm.tsx
 import React, { useState } from 'react';
-import { Box, TextField, Button, Typography, Select, MenuItem } from '@mui/material';
+import { Box, TextField, Button, Typography, Select, MenuItem, TextareaAutosize, FormControl, InputLabel } from '@mui/material';
 
 const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) => {
   const [vehicleNumber, setVehicleNumber] = useState('');
@@ -8,8 +8,7 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
   const [capacity, setCapacity] = useState('');
   const [chassisNumber, setChassisNumber] = useState('');
   const [remarks, setRemarks] = useState('');
-  const [status, setStatus] = useState('');
-  const [spocName, setSpocName] = useState('');
+  const [vehicleType, setVehicleType] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +20,7 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
 
       <TextField
         fullWidth
-        label="Vehicle Number*"
+        label="Vehicle Number"
         variant="outlined"
         value={vehicleNumber}
         onChange={(e) => setVehicleNumber(e.target.value)}
@@ -30,7 +29,7 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
       />
       <TextField
         fullWidth
-        label="Model*"
+        label="Model"
         variant="outlined"
         value={model}
         onChange={(e) => setModel(e.target.value)}
@@ -39,7 +38,7 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
       />
       <TextField
         fullWidth
-        label="Capacity*"
+        label="Capacity"
         variant="outlined"
         value={capacity}
         onChange={(e) => setCapacity(e.target.value)}
@@ -48,7 +47,7 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
       />
       <TextField
         fullWidth
-        label="Chassis Number*"
+        label="Chassis Number"
         variant="outlined"
         value={chassisNumber}
         onChange={(e) => setChassisNumber(e.target.value)}
@@ -57,21 +56,30 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
       />
       <TextField
         fullWidth
-        label="Remarks*"
+        label="Remarks"
         variant="outlined"
         value={remarks}
         onChange={(e) => setRemarks(e.target.value)}
+        multiline
+        rows={4}
+        sx={{ mb: 2 }}
       />
-      <Select
-        fullWidth
-        label="Status*"
-        variant="outlined"
-        value={spocName}
-        onChange={(e) => setSpocName(e.target.value)}
-      >
-        <MenuItem value="Own">Own</MenuItem>
-        <MenuItem value="Market">Market</MenuItem>
-      </Select>
+      <FormControl fullWidth variant="outlined">
+        <InputLabel id="vehicleType-label">Vehicle Type</InputLabel>
+        <Select
+          fullWidth
+          labelId="vehicleType-label"
+          label="Vehicle Type"
+          value={vehicleType}
+          onChange={(e) => setVehicleType(e.target.value)}
+          sx={{ mb: 2 }}
+          required
+        >
+          <MenuItem value="Own fleet">Own fleet</MenuItem>
+          <MenuItem value="Vendor fleet">Vendor fleet</MenuItem>
+        </Select>
+      </FormControl>
+ 
       <Button type="submit" variant="contained" color="primary">
         Submit
       </Button>
