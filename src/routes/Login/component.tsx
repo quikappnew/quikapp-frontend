@@ -74,12 +74,12 @@ export const RegisterForm: FC<FormProps> = ({ onSubmit, formState }) => (
       fullWidth
       validators={{ required: true }}
     />
-    <FormInput
+    {/* <FormInput
       fieldName="email"
       type="string"
       defaultValue=""
       label="Email (Optional)"
       fullWidth
-    />
+    /> */}
   </FormPanel>
 );

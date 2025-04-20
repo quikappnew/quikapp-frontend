@@ -346,7 +346,7 @@ export const getIdentityCardPublic = async (id: string): Promise<IdentityCard> =
 
 export const login = async (phone_number: string): Promise<any> => {
   try {
-    const response = await api.post<User>('users/auth/request-otp/', { phone_number });
+    const response = await api.post<User>('/api/v2/users/request_otp/', { phone_number });
     return response.data;
   } catch (error) {
     throw ApiError.fromAxiosError(error, 'Failed to login');
@@ -428,12 +428,12 @@ export const markPrintSessionAsCancelled = async (id: string): Promise<void> => 
 interface RegisterData {
   phone_number: string;
   full_name: string;
-  email?: string;
+  // email?: string;
 }
 
 export const register = async (data: RegisterData): Promise<any> => {
   try {
-    const response = await api.post('/users/auth/register/', data);
+    const response = await api.post('/api/v2/users/register/', data);
     return response.data;
   } catch (error) {
     throw ApiError.fromAxiosError(error, 'Registration failed');
@@ -446,7 +446,7 @@ interface VerifyOTPData {
 }
 
 export const verifyOTP = async (data: VerifyOTPData): Promise< VerifyOTPResponse> => {
-  const response = await api.post('/users/auth/verify-otp/', data);
+  const response = await api.post('/api/v2/users/verify_otp/', data);
   return response.data;
   };
 

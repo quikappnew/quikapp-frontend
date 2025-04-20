@@ -20,7 +20,7 @@ export const useAuth = (redirectTo: string | null, navigate: (path: string) => v
 
     try {
       const response: LoginResponse = await login(data.phone_number);
-      if (response?.data?.user_exists) {
+      if (response?.user_exists) {
         dispatch({ type: 'SET_PHONE_NUMBER', payload: data.phone_number });
         dispatch({ type: 'SHOW_OTP' });
       } else {
@@ -45,8 +45,8 @@ const handleOTPVerification = async (data: FormData) => {
       otp: data.otp!
     });
 
-    if (response.success && response.data?.user?.token) {
-      const token = response.data.user.token;
+    if (response.user.token) {
+      const token = response.user.token;
       TokenService.setToken(token);
       
       // Verify token was set
@@ -78,10 +78,10 @@ const handleOTPVerification = async (data: FormData) => {
       const response: RegisterResponse = await register({
         phone_number: data.phone_number,
         full_name: data.full_name!,
-        email: data.email
+        // email: data.email
       });
 
-      if (response.data?.register_required) {
+      if (response.register_required) {
         dispatch({ type: 'SET_PHONE_NUMBER', payload: data.phone_number });
         dispatch({ type: 'SET_FULL_NAME', payload: data.full_name! });
         dispatch({ type: 'SET_EMAIL', payload: data.email! });
