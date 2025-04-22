@@ -82,6 +82,18 @@ const getSidebarTabs = (): TabItem[] => {
       label: 'Vendor',
       icon: StorefrontOutlinedIcon,
       route: '/vendor',
+      children: [
+        {
+          key: 'vendor-onboarding',
+          label: 'Vendor Onboarding',
+          route: '/vendor/onboarding',
+        },
+        {
+          key: 'vendor-list',
+          label: 'Vendor List',
+          route: '/vendor/list',
+        },
+      ],
     },
     {
       key: 'client',

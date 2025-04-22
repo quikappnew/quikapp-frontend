@@ -1,7 +1,8 @@
 // src/components/ClientModal.tsx
 import React from 'react';
 import { Modal, Box, Button, Typography } from '@mui/material';
-import VendorForm from './vendorForm';
+import VendorForm from './vendorOnBoardingForm';
+import { vendorOnboarding } from '../../services/api';
 
 interface VendorModalProps {
   open: boolean;
@@ -12,10 +13,11 @@ const VendorModal: React.FC<VendorModalProps> = ({ open, onClose }) => {
     const handleFormSubmit = (data: any) => {
         console.log('Vendor Data:', data);
         // Handle form submission logic here
+        vendorOnboarding(data);
         onClose(); // Close the modal after submission
       };
   return (
-    <Modal open={open} onClose={onClose}>
+
       <Box
         sx={{
           position: 'absolute',
@@ -28,12 +30,11 @@ const VendorModal: React.FC<VendorModalProps> = ({ open, onClose }) => {
           p: 4,
         }}
       >
-        <Typography variant="h6" component="h2">
+        {/* <Typography variant="h6" component="h2">
          Add Vendor
         </Typography>
-        <VendorForm onSubmit={handleFormSubmit} />
+        <VendorForm onSubmit={handleFormSubmit} /> */}
       </Box>
-    </Modal>
   );
 };
 

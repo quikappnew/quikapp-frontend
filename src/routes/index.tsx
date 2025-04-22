@@ -20,9 +20,11 @@ import Reports from './Reports';
 import DriverPaymentRequests from './DriverPaymentRequests';
 import AccountsPayable from './AccountsPayable';
 import Vendor from './Vendor';
+import VendorOnboarding from './Vendor/vendorOnBoardingForm';
 import Client from './Client';
 import Drivers from './Drivers';
 import AdministrationUsers from './Users';
+import VendorOnBoardingForm from './Vendor/vendorOnBoardingForm';
 const App: React.FC = () => {
   const router = createBrowserRouter([
     {
@@ -100,12 +102,25 @@ const App: React.FC = () => {
     },
     {
       path: '/vendor',
-      element: (
-        <ProtectedRoute>
-          <Vendor />
-        </ProtectedRoute>
-      ),
-    },  
+      children: [
+        {
+          path: 'onboarding',
+          element: (
+            <ProtectedRoute>
+              <VendorOnBoardingForm />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'list',
+          element: (
+            <ProtectedRoute>
+              <Vendor />
+            </ProtectedRoute>
+          ),
+        },
+      ],
+    },
     {
       path: '/client',
       element: (

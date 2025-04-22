@@ -450,5 +450,20 @@ export const verifyOTP = async (data: VerifyOTPData): Promise< VerifyOTPResponse
   return response.data;
   };
 
-
 export default api; 
+
+export const vendorOnboarding = async (formData: FormData): Promise<any> => {
+  try {
+    const response = await api.post('/api/v2/core/vendor-onboarding/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to onboard vendor');
+  }
+};
+
+
+

@@ -187,7 +187,7 @@ const Vendor = () => {
                 searchFields={['vendorName', 'gstNumber', 'panNumber', 'spocName']}
                 showAccordion={true}
             />
-            <VendorModal open={modalOpen} onClose={handleClose} />
+            {/* <VendorModal open={modalOpen} onClose={handleClose} /> */}
         </SidebarLayout>
     )
 }   
