@@ -465,5 +465,46 @@ export const vendorOnboarding = async (formData: FormData): Promise<any> => {
   }
 };
 
+export interface Vendor {
+  id: string;
+  name: string;
+  gst: string;
+  pan: string;
+  spoc_name: string;
+  created_at: string;
+}
+
+export interface APIVendorResponse {
+  success: boolean;
+  data: Vendor[];
+}
+
+export const getVendors = async (): Promise<APIVendorResponse> => {
+  try {
+    const response = await api.get('/api/v2/core/vendors/');
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch vendors');
+  }
+};
+
+export const getVendor = async (id: string): Promise<{ success: boolean; data: Vendor }> => {
+  try {
+    const response = await api.get(`/api/v2/core/vendors/${id}/`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch vendor details');
+  }
+};
+
+export const approveVendor = async (id: string): Promise<any> => {
+  try {
+    const response = await api.post(`/api/v2/core/vendors/${id}/approve/`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to approve vendor');
+  }
+};
+
 
 

@@ -25,6 +25,8 @@ import Client from './Client';
 import Drivers from './Drivers';
 import AdministrationUsers from './Users';
 import VendorOnBoardingForm from './Vendor/vendorOnBoardingForm';
+import Lock from './Lock';
+import VendorOnBoardingList from './Vendor/vendorOnBoardingList';
 const App: React.FC = () => {
   const router = createBrowserRouter([
     {
@@ -76,30 +78,30 @@ const App: React.FC = () => {
         },
       ],
     },
-    {
-      path: '/reports',
-      element: (
-        <ProtectedRoute>
-          <Reports />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: '/driver-payment-requests',
-      element: (
-        <ProtectedRoute>
-          <DriverPaymentRequests />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: '/accounts-payable',
-      element: (
-        <ProtectedRoute>
-          <AccountsPayable />
-        </ProtectedRoute>
-      ),
-    },
+    // {
+    //   path: '/reports',
+    //   element: (
+    //     <ProtectedRoute>
+    //       <Reports />
+    //     </ProtectedRoute>
+    //   ),
+    // },
+    // {
+    //   path: '/driver-payment-requests',
+    //   element: (
+    //     <ProtectedRoute>
+    //       <DriverPaymentRequests />
+    //     </ProtectedRoute>
+    //   ),
+    // },
+    // {
+    //   path: '/accounts-payable',
+    //   element: (
+    //     <ProtectedRoute>
+    //       <AccountsPayable />
+    //     </ProtectedRoute>
+    //   ),
+    // },
     {
       path: '/vendor',
       children: [
@@ -116,6 +118,14 @@ const App: React.FC = () => {
           element: (
             <ProtectedRoute>
               <Vendor />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'onboarding-list',
+          element: (
+            <ProtectedRoute>
+              <VendorOnBoardingList />
             </ProtectedRoute>
           ),
         },
@@ -176,33 +186,9 @@ const App: React.FC = () => {
                 </ProtectedRoute>
               ),
             },
-            {
-              path: 'identity-cards',
-              element: (
-                <ProtectedRoute>
-                  <UserCards />
-                </ProtectedRoute>
-              ),
-            },
-            // {
-            //   path: 'activity',
-            //   element: (
-            //     <ProtectedRoute>
-            //       <UserActivity />
-            //     </ProtectedRoute>
-            //   ),
-            // },
           ],
         },
       ],
-    },
-    {
-      path: '/settings',
-      element: (
-        <ProtectedRoute>
-          <Settings />
-        </ProtectedRoute>
-      ),
     },
     {
       path: '/vehicle',
@@ -224,6 +210,14 @@ const App: React.FC = () => {
           ),
         },
       ],
+    },
+    {
+      path: '/lock',
+      element:(
+        <ProtectedRoute>
+             <Lock />
+        </ProtectedRoute>
+      ),
     },
   ]);
 

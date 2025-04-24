@@ -8,7 +8,7 @@ import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
-
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 export interface TabItem {
   key: string;
   label: string;
@@ -89,6 +89,11 @@ const getSidebarTabs = (): TabItem[] => {
           route: '/vendor/onboarding',
         },
         {
+          key:'vendor-onboarding-list',
+          label:'Vendor Onboarding List',
+          route:'/vendor/onboarding-list'
+        },
+        {
           key: 'vendor-list',
           label: 'Vendor List',
           route: '/vendor/list',
@@ -151,6 +156,12 @@ const getSidebarTabs = (): TabItem[] => {
       label: 'Manage Users',
       icon: ManageAccountsOutlinedIcon,
       route: '/users'
+    },
+    {
+      key: 'lock',
+      label: 'Lock',
+      icon: LockOutlinedIcon,
+      route: '/lock',
     },
     {
       key: 'sign-out',

@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Typography, CircularProgress } from '@mui/material';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
 import { getVendors } from 'services/api';
 import { useNavigate } from 'react-router-dom';
-import type { APIVendorResponse } from 'services/api';
+import type { Vendor } from 'services/api';
 
-const Vendor = () => {
+const VendorOnBoardingList: React.FC = () => {
   const navigate = useNavigate();
+  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
-  const [vendors, setVendors] = useState<APIVendorResponse['data']>([]);
   const [error, setError] = useState<string | null>(null);
 
   const columns = [
     { label: 'Vendor Name', fieldName: 'name', width: 200 },
     { label: 'GST Number', fieldName: 'gst', width: 150 },
     { label: 'PAN Number', fieldName: 'pan', width: 150 },
-    { label: 'SPOC Name', fieldName: 'spoc_name', width: 150 }
+    { label: 'SPOC Name', fieldName: 'spoc_name', width: 150 },
   ];
 
   useEffect(() => {
@@ -30,33 +30,22 @@ const Vendor = () => {
       setVendors(response.data || []);
       setError(null);
     } catch (err) {
-      setError('Failed to fetch vendors. Please try again.');
-      console.error('Error fetching vendors:', err);
+      setError('Failed to fetch vendor onboarding list. Please try again.');
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddVendor = () => {
-    navigate('/vendor/onboarding');
+  const handleRowClick = (vendor: Vendor) => {
+    navigate(`/vendor/onboarding/${vendor.id}`);
   };
 
   return (
     <SidebarLayout>
-      <Box sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h5">
-            Vendor Management
-          </Typography>
-          <Button 
-            variant="contained" 
-            color="primary"
-            onClick={handleAddVendor}
-          >
-            Add Vendor
-          </Button>
-        </Box>
-
+        <Typography variant="h5" gutterBottom>
+          Vendor Onboarding List
+        </Typography>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
             <CircularProgress />
@@ -70,11 +59,11 @@ const Vendor = () => {
             data={vendors}
             columns={columns}
             searchFields={['name', 'gst', 'pan', 'spoc_name']}
+            onClick={handleRowClick}
           />
         )}
-      </Box>
     </SidebarLayout>
   );
 };
 
-export default Vendor;
+export default VendorOnBoardingList;
