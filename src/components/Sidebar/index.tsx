@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import { NavLink, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import rapidLogo from 'media/rapid-logo.png';
 import { TabItem } from 'utils/sidebar-tabs';
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
@@ -10,25 +10,45 @@ const MenuItem = ({ tab, level = 0 }: { tab: TabItem; level?: number }) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasChildren = tab.children && tab.children.length > 0;
 
-  const isActive = tab.exact
+  // Check if any child route is active
+  const isChildActive = hasChildren && tab.children?.some(child => {
+    // Exact match for child routes
+    return location.pathname === child.route;
+  });
+
+  // Update isOpen state when a child becomes active
+  useEffect(() => {
+    if (isChildActive || location.pathname.startsWith(tab.route)) {
+      setIsOpen(true);
+    }
+  }, [isChildActive, location.pathname, tab.route]);
+
+  // For child items (level > 0), use exact matching
+  // For parent items, check if current path matches exactly or if any child is active
+  const isActive = level > 0 
     ? location.pathname === tab.route
-    : location.pathname === tab.route ||
-      (location.pathname.startsWith(tab.route) && tab.route !== '/');
+    : tab.route === location.pathname || isChildActive;
 
   return (
     <div className="w-full">
       <div
         className={classNames(
           'flex items-center gap-2 hover:bg-gray-50 rounded-md p-1.5 text-sm cursor-pointer',
-          isActive ? 'text-blue-500 font-medium bg-gray-100' : null,
+          (isActive) ? 'text-blue-500 font-medium bg-gray-100' : null,
           level > 0 ? 'ml-6' : ''
         )}
         onClick={() => hasChildren && setIsOpen(!isOpen)}
       >
         {hasChildren ? (
           <>
-            <div className="flex items-center gap-2 flex-1">
-              {tab.icon && <tab.icon className="w-5 h-5" />}
+            <div className={classNames(
+              'flex items-center gap-2 flex-1',
+              isActive ? 'text-blue-500' : ''
+            )}>
+              {tab.icon && <tab.icon className={classNames(
+                'w-5 h-5',
+                isActive ? 'text-blue-500' : 'text-black/80'
+              )} />}
               <span>{tab.label}</span>
             </div>
             {isOpen ? (
@@ -40,9 +60,16 @@ const MenuItem = ({ tab, level = 0 }: { tab: TabItem; level?: number }) => {
         ) : (
           <NavLink
             to={tab.route}
-            className="flex items-center gap-2 w-full"
+            className={({ isActive: linkActive }) => classNames(
+              'flex items-center gap-2 w-full',
+              linkActive ? 'text-blue-500' : ''
+            )}
+            end={level > 0} // Use end prop for exact matching on child routes
           >
-            {tab.icon && <tab.icon className="w-5 h-5 text-black/80" />}
+            {tab.icon && <tab.icon className={classNames(
+              'w-5 h-5',
+              isActive ? 'text-blue-500' : 'text-black/80'
+            )} />}
             {tab.label}
           </NavLink>
         )}
