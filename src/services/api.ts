@@ -506,5 +506,43 @@ export const approveVendor = async (id: string): Promise<any> => {
   }
 };
 
+export const rejectVendor = async (id: string): Promise<any> => {
+  try {
+    const response = await api.post(`/api/v2/core/vendors/${id}/reject/`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to reject vendor');
+  }
+};
+
+export const getVendorOnboardingList = async (): Promise<any> => {
+  try {
+    const response = await api.get('/api/v2/core/vendor-onboarding/');
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch vendor onboarding list');
+  }
+};  
+
+export const getLocationList = async (): Promise<{ success: boolean; data: Location[] }> => {
+  try {
+    const response = await api.get('api/v2/core/locations/');
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch location list');
+  }
+};
+
+interface Location {
+  id: string;
+  name_of_city: string;
+  district: string;
+  state: string;
+  pincode: string;
+  soft_delete: boolean;
+  created_at: string;
+}
+
+
 
 

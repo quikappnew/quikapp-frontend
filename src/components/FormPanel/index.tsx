@@ -590,11 +590,18 @@ const FormInput: FC<FormInputProps> = ({
   );
 };
 
+// Define a type for the props
+interface FormElementProps {
+  fieldName: string;
+  defaultValue: any;
+  validators?: any;
+}
+
 function getInitialDataAndValidatorsFromChildren(children: ReactNode) {
   let initialData = {};
   let validators = {};
   Children.forEach(children, element => {
-    if (!isValidElement(element)) return;
+    if (!isValidElement<FormElementProps>(element)) return;
 
     initialData = { ...initialData, [element.props.fieldName]: element.props.defaultValue };
     validators = { ...validators, [element.props.fieldName]: element.props.validators };

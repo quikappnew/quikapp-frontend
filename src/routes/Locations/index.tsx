@@ -1,15 +1,28 @@
 import { Box, Button, Grid } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import LocationModal from './locationModal';
 import BasicCard from 'components/Card';
 import DataTable from 'components/DataTable';
 import ConfirmationModal from './confrimationModal';
 import ConfirmButton from 'components/ConfirmButton';
 import { getRandomColor } from 'utils/randomColorGenerator';
+import { getLocationList } from 'services/api';
+import dayjs from 'dayjs';
+
+interface CityLocation {
+  id: string;
+  name_of_city: string;
+  district: string;
+  state: string;
+  pincode: string;
+  soft_delete: boolean;
+  created_at: string;
+}
 
 const Locations = () => {
   const client = 'Sowmya';
+  const [locationList, setLocationList] = useState<CityLocation[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleOpen = () => setModalOpen(true);
@@ -25,6 +38,14 @@ const Locations = () => {
     },
   ];
 
+  useEffect(() => {
+    getLocationList().then((res) => {
+      setLocationList(res.data);
+    });
+  }, []);
+
+  console.log(locationList);
+
   // Memoize the generated colors
   const cardColors = useMemo(() => {
     return list.map(() => getRandomColor());
@@ -37,69 +58,27 @@ const Locations = () => {
 
   const columns = [
     { label: 'Nodal Name', fieldName: 'nodalLocationName', width: 200 },
-    { label: 'Location Name', fieldName: 'locationName', width: 200 },
+    { label: 'Location Name', fieldName: 'name_of_city', width: 200 },
     { label: 'District', fieldName: 'district', width: 150 },
     { label: 'State', fieldName: 'state', width: 150 },
-    { label: 'Pin Code', fieldName: 'pinCode', width: 200 },
-    { label: 'Created By', fieldName: 'createdBy', width: 150 },
+    { label: 'Pin Code', fieldName: 'pincode', width: 200 },
+    { label: 'Created By', fieldName: 'created_at', width: 150 },
     { label: ' Date', fieldName: 'createdDate', width: 150 },
     { label: 'Action', fieldName: 'action', width: 150 },
   ];
 
-  const data = [
-    {
-      id: 1,
-      nodalLocationName: 'Nodal Location 1',
-      locationName: 'Location 1',
-      district: 'District 1',
-      state: 'State 1',
-      pinCode: '123456',
-      createdBy: 'Admin',
-      createdDate: '2021-01-01',
-    },
-    {
-      id: 2,
-      nodalLocationName: 'Nodal Location 2',
-      locationName: 'Location 2',
-      district: 'District 2',
-      state: 'State 2',
-      pinCode: '123456',
-      createdBy: 'Admin',
-      createdDate: '2021-01-01',
-    },
-    {
-      id: 3,
-      nodalLocationName: 'Nodal Location 3',
-      locationName: 'Location 3',
-      district: 'District 3',
-      state: 'State 3',
-      pinCode: '123456',  
-      createdBy: 'Admin',
-      createdDate: '2021-01-01',
-    },
-    {
-      id: 4,
-      nodalLocationName: 'Nodal Location 4',
-      locationName: 'Location 4',
-      district: 'District 4',
-      state: 'State 4',
-      pinCode: '123456',
-      createdBy: 'Admin',
-      createdDate: '2021-01-01',
-    },
-  ].map(item => ({
+  const data = locationList.map(item => ({
     ...item,
+    created_at: dayjs(item.created_at).format('MMMM D, YYYY'),
     action: (
       <ConfirmButton
         onConfirm={async () => {
-          // Add your delete logic here
-          console.log('Deleting location:', item.locationName);
-          // Call the actual delete function here
-          handleOpenConfirmationModal(item.locationName); // You might want to remove this if the modal handles everything
+          console.log('Deleting location:', item.name_of_city);
+          handleOpenConfirmationModal(item.name_of_city);
           return Promise.resolve();
         }}
         title="Confirm Deletion"
-        description={`Are you sure you want to delete ${item.locationName}?`}
+        description={`Are you sure you want to delete ${item.name_of_city}?`}
         buttonText="Delete"
         color="error"
         variant="contained"
@@ -131,7 +110,7 @@ const Locations = () => {
       <DataTable
         data={data}
         columns={columns}
-        searchFields={['locationName', 'district', 'state', 'pinCode']}
+        searchFields={['name_of_city', 'district', 'state', 'pincode']}
       />
       <LocationModal open={modalOpen} onClose={handleClose} />
       <ConfirmationModal />
