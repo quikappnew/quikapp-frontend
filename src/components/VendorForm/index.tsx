@@ -174,7 +174,7 @@ const VendorForm: React.FC = () => {
     
     return (
       <FormControl fullWidth error={isError}>
-        <Typography variant="body1" gutterBottom color="textPrimary">
+        <Typography variant="body2" gutterBottom color="textPrimary">
           {label}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -234,8 +234,8 @@ const VendorForm: React.FC = () => {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 4, maxWidth: 800, mx: 'auto', my: 4 }}>
-      <Typography variant="h5" gutterBottom>
+    <Box  sx={{ p: 0, maxWidth: 800, mx: 'auto', my: 2 }}>
+      <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb:2 }}>
         Vendor Onboarding Form
       </Typography>
       <form onSubmit={handleSubmit}>
@@ -384,7 +384,7 @@ const VendorForm: React.FC = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Paper>
+    </Box>
   );
 };
 

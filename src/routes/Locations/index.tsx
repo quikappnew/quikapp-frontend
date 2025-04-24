@@ -7,7 +7,7 @@ import DataTable from 'components/DataTable';
 import ConfirmationModal from './confrimationModal';
 import ConfirmButton from 'components/ConfirmButton';
 import { getRandomColor } from 'utils/randomColorGenerator';
-import { getLocationList } from 'services/api';
+import { deleteLocation, getLocationList } from 'services/api';
 import dayjs from 'dayjs';
 
 interface CityLocation {
@@ -22,7 +22,7 @@ interface CityLocation {
 
 const Locations = () => {
   const client = 'Sowmya';
-  const [locationList, setLocationList] = useState<CityLocation[]>([]);
+  const [locationList, setLocationList] = useState<any[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleOpen = () => setModalOpen(true);
@@ -51,19 +51,20 @@ const Locations = () => {
     return list.map(() => getRandomColor());
   }, []); // Empty dependency array ensures colors are generated only once
 
-  const handleOpenConfirmationModal = (locationName: string) => {
+  const handleOpenConfirmationModal = (locationName: string , id: string) => {
     // Implement the logic to view trips for the selected client
+    deleteLocation(id);
     console.log(`Viewing trips for ${locationName}`);
   };
 
   const columns = [
-    { label: 'Nodal Name', fieldName: 'nodalLocationName', width: 200 },
+    // { label: 'Nodal Name', fieldName: 'nodalLocationName', width: 200 },
     { label: 'Location Name', fieldName: 'name_of_city', width: 200 },
     { label: 'District', fieldName: 'district', width: 150 },
     { label: 'State', fieldName: 'state', width: 150 },
     { label: 'Pin Code', fieldName: 'pincode', width: 200 },
-    { label: 'Created By', fieldName: 'created_at', width: 150 },
-    { label: ' Date', fieldName: 'createdDate', width: 150 },
+    { label: 'Created at', fieldName: 'created_at', width: 150 },
+    // { label: ' Date', fieldName: 'createdDate', width: 150 },
     { label: 'Action', fieldName: 'action', width: 150 },
   ];
 
@@ -74,7 +75,7 @@ const Locations = () => {
       <ConfirmButton
         onConfirm={async () => {
           console.log('Deleting location:', item.name_of_city);
-          handleOpenConfirmationModal(item.name_of_city);
+          handleOpenConfirmationModal(item.name_of_city, item.id);
           return Promise.resolve();
         }}
         title="Confirm Deletion"

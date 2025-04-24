@@ -1,18 +1,50 @@
 // src/components/ClientForm.tsx
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography } from '@mui/material';
+import { Box, TextField, Button, Typography, Snackbar, Alert, AlertColor } from '@mui/material';
+import { addLocation } from 'services/api';
+import { useNavigate } from 'react-router-dom';     
 
 const LocationForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) => {
+  const navigate = useNavigate();
   const [locationName, setLocationName] = useState('');
   const [nodalLocationName, setNodalLocationName] = useState('');
   const [district, setDistrict] = useState('');
   const [state, setState] = useState('');
   const [pinCode, setPinCode] = useState('');
   const [pinCodeError, setPinCodeError] = useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: AlertColor }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ locationName, district, state, pinCode });
+    const location = {
+      name_of_city: locationName,
+      district,
+      state,
+      pincode: pinCode,
+      nodal_location: nodalLocationName,
+      soft_delete: false,
+      created_at: new Date().toISOString(),
+    };
+    try {
+      const response = await addLocation(location);
+      console.log(response);
+      setSnackbar({ 
+        open: true,
+        message: 'Location added successfully!',
+        severity: 'success',
+      });
+      onSubmit(location);
+      navigate('/locations');
+    } catch (error) {
+      console.error('Error adding location:', error);
+    }
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   useEffect(() => {
@@ -130,6 +162,16 @@ const LocationForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit })
       <Button type="submit" variant="contained" color="primary">
         Submit
       </Button>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

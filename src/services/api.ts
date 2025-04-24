@@ -533,8 +533,15 @@ export const getLocationList = async (): Promise<{ success: boolean; data: Locat
   }
 };
 
+export const addLocation = async (location: Location): Promise<any> => {
+  try {
+    const response = await api.post('api/v2/core/locations/', location);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to add location');
+  }
+};
 interface Location {
-  id: string;
   name_of_city: string;
   district: string;
   state: string;
@@ -543,6 +550,11 @@ interface Location {
   created_at: string;
 }
 
-
-
-
+export const deleteLocation = async (id: string): Promise<any> => {
+  try {
+    const response = await api.delete(`api/v2/core/locations/${id}/`);   
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to delete location');  
+  }
+};

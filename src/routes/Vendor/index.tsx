@@ -43,8 +43,8 @@ const Vendor = () => {
 
   return (
     <SidebarLayout>
-      <Box sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      {/* <Box sx={{ p: 3 }}> */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <Typography variant="h5">
             Vendor Management
           </Typography>
@@ -55,7 +55,7 @@ const Vendor = () => {
           >
             Add Vendor
           </Button>
-        </Box>
+        </div>
 
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
@@ -72,7 +72,7 @@ const Vendor = () => {
             searchFields={['name', 'gst', 'pan', 'spoc_name']}
           />
         )}
-      </Box>
+      {/* </Box> */}
     </SidebarLayout>
   );
 };
