@@ -116,7 +116,16 @@ const DataTableCell: FC<{
     | 'FILE'
     | 'TRIP_STATUS';
   onSelect?: (value: any) => void;
-}> = ({ value, type, onSelect = () => {} }) => {
+  isActionCell?: boolean;
+}> = ({ value, type, onSelect = () => {}, isActionCell = false }) => {
+  if (isActionCell) {
+    return (
+      <TableCell align="left" onClick={(e) => e.stopPropagation()}>
+        {value}
+      </TableCell>
+    );
+  }
+
   switch (type) {
     case 'SELECT':
       return (
@@ -371,7 +380,7 @@ const DataTable: FC<DataTableProps> = ({
                 ) : (
                   <>
                     <TableRow
-                      hover
+                      key={index}
                       onClick={() => onClick && onClick(row)}
                       sx={{ cursor: onClick ? 'pointer' : 'default' }}
                     >
@@ -380,13 +389,7 @@ const DataTable: FC<DataTableProps> = ({
                           key={column.fieldName}
                           value={getValueByFieldName(column.fieldName, row)}
                           type={column.type}
-                          onSelect={value => {
-                            if (value) {
-                              updateSelectedItems([...selectedItems, row.id]);
-                            } else {
-                              updateSelectedItems(selectedItems.filter(id => id !== row.id));
-                            }
-                          }}
+                          isActionCell={column.fieldName === 'action'}
                         />
                       ))}
                     </TableRow>

@@ -14,6 +14,7 @@ import Vehicle from './Vehicle';
 import VehicleDetails from './Vehicle/vehicleDetails';
 import Dashboard from './Dashboard';
 import Locations from './Locations';
+import LocationDetails from './Locations/locationDetails';
 import Trips from './Trips';
 import ViewTrip from './Trips/ViewTrip';
 import Reports from './Reports';
@@ -27,6 +28,8 @@ import AdministrationUsers from './Users';
 import VendorOnBoardingForm from './Vendor/vendorOnBoardingForm';
 import Lock from './Lock';
 import VendorOnBoardingList from './Vendor/vendorOnBoardingList';
+import ClientDetail from './Client/ClientDetail';
+
 const App: React.FC = () => {
   const router = createBrowserRouter([
     {
@@ -56,6 +59,16 @@ const App: React.FC = () => {
           <Locations />
         </ProtectedRoute>
       ),
+      children: [
+        {
+          path: ':locationId',
+          element: (
+            <ProtectedRoute>
+              <LocationDetails />
+            </ProtectedRoute>
+          ),
+        },
+      ],
     },
     {
       path: '/trips',
@@ -138,6 +151,10 @@ const App: React.FC = () => {
           <Client />
         </ProtectedRoute>
       ),
+    },
+    {
+      path: '/clients/:id',
+      element: <ClientDetail />
     },
     {
       path: '/drivers',

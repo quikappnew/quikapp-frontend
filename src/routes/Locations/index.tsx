@@ -1,6 +1,7 @@
 import { Box, Button, Grid } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import { useState, useMemo, useEffect } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import LocationModal from './locationModal';
 import BasicCard from 'components/Card';
 import DataTable from 'components/DataTable';
@@ -10,20 +11,15 @@ import { getRandomColor } from 'utils/randomColorGenerator';
 import { deleteLocation, getLocationList } from 'services/api';
 import dayjs from 'dayjs';
 
-interface CityLocation {
-  id: string;
-  name_of_city: string;
-  district: string;
-  state: string;
-  pincode: string;
-  soft_delete: boolean;
-  created_at: string;
-}
 
 const Locations = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isDetailsView = location.pathname.includes('/locations/') && location.pathname !== '/locations';
   const client = 'Sowmya';
   const [locationList, setLocationList] = useState<any[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState<string | null>(null);
 
   const handleOpen = () => setModalOpen(true);
   const handleClose = () => setModalOpen(false);
@@ -51,10 +47,18 @@ const Locations = () => {
     return list.map(() => getRandomColor());
   }, []); // Empty dependency array ensures colors are generated only once
 
-  const handleOpenConfirmationModal = (locationName: string , id: string) => {
-    // Implement the logic to view trips for the selected client
-    deleteLocation(id);
-    console.log(`Viewing trips for ${locationName}`);
+  const handleDelete = async (locationName: string, id: string) => {
+    try {
+      setLoading(id);
+      await deleteLocation(id);
+      // Refresh the location list after successful deletion
+      const response = await getLocationList();
+      setLocationList(response.data);
+    } catch (error) {
+      console.error('Error deleting location:', error);
+    } finally {
+      setLoading(null);
+    }
   };
 
   const columns = [
@@ -74,47 +78,57 @@ const Locations = () => {
     action: (
       <ConfirmButton
         onConfirm={async () => {
-          console.log('Deleting location:', item.name_of_city);
-          handleOpenConfirmationModal(item.name_of_city, item.id);
-          return Promise.resolve();
+          await handleDelete(item.name_of_city, item.id);
         }}
         title="Confirm Deletion"
         description={`Are you sure you want to delete ${item.name_of_city}?`}
         buttonText="Delete"
         color="error"
         variant="contained"
+        loading={loading === item.id}
       />
     ),
   }));
 
   return (
     <SidebarLayout>
-      {/* <Navbar title="Client" subTitle="Client" /> */}
-      <h2 style={{ marginBottom: '20px' }}>Welcome {client}</h2>
-      <Button
-        variant="contained"
-        color="info"
-        onClick={handleOpen}
-        style={{ marginBottom: '20px' }}
-      >
-        Add Location
-      </Button>
-      <Box display="flex" justifyContent="space-between" marginBottom="20px">
-        <Grid container spacing={2}>
-          {list.map((item, index) => (
-            <Grid item xs={12} md={6} lg={6} key={item.count}>
-              <BasicCard key={item.count} count={item.count} description={item.description} bgColor={cardColors[index]} />
+      {!isDetailsView ? (
+        <>
+          <h2 style={{ marginBottom: '20px' }}>Welcome {client}</h2>
+          <Button
+            variant="contained"
+            color="info"
+            onClick={handleOpen}
+            style={{ marginBottom: '20px' }}
+          >
+            Add Location
+          </Button>
+          <Box display="flex" justifyContent="space-between" marginBottom="20px">
+            <Grid container spacing={2}>
+              {list.map((item, index) => (
+                <Grid item xs={12} md={6} lg={6} key={item.count}>
+                  <BasicCard key={item.count} count={item.count} description={item.description} bgColor={cardColors[index]} />
+                </Grid>
+              ))}
             </Grid>
-          ))}
-        </Grid>
-      </Box>
-      <DataTable
-        data={data}
-        columns={columns}
-        searchFields={['name_of_city', 'district', 'state', 'pincode']}
-      />
-      <LocationModal open={modalOpen} onClose={handleClose} />
-      <ConfirmationModal />
+          </Box>
+          <DataTable
+            data={data}
+            columns={columns}
+            searchFields={['name_of_city', 'district', 'state', 'pincode']}
+            onClick={item => {
+              // Only navigate if not clicking the action column
+              const { action, ...locationData } = item;
+              if (action) return;
+              navigate(`/locations/${item.id}`, { state: { location: locationData } });
+            }}
+          />
+          <LocationModal open={modalOpen} onClose={handleClose} />
+          <ConfirmationModal />
+        </>
+      ) : (
+        <Outlet />
+      )}
     </SidebarLayout>
   );
 };

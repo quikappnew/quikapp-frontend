@@ -558,3 +558,50 @@ export const deleteLocation = async (id: string): Promise<any> => {
     throw ApiError.fromAxiosError(error, 'Failed to delete location');  
   }
 };
+
+interface Client {
+  name: string;
+  gst: string;
+  pan: string;
+  spoc_name: string;
+  contact_number: string;
+  contact_email: string;
+}
+
+export const addClient = async (client: Client): Promise<any> => {
+  try {
+    const response = await api.post('api/v2/core/clients/', client);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to add client');
+  }
+};
+
+export const getClients = async (): Promise<any> => {
+  try {
+    const response = await api.get('/api/v2/core/clients/');
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch clients');
+  }
+};
+
+export const getClientDetails = async (id: string): Promise<{ success: boolean; data: Client }> => {
+  try {
+    const response = await api.get(`/api/v2/core/clients/${id}/`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch client details');
+  }
+};
+
+export const updateClient = async (id: string, client: Partial<Client>): Promise<any> => {
+  try {
+    const response = await api.put(`/api/v2/core/clients/${id}/`, client);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update client');
+  }
+};
+
+

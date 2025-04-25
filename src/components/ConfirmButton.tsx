@@ -29,17 +29,19 @@ const ConfirmButton: FC<Props> = ({
 }) => {
   const [open, setOpen] = useState(false);
 
-  const handleClickOpen = () => {
+  const handleClickOpen = (e: React.MouseEvent) => {
+    e.preventDefault();
     setOpen(true);
   };
 
-  const handleClose = () => {
+  const handleClose = (event: {}, reason?: "backdropClick" | "escapeKeyDown") => {
     setOpen(false);
   };
 
-  const handleConfirm = async () => {
+  const handleConfirm = async (e: React.MouseEvent) => {
+    e.preventDefault();
     await onConfirm();
-    handleClose();
+    handleClose({});
   };
 
   return (
