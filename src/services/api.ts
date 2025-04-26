@@ -604,4 +604,59 @@ export const updateClient = async (id: string, client: Partial<Client>): Promise
   }
 };
 
+//vehicle onboarding
+interface Vehicle {
+  client: string;
+  vehicle_number: string;
+  vehicle_type: string;
+  vehicle_model: string;
+  vehicle_color: string;
+  vehicle_image: File;
+  vehicle_registration_certificate: File;
+  vehicle_insurance_certificate: File;
+  vehicle_fitment_certificate: File;
+}
 
+export const vehicleOnboarding = async (formData: FormData): Promise<any> => {
+  try {
+    const response = await api.post('/api/v2/core/vehicle-onboarding/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw ApiError.fromAxiosError(error, 'Failed to onboard vehicle');
+    }
+  };
+
+  export const getOnboardedVehicles = async (): Promise<any> => {
+    try {
+      const response = await api.get('/api/v2/core/vehicle-onboarding/');
+      return response.data;
+    } catch (error) {
+      throw ApiError.fromAxiosError(error, 'Failed to fetch onboarded vehicles');
+    }
+  };
+
+  export const getVehicleOnboardingDetails = async (id: string): Promise<any> => {
+    try {
+      const response = await api.get(`/api/v2/core/vehicle-onboarding/${id}/`);
+      return response.data;
+    } catch (error) {
+      throw ApiError.fromAxiosError(error, 'Failed to fetch vehicle details');
+    }
+  };
+
+  export const updateVehicleOnboarding = async (id: string, data: FormData): Promise<any> => {
+    try {
+      const response = await api.put(`/api/v2/core/vehicle-onboarding/${id}/`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw ApiError.fromAxiosError(error, 'Failed to update vehicle onboarding');
+    }
+  };

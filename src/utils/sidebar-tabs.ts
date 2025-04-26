@@ -127,6 +127,25 @@ const getSidebarTabs = (): TabItem[] => {
       ],
     },
     {
+      key: 'vehicle-onboarding',
+      label: 'Vehicle Onboarding',
+      icon: LocalShippingOutlinedIcon,
+      route: '/vehicle-onboarding',
+      children: [
+        {
+          key: 'vehicle-onboarding-form',
+          label: 'Vehicle Onboarding',
+          route: '/vehicle-onboarding',
+        },
+        {
+          key: 'vehicle-onboarding-list',
+          label: 'Vehicle Onboarding List',
+          route: '/vehicle-onboarding/list',
+        },
+      ],
+    },
+
+    {
       key: 'vehicles',
       label: 'Vehicles',
       icon: LocalShippingOutlinedIcon,

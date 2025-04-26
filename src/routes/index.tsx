@@ -29,7 +29,10 @@ import VendorOnBoardingForm from './Vendor/vendorOnBoardingForm';
 import Lock from './Lock';
 import VendorOnBoardingList from './Vendor/vendorOnBoardingList';
 import ClientDetail from './Client/ClientDetail';
-
+import VehicleOnboarding from './VehicleOnboarding';
+import VehicleOnboardingList from './VehicleOnboarding/vehicleOnboarding';
+import VehicleOnboardingDetails from './VehicleOnboarding/vehicleDetails';
+import UpdateVehicleOnboardingForm from './VehicleOnboarding/updateVehicleOnboardingForm';
 const App: React.FC = () => {
   const router = createBrowserRouter([
     {
@@ -223,6 +226,43 @@ const App: React.FC = () => {
           element: (
             <ProtectedRoute>
               <VehicleDetails />
+            </ProtectedRoute>
+          ),
+        },
+      ],
+    },
+    {
+      path: '/vehicle-onboarding',
+      children: [
+        {
+          index: true,
+          element: (
+            <ProtectedRoute>
+              <VehicleOnboarding />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: '/vehicle-onboarding/list',
+          element: (
+            <ProtectedRoute>
+              <VehicleOnboardingList />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: '/vehicle-onboarding/:id',
+          element: (
+            <ProtectedRoute>
+              <VehicleOnboardingDetails />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: '/vehicle-onboarding/:id/edit',
+          element: (
+            <ProtectedRoute>
+              <UpdateVehicleOnboardingForm />
             </ProtectedRoute>
           ),
         },
