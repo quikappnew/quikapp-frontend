@@ -222,7 +222,7 @@ const App: React.FC = () => {
           ),
         },
         {
-          path: ':vehicleId',
+          path: '/vehicle/:vehicleId',
           element: (
             <ProtectedRoute>
               <VehicleDetails />

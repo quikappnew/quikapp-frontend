@@ -1,100 +1,78 @@
-import { Box, Typography, Grid, Paper, Button } from '@mui/material';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Box, Typography, Card, CardContent, CircularProgress, Alert, Grid, Button } from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
 import SidebarLayout from 'layouts/SidebarLayout';
+import { getVehicleById } from 'services/api';
+import dayjs from 'dayjs';
 
 const VehicleDetails = () => {
   const { vehicleId } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
-  const vehicle = location.state?.vehicle;
+  const [vehicle, setVehicle] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!vehicle) {
-    return (
-      <SidebarLayout>
-        <Box sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>
-            Vehicle Not Found
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => navigate('/vehicle')}
-            sx={{ mt: 2 }}
-          >
-            Back to Vehicle List
-          </Button>
-        </Box>
-      </SidebarLayout>
-    );
-  }
+  useEffect(() => {
+    const fetchVehicle = async () => {
+      try {
+        setLoading(true);
+        const response = await getVehicleById(vehicleId!);
+        setVehicle(response.data);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch vehicle details');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVehicle();
+  }, [vehicleId]);
 
   return (
     <SidebarLayout>
-      <Box sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4" gutterBottom>
-            Vehicle Details
-          </Typography>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={() => navigate('/vehicle')}
-          >
-            Back to Vehicle List
-          </Button>
-        </Box>
-        <Paper sx={{ p: 3 }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Vehicle Number
-              </Typography>
-              <Typography variant="body1">{vehicle.vehicleNumber}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Model
-              </Typography>
-              <Typography variant="body1">{vehicle.model}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Status
-              </Typography>
-              <Typography variant="body1">{vehicle.status}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Capacity
-              </Typography>
-              <Typography variant="body1">{vehicle.capacity} kg</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Chassis Number
-              </Typography>
-              <Typography variant="body1">{vehicle.chassisNumber}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Trip Count
-              </Typography>
-              <Typography variant="body1">{vehicle.tripCount}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Latest Odometer Reading
-              </Typography>
-              <Typography variant="body1">{vehicle.latestOdometerReading} km</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Remarks
-              </Typography>
-              <Typography variant="body1">{vehicle.remarks}</Typography>
-            </Grid>
-          </Grid>
-        </Paper>
+      <Box p={3}>
+        <Button variant="outlined" onClick={() => navigate(-1)} sx={{ mb: 2 }}>
+          Back
+        </Button>
+        <Typography variant="h5" fontWeight={700} mb={3}>
+          Vehicle Details
+        </Typography>
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Alert severity="error">{error}</Alert>
+        ) : (
+          <Card>
+            <CardContent>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle2" color="textSecondary">Vehicle Number</Typography>
+                  <Typography variant="body1">{vehicle?.vehicle_number}</Typography>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle2" color="textSecondary">Owner</Typography>
+                  <Typography variant="body1">{vehicle?.vehicle_owner_display}</Typography>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle2" color="textSecondary">Vendor</Typography>
+                  <Typography variant="body1">{vehicle?.vendor_name || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle2" color="textSecondary">Truck Length</Typography>
+                  <Typography variant="body1">{vehicle?.truck_length_feet || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle2" color="textSecondary">Created At</Typography>
+                  <Typography variant="body1">
+                    {vehicle?.created_at ? dayjs(vehicle.created_at).format('YYYY-MM-DD HH:mm') : '-'}
+                  </Typography>
+                </Grid>
+                {/* Add more fields as needed */}
+              </Grid>
+            </CardContent>
+          </Card>
+        )}
       </Box>
     </SidebarLayout>
   );

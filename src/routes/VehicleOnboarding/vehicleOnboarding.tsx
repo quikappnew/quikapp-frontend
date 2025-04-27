@@ -14,11 +14,23 @@ import {
   Paper,
   Alert,
   Button,
+  Chip,
 } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import { getOnboardedVehicles } from 'services/api';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
+
+const statusColor = (status: string) => {
+  switch (status) {
+    case 'COMPLETED':
+      return 'success';
+    case 'DOCUMENTS_SUBMITTED':
+      return 'warning';
+    default:
+      return 'default';
+  }
+};
 
 const VehicleOnboardingList = () => {
   const [vehicles, setVehicles] = useState<any[]>([]);
@@ -43,8 +55,8 @@ const VehicleOnboardingList = () => {
 
   return (
     <SidebarLayout>
-      <Box p={3}>
-        <Typography variant="h5" fontWeight={700} mb={3}>
+      <Box sx={{ p: { xs: 1, sm: 3 }, background: '#f7f7f9', minHeight: '100vh' }}>
+        <Typography variant="h5"  mb={4}>
           Onboarded Vehicles
         </Typography>
         {loading ? (
@@ -54,40 +66,50 @@ const VehicleOnboardingList = () => {
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : (
-          <Card>
+          <Card sx={{ borderRadius: 4, boxShadow: 6 }}>
             <CardContent>
-              <TableContainer component={Paper}>
-                <Table>
+              <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
+                <Table stickyHeader>
                   <TableHead>
-                    <TableRow>
-                      <TableCell>Vehicle Number</TableCell>
-                      <TableCell>Owner</TableCell>
-                      <TableCell>Vendor</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell>Created At</TableCell>
-                      <TableCell>Action</TableCell>
+                    <TableRow sx={{ background: '#f0f4f8' }}>
+                      <TableCell sx={{ fontWeight: 700 }}>Vehicle Number</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Owner</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Vendor</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Created At</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Action</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {vehicles.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} align="center">
+                        <TableCell colSpan={6} align="center">
                           No vehicles onboarded yet.
                         </TableCell>
                       </TableRow>
                     ) : (
                       vehicles.map((vehicle: any) => (
-                        <TableRow key={vehicle.id}>
+                        <TableRow
+                          key={vehicle.id}
+                          hover
+                          sx={{
+                            transition: 'background 0.2s',
+                            '&:hover': { background: '#f5faff' },
+                          }}
+                        >
                           <TableCell>{vehicle.vehicle_number}</TableCell>
                           <TableCell>{vehicle.vehicle_owner_display}</TableCell>
                           <TableCell>{vehicle.vendor_name || '-'}</TableCell>
                           <TableCell>
-                            <Typography
-                              color={vehicle.status === 'COMPLETED' ? 'success.main' : 'warning.main'}
-                              fontWeight={600}
-                            >
-                              {vehicle.status}
-                            </Typography>
+                            <Chip
+                              label={vehicle.status}
+                              color={statusColor(vehicle.status)}
+                              sx={{
+                                fontWeight: 600,
+                                fontSize: '0.6rem',
+                                px: 1.5,
+                              }}
+                            />
                           </TableCell>
                           <TableCell>
                             {vehicle.created_at
@@ -96,8 +118,21 @@ const VehicleOnboardingList = () => {
                           </TableCell>
                           <TableCell>
                             <Button
-                              variant="outlined"
+                              variant="contained"
+                              color="info"
                               size="small"
+                              sx={{
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                borderRadius: 2,
+                                px: 2,
+                                boxShadow: 1,
+                                background: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)',
+                                color: '#fff',
+                                '&:hover': {
+                                  background: 'linear-gradient(90deg, #1565c0 0%, #42a5f5 100%)',
+                                },
+                              }}
                               onClick={() => navigate(`/vehicle-onboarding/${vehicle.id}`)}
                             >
                               View Details

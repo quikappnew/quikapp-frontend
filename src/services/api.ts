@@ -660,3 +660,21 @@ export const vehicleOnboarding = async (formData: FormData): Promise<any> => {
       throw ApiError.fromAxiosError(error, 'Failed to update vehicle onboarding');
     }
   };
+
+  export const getVehicles = async (): Promise<any> => {
+    try {
+      const response = await api.get('/api/v2/core/vehicles/');
+      return response.data;
+    } catch (error) {
+      throw ApiError.fromAxiosError(error, 'Failed to fetch vehicles');
+    }
+  };
+
+  export const getVehicleById = async (id: string): Promise<any> => {
+    try {
+      const response = await api.get(`/api/v2/core/vehicles/${id}`);
+      return response.data;
+    } catch (error) {
+      throw ApiError.fromAxiosError(error, 'Failed to fetch vehicle details');
+    }
+  };
