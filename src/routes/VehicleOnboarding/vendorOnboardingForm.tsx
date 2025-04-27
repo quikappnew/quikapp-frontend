@@ -86,9 +86,9 @@ const VehicleOnboardingForm = () => {
         display="flex"
         alignItems="center"
         justifyContent="center"
-        sx={{
-          background: 'linear-gradient(135deg, #e0e7ff 0%, #fffde4 100%)',
-        }}
+        // sx={{
+        //   background: 'linear-gradient(135deg, #e0e7ff 0%, #fffde4 100%)',
+        // }}
       >
         <Card
           sx={{
@@ -102,18 +102,15 @@ const VehicleOnboardingForm = () => {
           <CardHeader
             title={
               <Typography
-                variant="h4"
-                fontWeight={800}
-                letterSpacing={1}
-                sx={{ color: '#1976d2' }}
+                variant="h5"
               >
                 Vehicle Onboarding
               </Typography>
             }
             sx={{
-              textAlign: 'center',
-              background: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)',
-              color: 'white',
+            //   textAlign: 'center',
+            //   background: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)',
+              color: 'black',
               py: 4,
             }}
           />
@@ -122,34 +119,34 @@ const VehicleOnboardingForm = () => {
               <Grid container spacing={3}>
                 {/* Form Fields */}
                 <Grid item xs={12} md={6}>
-                  <TextField label="Vehicle Number" name="vehicle_number" value={form.vehicle_number} onChange={handleChange} fullWidth required />
+                  <TextField label="Vehicle Number" name="vehicle_number" value={form.vehicle_number} onChange={handleChange} fullWidth required placeholder="Vehicle Number" InputProps={{ sx: { '::placeholder': { color: '#888', opacity: 1 } } }} />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <TextField label="Chassis Number" name="chassis_number" value={form.chassis_number} onChange={handleChange} fullWidth required />
+                  <TextField label="Chassis Number" name="chassis_number" value={form.chassis_number} onChange={handleChange} fullWidth required placeholder="Chassis Number" InputProps={{ sx: { '::placeholder': { color: '#888', opacity: 1 } } }} />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <TextField label="Vehicle Owner" name="vehicle_owner" value={form.vehicle_owner} onChange={handleChange} fullWidth required />
+                  <TextField label="Vehicle Owner" name="vehicle_owner" value={form.vehicle_owner} onChange={handleChange} fullWidth required placeholder="Vehicle Owner" InputProps={{ sx: { '::placeholder': { color: '#888', opacity: 1 } } }} />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <TextField label="Vendor" name="vendor" value={form.vendor} onChange={handleChange} fullWidth required />
+                  <TextField label="Vendor" name="vendor" value={form.vendor} onChange={handleChange} fullWidth required placeholder="Vendor" InputProps={{ sx: { '::placeholder': { color: '#888', opacity: 1 } } }} />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <TextField label="Truck Length (feet)" name="truck_length_feet" value={form.truck_length_feet} onChange={handleChange} fullWidth required />
+                  <TextField label="Truck Length (feet)" name="truck_length_feet" value={form.truck_length_feet} onChange={handleChange} fullWidth required placeholder="Truck Length (feet)" InputProps={{ sx: { '::placeholder': { color: '#888', opacity: 1 } } }} />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <TextField label="Registration Date" name="registration_date" type="date" value={form.registration_date} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} required />
+                  <TextField label="Registration Date" name="registration_date" type="date" value={form.registration_date} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} required placeholder="Registration Date" InputProps={{ sx: { '::placeholder': { color: '#888', opacity: 1 } } }} />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <TextField label="Fitness Certificate Expiry" name="fitness_certificate_expiry" type="date" value={form.fitness_certificate_expiry} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} required />
+                  <TextField label="Fitness Certificate Expiry" name="fitness_certificate_expiry" type="date" value={form.fitness_certificate_expiry} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} required placeholder="Fitness Certificate Expiry" InputProps={{ sx: { '::placeholder': { color: '#888', opacity: 1 } } }} />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <TextField label="Tax Expiry Date" name="tax_expiry_date" type="date" value={form.tax_expiry_date} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} required />
+                  <TextField label="Tax Expiry Date" name="tax_expiry_date" type="date" value={form.tax_expiry_date} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} required placeholder="Tax Expiry Date" InputProps={{ sx: { '::placeholder': { color: '#888', opacity: 1 } } }} />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <TextField label="Insurance Expiry Date" name="insurance_expiry_date" type="date" value={form.insurance_expiry_date} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} required />
+                  <TextField label="Insurance Expiry Date" name="insurance_expiry_date" type="date" value={form.insurance_expiry_date} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} required placeholder="Insurance Expiry Date" InputProps={{ sx: { '::placeholder': { color: '#888', opacity: 1 } } }} />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <TextField label="National Permit Validity" name="national_permit_validity" type="date" value={form.national_permit_validity} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} required />
+                  <TextField label="National Permit Validity" name="national_permit_validity" type="date" value={form.national_permit_validity} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} required placeholder="National Permit Validity" InputProps={{ sx: { '::placeholder': { color: '#888', opacity: 1 } } }} />
                 </Grid>
                 {/* Divider */}
                 <Grid item xs={12}>
@@ -165,8 +162,8 @@ const VehicleOnboardingForm = () => {
                       startIcon={<CloudUpload />}
                       sx={{
                         borderRadius: 2,
-                        border: '2px dashed #1976d2',
-                        color: '#1976d2',
+                        border: '2px dashed #dddd',
+                        color: 'rgba(0, 0, 0, 0.6)',
                         background: '#f0f7ff',
                         fontWeight: 600,
                         mb: 1,
@@ -174,7 +171,7 @@ const VehicleOnboardingForm = () => {
                         transition: 'all 0.2s',
                         '&:hover': {
                           background: '#e3f2fd',
-                          borderColor: '#1565c0',
+                          borderColor: '#dddd',
                           boxShadow: 2,
                         },
                       }}
@@ -192,21 +189,18 @@ const VehicleOnboardingForm = () => {
                     )}
                   </Grid>
                 ))}
-                <Grid item xs={12}>
+                <Grid item xs={12} sx={{ textAlign: 'right' }}>
                   <Button
                     type="submit"
                     variant="contained"
                     color="primary"
                     disabled={loading}
-                    fullWidth
                     sx={{
                       py: 1.7,
                       fontWeight: 700,
-                      fontSize: '1.15rem',
+                      fontSize: '1rem',
                       borderRadius: 3,
-                      background: 'linear-gradient(90deg, #ff9800 0%, #ffc107 100%)',
                       color: '#fff',
-                      boxShadow: 3,
                       mt: 2,
                       transition: 'transform 0.2s, box-shadow 0.2s',
                       '&:hover': {

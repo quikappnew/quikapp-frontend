@@ -89,11 +89,11 @@ const UpdateVehicleOnboardingForm = () => {
 
   return (
     <SidebarLayout>
-      <Box minHeight="100vh" display="flex" alignItems="center" justifyContent="center" sx={{ background: 'linear-gradient(135deg, #e0e7ff 0%, #fffde4 100%)' }}>
+      <Box minHeight="100vh" display="flex" alignItems="center" justifyContent="center" >
         <Card sx={{ maxWidth: 750, width: '100%', boxShadow: 8, borderRadius: 5, overflow: 'hidden' }}>
           <CardHeader
-            title={<Typography variant="h4" fontWeight={800} letterSpacing={1} sx={{ color: '#1976d2' }}>Update Vehicle Onboarding</Typography>}
-            sx={{ textAlign: 'center', background: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)', color: 'white', py: 4 }}
+            title={<Typography variant="h5">Update Vehicle Onboarding</Typography>}
+            sx={{  py: 4 }}
           />
           <CardContent>
             <form onSubmit={handleSubmit} encType="multipart/form-data">
@@ -142,8 +142,8 @@ const UpdateVehicleOnboardingForm = () => {
                       startIcon={<CloudUpload />}
                       sx={{
                         borderRadius: 2,
-                        border: '2px dashed #1976d2',
-                        color: '#1976d2',
+                        border: '2px dashed rgba(0, 0, 0, 0.6)',
+                        color: 'rgba(0, 0, 0, 0.6)',
                         background: '#f0f7ff',
                         fontWeight: 600,
                         mb: 1,
@@ -169,19 +169,17 @@ const UpdateVehicleOnboardingForm = () => {
                     )}
                   </Grid>
                 ))}
-                <Grid item xs={12}>
+                <Grid item xs={12} sx={{ textAlign: 'right' }}>
                   <Button
                     type="submit"
                     variant="contained"
                     color="primary"
                     disabled={saving}
-                    fullWidth
                     sx={{
                       py: 1.7,
                       fontWeight: 700,
-                      fontSize: '1.15rem',
+                      fontSize: '1rem',
                       borderRadius: 3,
-                      background: 'linear-gradient(90deg, #ff9800 0%, #ffc107 100%)',
                       color: '#fff',
                       boxShadow: 3,
                       mt: 2,

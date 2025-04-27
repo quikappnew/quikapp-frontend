@@ -166,7 +166,7 @@ const getSidebarTabs = (): TabItem[] => {
     },
     {
       key: 'add-remove-locations',
-      label: 'Add/Remove Locations',
+      label: ' Locations',
       icon: LocationOnOutlinedIcon,
       route: '/locations'
     },
