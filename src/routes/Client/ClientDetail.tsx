@@ -89,7 +89,7 @@ const ClientDetail = () => {
                 </Button>
                 <Button
                   variant="contained"
-                  color="primary"
+                  color="info"
                   onClick={handleSave}
                   disabled={saving}
                 >
@@ -97,7 +97,7 @@ const ClientDetail = () => {
                 </Button>
               </>
             ) : (
-              <Button variant="contained" color="primary" onClick={handleEdit}>
+              <Button variant="contained" color="info" onClick={handleEdit}>
                 Edit
               </Button>
             )}

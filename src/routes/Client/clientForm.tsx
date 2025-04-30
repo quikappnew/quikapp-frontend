@@ -75,6 +75,7 @@ const ClientForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) =
         variant="outlined"
         value={contactNumber}
         onChange={(e) => setContactNumber(e.target.value)}
+        sx={{ mb: 2 }}
       />
       <TextField
         fullWidth
@@ -82,6 +83,7 @@ const ClientForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) =
         variant="outlined"
         value={contactEmail}
         onChange={(e) => setContactEmail(e.target.value)}
+        sx={{ mb: 2 }}
       />
 
       <Button type="submit" variant="contained" color="primary">

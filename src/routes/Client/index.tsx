@@ -48,7 +48,8 @@ const Client = () => {
     const listWithColors = useMemo(() => {
         return initialList.map(item => ({
             ...item,
-            bgColor: getRandomColor(),
+            color: "#000000",
+            bgColor: "#f0f0f0",
         }));
     }, []); // Empty dependency array means this runs once
 
@@ -145,7 +146,7 @@ const Client = () => {
             {/* <Navbar title="Client" subTitle="Client" /> */}
             <h2 style={{marginBottom: "20px"}}>Welcome {client}</h2>
             <Box sx={{ display: 'flex', gap: 2, marginBottom: "20px" }}>
-                <Button variant="contained" color="primary" onClick={handleOpen}>
+                <Button variant="contained" color="info" onClick={handleOpen}>
                     Add Client
                 </Button>
             </Box>
@@ -157,6 +158,7 @@ const Client = () => {
                                 count={item.count} 
                                 description={item.description} 
                                 bgColor={item.bgColor}
+                                color={item.color}
                             />
                         </Grid>
                     ))}
