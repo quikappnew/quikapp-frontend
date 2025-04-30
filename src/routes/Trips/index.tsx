@@ -93,8 +93,8 @@ const Trips: FC = () => {
         <SidebarLayout>
             {/* <Navbar title="Client" subTitle="Client" /> */}
             <h1 style={{marginBottom: "10px"}}>Welcome {client}</h1>
-            <h2 style={{marginBottom: "20px"}}>Dashboard Overview</h2>
-            <TripStatusOverview statusCounts={tripStatusCounts} />
+            {/* <h2 style={{marginBottom: "20px"}}>Dashboard Overview</h2>
+            <TripStatusOverview statusCounts={tripStatusCounts} /> */}
          
             <DataTable 
                 data={data} 

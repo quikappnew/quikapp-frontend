@@ -723,3 +723,20 @@ export const updateOrder = async (orderId: string, data: OrderData) => {
   });
   return response.data;
 };
+
+//trip
+interface Trip {
+  vendor_id: string;
+  order: string;
+  reference_id: string;
+  payment_status: string;
+}
+
+export const createTrip = async (tripData: Trip) => {
+  const response = await api.post('/api/v2/core/trips/', tripData);
+  return response.data;
+};
+
+
+
+

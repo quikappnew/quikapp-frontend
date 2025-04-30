@@ -1,7 +1,11 @@
+import SidebarLayout from 'layouts/SidebarLayout';
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
-import { getLocationList, getVendors, getClients } from 'services/api';
+import {  getVendors, getLocationList, getVendor, getOrders, getClients, createTrip } from 'services/api';
+import { toast } from 'react-toastify';
+import { Card, CardContent, Typography, Box, Button, Grid } from '@mui/material';
 
 interface Vendor {
   id: string;
@@ -38,22 +42,26 @@ interface ClientOption {
 
 interface TripFormData {
   vendor_id: string;
+  order: string;
   reference_id: string;
   payment_status: string;
-  initial_status: string;
-  initial_notes: string;
 }
 
 const CreateTrip: React.FC = () => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
+  const [orders, setOrders] = useState<{ id: string; order_id: string }[]>([]);
   const [isLoadingVendors, setIsLoadingVendors] = useState(false);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { control, register, handleSubmit, formState: { errors } } = useForm<TripFormData>();
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     fetchVendors();
+    fetchOrders();
   }, []);
 
   const fetchVendors = async () => {
@@ -70,17 +78,25 @@ const CreateTrip: React.FC = () => {
     }
   };
 
-
+  const fetchOrders = async () => {
+    try {
+      setIsLoadingOrders(true);
+      const response = await getOrders();
+      setOrders(response.data || []);
+    } catch (err) {
+      setError('Failed to fetch orders. Please try again.');
+      console.error('Error fetching orders:', err);
+    } finally {
+      setIsLoadingOrders(false);
+    }
+  };
 
   const onSubmit = async (data: TripFormData) => {
     try {
-      const response = await fetch('/api/v2/core/trips', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+       const response = await createTrip(data);
+       console.log(response);
+       toast.success('Trip created successfully');
+       navigate('/trips');
       
       if (!response.ok) {
         throw new Error('Failed to create trip');
@@ -108,88 +124,98 @@ const CreateTrip: React.FC = () => {
     label: client.name,
   }));
 
+  const orderOptions = orders.map(order => ({ value: order.id, label: order.order_id }));
+
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-6">Create New Trip</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Vendor</label>
-          <Controller
-            name="vendor_id"
-            control={control}
-            rules={{ required: 'Vendor is required' }}
-            render={({ field: { onChange, value } }) => (
-              <Select<VendorOption>
-                options={vendorOptions}
-                value={vendorOptions.find((option) => option.value === value)}
-                onChange={(option) => onChange(option?.value)}
-                isLoading={isLoadingVendors}
-                className="mt-1"
-                placeholder="Search and select vendor..."
-                isClearable
-                classNamePrefix="react-select"
-              />
+    <SidebarLayout>
+      <Box className="flex justify-center items-center min-h-screen bg-gray-50">
+        <Card sx={{ width: '100%', maxWidth: 600, borderRadius: 4, boxShadow: 6, p: 2 }}>
+          <CardContent>
+            <Typography variant="h4" fontWeight={700} color="text.primary" mb={4} align="center">
+              Create New Trip
+            </Typography>
+            {error && (
+              <div className="mb-4 p-3 rounded bg-red-100 text-red-800 border border-red-300 shadow">
+                {error}
+              </div>
             )}
-          />
-          {errors.vendor_id && <p className="text-red-500 text-sm">{errors.vendor_id.message}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Reference ID</label>
-          <input
-            type="text"
-            {...register('reference_id', { required: 'Reference ID is required' })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          />
-          {errors.reference_id && <p className="text-red-500 text-sm">{errors.reference_id.message}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Payment Status</label>
-          <select
-            {...register('payment_status', { required: 'Payment Status is required' })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          >
-            <option value="PENDING">PENDING</option>
-            <option value="COMPLETED">COMPLETED</option>
-            <option value="FAILED">FAILED</option>
-          </select>
-          {errors.payment_status && <p className="text-red-500 text-sm">{errors.payment_status.message}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Initial Status</label>
-          <select
-            {...register('initial_status', { required: 'Initial Status is required' })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          >
-            <option value="CREATED">CREATED</option>
-            <option value="IN_PROGRESS">IN_PROGRESS</option>
-            <option value="COMPLETED">COMPLETED</option>
-          </select>
-          {errors.initial_status && <p className="text-red-500 text-sm">{errors.initial_status.message}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Initial Notes</label>
-          <textarea
-            {...register('initial_notes')}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            rows={3}
-          />
-          {errors.initial_notes && <p className="text-red-500 text-sm">{errors.initial_notes.message}</p>}
-        </div>
-
-        <div className="pt-4">
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >
-            Create Trip
-          </button>
-        </div>
-      </form>
-    </div>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <label className="block text-base font-medium text-gray-800 mb-2">Vendor</label>
+                  <Controller
+                    name="vendor_id"
+                    control={control}
+                    rules={{ required: 'Vendor is required' }}
+                    render={({ field: { onChange, value } }) => (
+                      <Select
+                        options={vendorOptions}
+                        value={vendorOptions.find(option => option.value === value) || null}
+                        onChange={option => onChange(option ? option.value : '')}
+                        isLoading={isLoadingVendors}
+                        classNamePrefix="react-select"
+                        placeholder="Search and select vendor..."
+                        isClearable
+                      />
+                    )}
+                  />
+                  {errors.vendor_id && <p className="text-red-500 text-sm mt-1">{errors.vendor_id.message}</p>}
+                </Grid>
+                <Grid item xs={12}>
+                  <label className="block text-base font-medium text-gray-800 mb-2">Order</label>
+                  <Controller
+                    name="order"
+                    control={control}
+                    rules={{ required: 'Order is required' }}
+                    render={({ field: { onChange, value } }) => (
+                      <Select
+                        options={orderOptions}
+                        value={orderOptions.find(option => option.value === value) || null}
+                        onChange={option => onChange(option ? option.value : '')}
+                        isLoading={isLoadingOrders}
+                        classNamePrefix="react-select"
+                        placeholder="Search and select order..."
+                        isClearable
+                      />
+                    )}
+                  />
+                  {errors.order && <p className="text-red-500 text-sm mt-1">{errors.order.message}</p>}
+                </Grid>
+                <Grid item xs={12}>
+                  <label className="block text-base font-medium text-gray-800 mb-2">Reference ID</label>
+                  <input
+                    type="text"
+                    {...register('reference_id', { required: 'Reference ID is required' })}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
+                  {errors.reference_id && <p className="text-red-500 text-sm mt-1">{errors.reference_id.message}</p>}
+                </Grid>
+                <Grid item xs={12}>
+                  <label className="block text-base font-medium text-gray-800 mb-2">Payment Status</label>
+                  <select
+                    {...register('payment_status', { required: 'Payment Status is required' })}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  >
+                    <option value="PENDING">PENDING</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                    <option value="FAILED">FAILED</option>
+                  </select>
+                  {errors.payment_status && <p className="text-red-500 text-sm mt-1">{errors.payment_status.message}</p>}
+                </Grid>
+                <Grid item xs={12}>
+                <button
+              type="submit"
+              className="w-full py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            >
+              Create Trip
+            </button>
+                </Grid>
+              </Grid>
+            </form>
+          </CardContent>
+        </Card>
+      </Box>
+    </SidebarLayout>
   );
 };
 
