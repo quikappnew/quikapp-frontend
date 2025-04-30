@@ -8,9 +8,19 @@ import DataTable from 'components/DataTable';
 import ConfirmationModal from './confrimationModal';
 import ConfirmButton from 'components/ConfirmButton';
 import { getRandomColor } from 'utils/randomColorGenerator';
-import { deleteLocation, getLocationList } from 'services/api';
+import api, { deleteLocation, getLocationList } from 'services/api';
 import dayjs from 'dayjs';
 
+export interface Order {
+  id: string;
+  order_id: string;
+  order_date: string;
+  order_pricing: number;
+  from_location_name: string;
+  to_location_name: string;
+  client_name: string;
+  created_at: string;
+}
 
 const Locations = () => {
   const navigate = useNavigate();

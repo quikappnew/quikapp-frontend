@@ -678,3 +678,48 @@ export const vehicleOnboarding = async (formData: FormData): Promise<any> => {
       throw ApiError.fromAxiosError(error, 'Failed to fetch vehicle details');
     }
   };
+
+export interface OrderData {
+  order_id: string;
+  order_date: string;
+  order_pricing: number;
+  from_location_id: string;
+  to_location_id: string;
+  client_id: string;
+}
+
+export interface Order {
+  id: string;
+  order_id: string;
+  order_date: string;
+  order_pricing: number;
+  from_location: string;
+  from_location_name: string;
+  to_location: string;
+  to_location_name: string;
+  client: string;
+  client_name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export const createOrder = async (orderData: OrderData) => {
+  const response = await api.post('/api/v2/core/orders/', orderData);
+  return response.data;
+};
+
+export const getOrders = async (): Promise<{ success: boolean; data: Order[] }> => {
+  const response = await api.get('/api/v2/core/orders/');
+  return response.data;
+};
+export const getOrderById = async (id: string): Promise<{ success: boolean; data: Order }> => {
+  const response = await api.get(`/api/v2/core/orders/${id}`);
+  return response.data;
+};
+
+export const updateOrder = async (orderId: string, data: OrderData) => {
+  const response = await api.put(`/api/v2/core/orders/${orderId}/`, data, {
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return response.data;
+};

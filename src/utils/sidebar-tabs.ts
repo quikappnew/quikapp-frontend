@@ -9,6 +9,8 @@ import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+
 export interface TabItem {
   key: string;
   label: string;
@@ -25,6 +27,24 @@ const getSidebarTabs = (): TabItem[] => {
       label: 'Dashboard & Analytics',
       icon: DashboardOutlinedIcon,
       route: '/dashboard',
+    },
+    {
+      key: 'orders',
+      label: 'Orders',
+      icon: ShoppingCartOutlinedIcon,
+      route: '/orders',
+      children: [
+        {
+          key: 'create-order',
+          label: 'Create Order',
+          route: '/orders/create-order',
+        },
+        {
+          key: 'get-orders',
+          label: 'Orders List',
+          route: '/orders/get-orders',
+        },
+      ],
     },
     {
       key: 'trips',

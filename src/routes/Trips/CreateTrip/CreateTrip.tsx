@@ -38,9 +38,6 @@ interface ClientOption {
 
 interface TripFormData {
   vendor_id: string;
-  from_location_id: string;
-  to_location_id: string;
-  client_id: string;
   reference_id: string;
   payment_status: string;
   initial_status: string;
@@ -52,15 +49,11 @@ const CreateTrip: React.FC = () => {
   const [locations, setLocations] = useState<Location[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoadingVendors, setIsLoadingVendors] = useState(false);
-  const [isLoadingLocations, setIsLoadingLocations] = useState(false);
-  const [isLoadingClients, setIsLoadingClients] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { control, register, handleSubmit, formState: { errors } } = useForm<TripFormData>();
 
   useEffect(() => {
     fetchVendors();
-    fetchLocations();
-    fetchClients();
   }, []);
 
   const fetchVendors = async () => {
@@ -77,48 +70,7 @@ const CreateTrip: React.FC = () => {
     }
   };
 
-  const fetchLocations = async () => {
-    try {
-      setIsLoadingLocations(true);
-      const response = await getLocationList();
-      if (response?.data) {
-        const locationData = response.data;
-        setLocations(locationData.map((loc: any) => ({
-          id: loc.id.toString(),
-          name_of_city: loc.name_of_city
-        })));
-      } else {
-        setLocations([]);
-      }
-    } catch (error) {
-      console.error('Error fetching locations:', error);
-      setLocations([]);
-    } finally {
-      setIsLoadingLocations(false);
-    }
-  };
 
-  const fetchClients = async () => {
-    try {
-      setIsLoadingClients(true);
-      const response = await getClients();
-      if (response?.data) {
-        const clientData = response.data;
-        console.log("clientData",clientData);
-        setClients(clientData.map((client: any) => ({
-          id: client.id.toString(),
-          name: client.name,
-        })));
-      } else {
-        setClients([]);
-      }
-    } catch (error) {
-      console.error('Error fetching clients:', error);
-      setClients([]);
-    } finally {
-      setIsLoadingClients(false);
-    }
-  };
 
   const onSubmit = async (data: TripFormData) => {
     try {
@@ -180,127 +132,6 @@ const CreateTrip: React.FC = () => {
             )}
           />
           {errors.vendor_id && <p className="text-red-500 text-sm">{errors.vendor_id.message}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">From Location</label>
-          <Controller
-            name="from_location_id"
-            control={control}
-            rules={{ required: 'From Location is required' }}
-            render={({ field: { onChange, value } }) => (
-              <Select<LocationOption>
-                options={locationOptions}
-                value={locationOptions.find((option) => option.value === value)}
-                onChange={(option) => onChange(option?.value)}
-                isLoading={isLoadingLocations}
-                className="mt-1"
-                placeholder="Search and select from location..."
-                isClearable
-                classNamePrefix="react-select"
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    minHeight: '42px',
-                    borderColor: '#D1D5DB',
-                    '&:hover': {
-                      borderColor: '#9CA3AF'
-                    }
-                  }),
-                  placeholder: (base) => ({
-                    ...base,
-                    color: '#6B7280'
-                  }),
-                  menu: (base) => ({
-                    ...base,
-                    zIndex: 9999
-                  })
-                }}
-              />
-            )}
-          />
-          {errors.from_location_id && <p className="text-red-500 text-sm">{errors.from_location_id.message}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">To Location</label>
-          <Controller
-            name="to_location_id"
-            control={control}
-            rules={{ required: 'To Location is required' }}
-            render={({ field: { onChange, value } }) => (
-              <Select<LocationOption>
-                options={locationOptions}
-                value={locationOptions.find((option) => option.value === value)}
-                onChange={(option) => onChange(option?.value)}
-                isLoading={isLoadingLocations}
-                className="mt-1"
-                placeholder="Search and select to location..."
-                isClearable
-                classNamePrefix="react-select"
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    minHeight: '42px',
-                    borderColor: '#D1D5DB',
-                    '&:hover': {
-                      borderColor: '#9CA3AF'
-                    }
-                  }),
-                  placeholder: (base) => ({
-                    ...base,
-                    color: '#6B7280'
-                  }),
-                  menu: (base) => ({
-                    ...base,
-                    zIndex: 9999
-                  })
-                }}
-              />
-            )}
-          />
-          {errors.to_location_id && <p className="text-red-500 text-sm">{errors.to_location_id.message}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Client</label>
-          <Controller
-            name="client_id"
-            control={control}
-            rules={{ required: 'Client is required' }}
-            render={({ field: { onChange, value } }) => (
-              <Select<ClientOption>
-                options={clientOptions}
-                value={clientOptions.find((option) => option.value === value)}
-                onChange={(option) => onChange(option?.value)}
-                isLoading={isLoadingClients}
-                className="mt-1"
-                placeholder="Search and select client..."
-                isClearable
-                classNamePrefix="react-select"
-                formatOptionLabel={(option: ClientOption) => (
-                  <div>
-                    <div>{option.label}</div>
-                  </div>
-                )}
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    minHeight: '42px',
-                    borderColor: '#D1D5DB',
-                    '&:hover': {
-                      borderColor: '#9CA3AF'
-                    }
-                  }),
-                  option: (base) => ({
-                    ...base,
-                    padding: '8px 12px'
-                  })
-                }}
-              />
-            )}
-          />
-          {errors.client_id && <p className="text-red-500 text-sm">{errors.client_id.message}</p>}
         </div>
 
         <div>
