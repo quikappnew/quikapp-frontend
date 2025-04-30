@@ -1,6 +1,7 @@
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import ProtectedRoute from 'components/ProtectedRoute';
+import CreateOrder from 'routes/Orders/CreateOrder';
 
 import CreateUserPage from './CreateUser';
 import Login from './Login';
@@ -17,9 +18,6 @@ import Locations from './Locations';
 import LocationDetails from './Locations/locationDetails';
 import Trips from './Trips';
 import ViewTrip from './Trips/ViewTrip';
-import Reports from './Reports';
-import DriverPaymentRequests from './DriverPaymentRequests';
-import AccountsPayable from './AccountsPayable';
 import Vendor from './Vendor';
 import VendorOnboarding from './Vendor/vendorOnBoardingForm';
 import Client from './Client';
@@ -34,6 +32,9 @@ import VehicleOnboardingList from './VehicleOnboarding/vehicleOnboarding';
 import VehicleOnboardingDetails from './VehicleOnboarding/vehicleDetails';
 import UpdateVehicleOnboardingForm from './VehicleOnboarding/updateVehicleOnboardingForm';
 import CreateTrip from './Trips/CreateTrip/CreateTrip';
+import GetOrders from './Orders';
+import OrderDetails from './Orders/orderDetails';
+import UpdateOrder from './Orders/updateOrder';
 const App: React.FC = () => {
   const router = createBrowserRouter([
     {
@@ -55,6 +56,44 @@ const App: React.FC = () => {
           <Dashboard />
         </ProtectedRoute>
       ),
+    },
+    {
+      path: '/orders',
+      children: [
+        {
+          index: true,
+          path: 'create-order',
+          element: (
+            <ProtectedRoute>
+              <CreateOrder />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'get-orders',
+          element: (
+            <ProtectedRoute>
+              <GetOrders />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: '/orders/:id',
+          element: (
+            <ProtectedRoute>
+              <OrderDetails />  
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: '/orders/update/:id',
+          element: (
+            <ProtectedRoute>
+              <UpdateOrder />
+            </ProtectedRoute>
+          ),
+        },
+      ],
     },
     {
       path: '/locations',
