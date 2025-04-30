@@ -131,8 +131,8 @@ const CreateTrip: React.FC = () => {
       <Box className="flex justify-center items-center min-h-screen bg-gray-50">
         <Card sx={{ width: '100%', maxWidth: 600, borderRadius: 4, boxShadow: 6, p: 2 }}>
           <CardContent>
-            <Typography variant="h4" fontWeight={700} color="text.primary" mb={4} align="center">
-              Create New Trip
+            <Typography variant="h6" fontWeight={700} color="text.primary" mb={4} align="left">
+              Create Trip
             </Typography>
             {error && (
               <div className="mb-4 p-3 rounded bg-red-100 text-red-800 border border-red-300 shadow">

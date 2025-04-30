@@ -90,7 +90,7 @@ export default function CreateOrder() {
     <SidebarLayout>
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
         <div className="w-full max-w-lg bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-3xl font-bold mb-8 text-gray-900">Create New Order</h2>
+          <h4 className="text-xl font-bold mb-8 text-gray-900">Create Order</h4>
           {successMessage && (
             <div className="mb-4 p-3 rounded bg-green-100 text-green-800 border border-green-300 shadow">
               {successMessage}

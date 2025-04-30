@@ -22,12 +22,12 @@ export interface TabItem {
 
 const getSidebarTabs = (): TabItem[] => {
   return [
-    {
-      key: 'dashboard',
-      label: 'Dashboard & Analytics',
-      icon: DashboardOutlinedIcon,
-      route: '/dashboard',
-    },
+    // {
+    //   key: 'dashboard',
+    //   label: 'Dashboard & Analytics',
+    //   icon: DashboardOutlinedIcon,
+    //   route: '/dashboard',
+    // },
     {
       key: 'orders',
       label: 'Orders',
