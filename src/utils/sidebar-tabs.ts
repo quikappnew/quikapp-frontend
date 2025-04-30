@@ -10,6 +10,7 @@ import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlin
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+import AirportShuttleOutlinedIcon from '@mui/icons-material/AirportShuttleOutlined';
 
 export interface TabItem {
   key: string;
@@ -149,7 +150,7 @@ const getSidebarTabs = (): TabItem[] => {
     {
       key: 'vehicle-onboarding',
       label: 'Vehicle Onboarding',
-      icon: LocalShippingOutlinedIcon,
+      icon: AirportShuttleOutlinedIcon,
       route: '/vehicle-onboarding',
       children: [
         {
