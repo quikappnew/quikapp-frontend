@@ -33,6 +33,7 @@ import VehicleOnboarding from './VehicleOnboarding';
 import VehicleOnboardingList from './VehicleOnboarding/vehicleOnboarding';
 import VehicleOnboardingDetails from './VehicleOnboarding/vehicleDetails';
 import UpdateVehicleOnboardingForm from './VehicleOnboarding/updateVehicleOnboardingForm';
+import CreateTrip from './Trips/CreateTrip/CreateTrip';
 const App: React.FC = () => {
   const router = createBrowserRouter([
     {
@@ -92,6 +93,14 @@ const App: React.FC = () => {
             </ProtectedRoute>
           ),
         },
+        {
+          path: 'create-trip',
+          element: (
+            <ProtectedRoute>
+              <CreateTrip />
+            </ProtectedRoute>
+          ),
+        }
       ],
     },
     // {

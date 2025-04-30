@@ -40,7 +40,7 @@ const getSidebarTabs = (): TabItem[] => {
         {
           key: 'create-trip',
           label: 'Create Trip',
-          route: '/dashboard/control-center',
+          route: '/trips/create-trip',
         },
         {
           key: 'search',
