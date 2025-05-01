@@ -54,7 +54,7 @@ const handleOTPVerification = async (data: FormData) => {
       await new Promise(resolve => setTimeout(resolve, 100));
     
       if (TokenService.isAuthenticated()) {
-        navigate(redirectTo || '/dashboard');
+        navigate(redirectTo || '/orders/get-orders');
       } else {
         throw new Error('Failed to store token');
       }

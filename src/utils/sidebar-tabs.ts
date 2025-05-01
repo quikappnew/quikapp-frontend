@@ -55,7 +55,7 @@ const getSidebarTabs = (): TabItem[] => {
       children: [
         {
           key: 'overview',
-          label: 'Dashboard Overview',
+          label: 'Trip List',
           route: '/trips',
         },
         {
@@ -63,21 +63,21 @@ const getSidebarTabs = (): TabItem[] => {
           label: 'Create Trip',
           route: '/trips/create-trip',
         },
-        {
-          key: 'search',
-          label: 'Search',
-          route: '/dashboard/control-center',
-        },
-        {
-          key: 'empty-trips',
-          label: 'Empty Trips',
-          route: '/dashboard/control-center',
-        },
-        {
-          key: 'in-Transit',
-          label: 'In Transit Trips',
-          route: '/dashboard/control-center',
-        },
+        // {
+        //   key: 'search',
+        //   label: 'Search',
+        //   route: '/dashboard/control-center',
+        // },
+        // {
+        //   key: 'empty-trips',
+        //   label: 'Empty Trips',
+        //   route: '/dashboard/control-center',
+        // },
+        // {
+        //   key: 'in-Transit',
+        //   label: 'In Transit Trips',
+        //   route: '/dashboard/control-center',
+        // },
       ],
     },
     // {
@@ -114,11 +114,11 @@ const getSidebarTabs = (): TabItem[] => {
           label:'Vendor Onboarding List',
           route:'/vendor/onboarding-list'
         },
-        {
-          key: 'vendor-list',
-          label: 'Vendor List',
-          route: '/vendor/list',
-        },
+        // {
+        //   key: 'vendor-list',
+        //   label: 'Vendor List',
+        //   route: '/vendor/list',
+        // },
       ],
     },
     {
@@ -127,26 +127,26 @@ const getSidebarTabs = (): TabItem[] => {
       icon: AccountCircleOutlinedIcon,
       route: '/client',
     },
-    {
-      key: 'drivers',
-      label: 'Drivers',
-      icon: PeopleOutlinedIcon,
-      route: '/drivers',
-      children: [
-        {
-          key: 'driver-details',
-          label: 'Drivers Details',
-          route: '/drivers',
-        },
-        {
-          key: 'driver-payment-reports',
-          label: 'Driver Payment Reports',
-          route: '/drivers',
-        },
+    // {
+    //   key: 'drivers',
+    //   label: 'Drivers',
+    //   icon: PeopleOutlinedIcon,
+    //   route: '/drivers',
+    //   children: [
+    //     {
+    //       key: 'driver-details',
+    //       label: 'Drivers Details',
+    //       route: '/drivers',
+    //     },
+    //     {
+    //       key: 'driver-payment-reports',
+    //       label: 'Driver Payment Reports',
+    //       route: '/drivers',
+    //     },
         
         
-      ],
-    },
+    //   ],
+    // },
     {
       key: 'vehicle-onboarding',
       label: 'Vehicle Onboarding',
@@ -177,11 +177,11 @@ const getSidebarTabs = (): TabItem[] => {
           label: 'Vehicle Details',
           route: '/vehicle',
         },
-        {
-          key: 'vehicles-bl',
-          label: 'Vehicles BL',
-          route: '/dashboard/vehicle-details',
-        },
+        // {
+        //   key: 'vehicles-bl',
+        //   label: 'Vehicles BL',
+        //   route: '/dashboard/vehicle-details',
+        // },
         
       ],
     },

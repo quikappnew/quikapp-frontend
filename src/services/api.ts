@@ -53,6 +53,8 @@ export class ApiError extends Error implements ApiErrorInterface {
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = TokenService.getToken();
+
+    console.log(token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -725,16 +727,49 @@ export const updateOrder = async (orderId: string, data: OrderData) => {
 };
 
 //trip
+export enum PaymentStatusEnum {
+    PENDING = 0,
+    PAID = 1,
+    PARTIALLY_PAID = 2,
+    OVERDUE = 3
+}
+
 interface Trip {
-  vendor_id: string;
-  order: string;
-  reference_id: string;
-  payment_status: string;
+    vendor_id: string;
+    order: string;
+    reference_id: string;
+    payment_status: PaymentStatusEnum;
 }
 
 export const createTrip = async (tripData: Trip) => {
   const response = await api.post('/api/v2/core/trips/', tripData);
   return response.data;
+};
+
+export interface TripDetails {
+    id: string;
+    vendor_name: string;
+    from_location_name: string;
+    to_location_name: string;
+    reference_id: string;
+    client_name: string;
+    payment_status: number;
+    latest_status: string;
+    created_at: string;
+}
+
+export interface APITripResponse {
+    success: boolean;
+    data: TripDetails[];
+}
+
+export const getTrips = async (): Promise<APITripResponse> => {
+    try {
+        const response = await api.get('/api/v2/core/trips/');
+        return response.data;
+    } catch (error) {
+        throw ApiError.fromAxiosError(error, 'Failed to fetch trips');
+    }
 };
 
 

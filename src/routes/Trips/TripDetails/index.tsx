@@ -38,8 +38,8 @@ const InfoSection: FC<{ title: string; children: React.ReactNode }> = ({ title, 
     <Typography
       variant="h6"
       sx={{
-        bgcolor: 'primary.light',
-        color: 'primary.main',
+        bgcolor: 'info.light',
+        color: 'white',
         p: 1,
         mb: 2,
         borderRadius: 1,

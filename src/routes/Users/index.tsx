@@ -113,7 +113,7 @@ const AdministrationUsers = () => {
       <Box sx={{ display: 'flex', gap: 1 }}>
         <Button
           variant="contained"
-          color="primary"
+          color="info"
           onClick={() => handleEdit(item)}
         >
           Edit
@@ -137,8 +137,8 @@ const AdministrationUsers = () => {
       <h2 style={{ marginBottom: '20px' }}>Welcome {client}</h2>
       <Button
         variant="contained"
-        color="primary"
-        onClick={handleOpen}
+          color="info"
+          onClick={handleOpen}
         style={{ marginBottom: '20px' }}
       >
         Add User

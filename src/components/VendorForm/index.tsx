@@ -11,6 +11,7 @@ import {
   Snackbar,
   Alert,
   FormHelperText,
+  Card,
 } from '@mui/material';
 import { vendorOnboarding } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -234,7 +235,8 @@ const VendorForm: React.FC = () => {
   };
 
   return (
-    <Box  sx={{ p: 0, maxWidth: 800, mx: 'auto', my: 2 }}>
+    <Card sx={{ p: 4, maxWidth: 800, mx: 'auto', my: 2 }}>
+  <Box  sx={{ p: 0, maxWidth: 800, mx: 'auto', my: 2 }}>
       <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb:2 }}>
         Vendor Onboarding Form
       </Typography>
@@ -358,7 +360,7 @@ const VendorForm: React.FC = () => {
               <Button
                 type="submit"
                 variant="contained"
-                color="primary"
+                color="info"
                 size="large"
                 disabled={loading}
                 startIcon={loading ? <CircularProgress size={20} /> : null}
@@ -385,6 +387,8 @@ const VendorForm: React.FC = () => {
         </Alert>
       </Snackbar>
     </Box>
+    </Card>
+  
   );
 };
 

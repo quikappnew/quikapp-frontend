@@ -1,7 +1,7 @@
 import { Box, Button, Grid } from "@mui/material";
 import Navbar from "components/Navbar";
 import SidebarLayout from "layouts/SidebarLayout"
-import { useState, Fragment, useMemo, FC } from "react";
+import { useState, Fragment, useMemo, FC, useEffect } from "react";
 import BasicCard from "components/Card";
 import DataTable from "components/DataTable";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
@@ -10,98 +10,103 @@ import { TableRow, TableCell } from "@mui/material";
 import { getRandomColor } from "utils/randomColorGenerator";
 import TripStatusOverview from './TripDetails/TripStatusOverview';
 import { useNavigate } from 'react-router-dom';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
+import { getTrips, TripDetails } from 'services/api';
 
-const initialList = [
-    {
-        count: 4,
-        description: "Total Number Clients"
-    },
-    {
-        count: 10,
-        description: "TotalNumber of Trips"  
-    },
-];
+interface ExtendedTripDetails extends TripDetails {
+    action?: React.ReactNode;
+}
 
 const Trips: FC = () => {
     const client = "Sowmya";
-    const [modalOpen, setModalOpen] = useState(false);
-    const [expandedRows, setExpandedRows] = useState<number[]>([]);
+    // const [modalOpen, setModalOpen] = useState(false);
+    // const [expandedRows, setExpandedRows] = useState<number[]>([]);
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [trips, setTrips] = useState<ExtendedTripDetails[]>([]);
 
-    const handleOpen = () => setModalOpen(true);
-    const handleClose = () => setModalOpen(false);
+    useEffect(() => {
+        const fetchTrips = async () => {
+            try {
+                setLoading(true);
+                const response = await getTrips();
+                const tripsWithActions = response.data.map(trip => ({
+                    ...trip,
+                    // action: (
+                    //     <Button 
+                    //         variant="contained" 
+                    //         color="info" 
+                    //         size="small" 
+                    //         onClick={(e) => {
+                    //             e.stopPropagation();
+                    //             handleViewTrips(trip.id);
+                    //         }}
+                    //     >
+                    //         View Trip
+                    //     </Button>
+                    // ),
+                }));
+                setTrips(tripsWithActions);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to fetch trips');
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const handleRowClick = (rowId: number) => {
-        setExpandedRows(prev => 
-            prev.includes(rowId) 
-                ? prev.filter(id => id !== rowId)
-                : [...prev, rowId]
-        );
-    };
+        fetchTrips();
+    }, []);
 
-    // Memoize the list with random colors
-    const listWithColors = useMemo(() => {
-        return initialList.map(item => ({
-            ...item,
-            bgColor: getRandomColor(),
-        }));
-    }, []); // Empty dependency array means this runs once
+    // const handleOpen = () => setModalOpen(true);
+    // const handleClose = () => setModalOpen(false);
 
-    const handleViewTrips = (tripId: number) => {
+    const handleViewTrips = (tripId: string) => {
         navigate(`/trips/${tripId}/view`);
     };
 
     const columns = [
-        { label: 'Trip Name', fieldName: 'tripName', width: 200, type: 'STRING' as const },
-        { label: 'Trip Number', fieldName: 'tripNumber', width: 150, type: 'STRING' as const },
-        { label: 'Trip Status', fieldName: 'tripStatus', width: 150, type: 'TRIP_STATUS' as const },
-        { label: 'Created At', fieldName: 'createdAt', width: 200, type: 'DATE' as const },
-        { label: 'Action', fieldName: 'action', width: 150, type: 'STRING' as const },
+        { label: 'Vendor Name', fieldName: 'vendor_name', width: 200, type: 'STRING' as const },
+        { label: 'From Location', fieldName: 'from_location_name', width: 200, type: 'STRING' as const },
+        { label: 'To Location', fieldName: 'to_location_name', width: 200, type: 'STRING' as const },
+        { label: 'Reference ID', fieldName: 'reference_id', width: 150, type: 'STRING' as const },
+        { label: 'Client Name', fieldName: 'client_name', width: 150, type: 'STRING' as const },
+        { label: 'Status', fieldName: 'latest_status', width: 150, type: 'STRING' as const },
+        { label: 'Created At', fieldName: 'created_at', width: 200, type: 'DATE' as const },
+        // { label: 'Action', fieldName: 'action', width: 150, type: 'STRING' as const },
     ];
 
-    const data = [
-        { id: 1, tripName: 'Test Trip', tripNumber: 'Trip123', tripStatus: 'Active', createdAt: '2021-01-01' },
-        { id: 2, tripName: 'Test Trip1', tripNumber: 'Trip123', tripStatus: 'In Transit', createdAt: '2021-01-01' },
-        { id: 3, tripName: 'Test Trip2', tripNumber: 'Trip123', tripStatus: 'Completed', createdAt: '2021-01-01' },
-        { id: 4, tripName: 'Test Trip3', tripNumber: 'Trip123', tripStatus: 'Cancelled', createdAt: '2021-01-01' },
-    ].map(item => ({
-        ...item,
-        action: (
-            <Button variant="contained" color="info" size="small" onClick={(e) => {
-                e.stopPropagation();
-                handleViewTrips(item.id);
-            }}>
-                View Trips
-            </Button>
-        ),
-    }));
+    if (loading) {
+        return (
+            <SidebarLayout>
+                <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+                    <CircularProgress />
+                </Box>
+            </SidebarLayout>
+        );
+    }
 
-  
-    // Example data - replace with actual data from your API/state management
-    const tripStatusCounts = {
-        loading: 0,
-        scheduled: 2,
-        inTransit: 59,
-        unloading: 0,
-        completed: 2953,
-        cancelled: 0,
-        paid: 0,
-        history: 96,
-    };
+    if (error) {
+        return (
+            <SidebarLayout>
+                <Alert severity="error">
+                    Error loading trips: {error}
+                </Alert>
+            </SidebarLayout>
+        );
+    }
 
     return (
         <SidebarLayout>
-            {/* <Navbar title="Client" subTitle="Client" /> */}
             <h1 style={{marginBottom: "10px"}}>Welcome {client}</h1>
-            {/* <h2 style={{marginBottom: "20px"}}>Dashboard Overview</h2>
-            <TripStatusOverview statusCounts={tripStatusCounts} /> */}
-         
             <DataTable 
-                data={data} 
+                data={trips} 
                 columns={columns}
-                searchFields={['tripName', 'tripNumber', 'tripStatus', 'createdAt']}
+                searchFields={['vendor_name', 'from_location_name', 'to_location_name', 'reference_id', 'client_name', 'latest_status']}
             />
         </SidebarLayout>
-    )
+    );
 }   
+
 export default Trips;

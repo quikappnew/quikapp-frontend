@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
-import {  getVendors, getLocationList, getVendor, getOrders, getClients, createTrip } from 'services/api';
+import { getVendors, getLocationList, getVendor, getOrders, getClients, createTrip, PaymentStatusEnum } from 'services/api';
 import { toast } from 'react-toastify';
 import { Card, CardContent, Typography, Box, Button, Grid } from '@mui/material';
 
@@ -44,8 +44,15 @@ interface TripFormData {
   vendor_id: string;
   order: string;
   reference_id: string;
-  payment_status: string;
+  payment_status: PaymentStatusEnum;
 }
+
+const paymentStatusOptions = [
+  { value: PaymentStatusEnum.PENDING, label: 'Pending' },
+  { value: PaymentStatusEnum.PAID, label: 'Paid' },
+  { value: PaymentStatusEnum.PARTIALLY_PAID, label: 'Partially Paid' },
+  { value: PaymentStatusEnum.OVERDUE, label: 'Overdue' }
+];
 
 const CreateTrip: React.FC = () => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -131,7 +138,7 @@ const CreateTrip: React.FC = () => {
       <Box className="flex justify-center items-center min-h-screen bg-gray-50">
         <Card sx={{ width: '100%', maxWidth: 600, borderRadius: 4, boxShadow: 6, p: 2 }}>
           <CardContent>
-            <Typography variant="h6" fontWeight={700} color="text.primary" mb={4} align="left">
+            <Typography variant="h6" fontWeight={500} color="text.primary" mb={4} align="left">
               Create Trip
             </Typography>
             {error && (
@@ -192,23 +199,30 @@ const CreateTrip: React.FC = () => {
                 </Grid>
                 <Grid item xs={12}>
                   <label className="block text-base font-medium text-gray-800 mb-2">Payment Status</label>
-                  <select
-                    {...register('payment_status', { required: 'Payment Status is required' })}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  >
-                    <option value="PENDING">PENDING</option>
-                    <option value="COMPLETED">COMPLETED</option>
-                    <option value="FAILED">FAILED</option>
-                  </select>
+                  <Controller
+                    name="payment_status"
+                    control={control}
+                    rules={{ required: 'Payment Status is required' }}
+                    render={({ field: { onChange, value } }) => (
+                      <Select
+                        options={paymentStatusOptions}
+                        value={paymentStatusOptions.find(option => option.value === value) || null}
+                        onChange={option => onChange(option ? option.value : '')}
+                        classNamePrefix="react-select"
+                        placeholder="Select payment status..."
+                        isClearable
+                      />
+                    )}
+                  />
                   {errors.payment_status && <p className="text-red-500 text-sm mt-1">{errors.payment_status.message}</p>}
                 </Grid>
                 <Grid item xs={12}>
-                <button
-              type="submit"
-              className="w-full py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            >
-              Create Trip
-            </button>
+                  <button
+                    type="submit"
+                    className="w-full py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                  >
+                    Create Trip
+                  </button>
                 </Grid>
               </Grid>
             </form>
