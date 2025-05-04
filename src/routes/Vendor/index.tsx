@@ -46,15 +46,15 @@ const Vendor = () => {
       {/* <Box sx={{ p: 3 }}> */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <Typography variant="h5">
-            Vendor Management
+            Vendors
           </Typography>
-          <Button 
+          {/* <Button 
             variant="contained" 
             color="primary"
             onClick={handleAddVendor}
           >
             Add Vendor
-          </Button>
+          </Button> */}
         </div>
 
         {loading ? (

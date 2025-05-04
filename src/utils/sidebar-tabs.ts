@@ -114,11 +114,11 @@ const getSidebarTabs = (): TabItem[] => {
           label:'Vendor Onboarding List',
           route:'/vendor/onboarding-list'
         },
-        // {
-        //   key: 'vendor-list',
-        //   label: 'Vendor List',
-        //   route: '/vendor/list',
-        // },
+        {
+          key: 'vendor-list',
+          label: 'Vendor List',
+          route: '/vendor/list',
+        },
       ],
     },
     {

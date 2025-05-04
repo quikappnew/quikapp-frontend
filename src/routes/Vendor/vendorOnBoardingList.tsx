@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
-import { getVendors } from 'services/api';
+import { getVendorOnboarding, getVendors } from 'services/api';
 import { useNavigate } from 'react-router-dom';
 import type { Vendor } from 'services/api';
 
@@ -14,9 +14,9 @@ const VendorOnBoardingList: React.FC = () => {
 
   const columns = [
     { label: 'Vendor Name', fieldName: 'name', width: 200 },
-    { label: 'GST Number', fieldName: 'gst', width: 150 },
-    { label: 'PAN Number', fieldName: 'pan', width: 150 },
     { label: 'SPOC Name', fieldName: 'spoc_name', width: 150 },
+    { label: 'SPOC Email', fieldName: 'spoc_email', width: 150 },
+    { label: 'Status', fieldName: 'status', width: 150 },
   ];
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const VendorOnBoardingList: React.FC = () => {
   const fetchVendors = async () => {
     try {
       setLoading(true);
-      const response = await getVendors();
+      const response = await getVendorOnboarding();
       setVendors(response.data || []);
       setError(null);
     } catch (err) {

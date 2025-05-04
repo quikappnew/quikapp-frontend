@@ -481,6 +481,14 @@ export interface APIVendorResponse {
   data: Vendor[];
 }
 
+export const getVendorOnboarding = async (): Promise<APIVendorResponse> => {
+  try {
+    const response = await api.get('/api/v2/core/vendor-onboarding/');
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch vendors');
+  }
+};
 export const getVendors = async (): Promise<APIVendorResponse> => {
   try {
     const response = await api.get('/api/v2/core/vendors/');
