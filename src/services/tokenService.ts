@@ -5,7 +5,7 @@ export class TokenService {
     static setToken(token: string): void {
       try {
         // Store in both localStorage and sessionStorage for redundancy
-        localStorage.setItem(this.TOKEN_KEY, token);
+        // localStorage.setItem(this.TOKEN_KEY, token);
         sessionStorage.setItem(this.TOKEN_KEY, token);
       } catch (error) {
         console.error('Error storing token:', error);
@@ -24,7 +24,7 @@ export class TokenService {
     }
   
     static removeToken(): void {
-      localStorage.removeItem(this.TOKEN_KEY);
+      // localStorage.removeItem(this.TOKEN_KEY);
       sessionStorage.removeItem(this.TOKEN_KEY);
     }
   
