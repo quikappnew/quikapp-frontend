@@ -191,18 +191,18 @@ const getSidebarTabs = (): TabItem[] => {
       icon: LocationOnOutlinedIcon,
       route: '/locations'
     },
-    {
-      key: 'manage-users',
-      label: 'Manage Users',
-      icon: ManageAccountsOutlinedIcon,
-      route: '/users'
-    },
-    {
-      key: 'lock',
-      label: 'Lock',
-      icon: LockOutlinedIcon,
-      route: '/lock',
-    },
+    // {
+    //   key: 'manage-users',
+    //   label: 'Manage Users',
+    //   icon: ManageAccountsOutlinedIcon,
+    //   route: '/users'
+    // },
+    // {
+    //   key: 'lock',
+    //   label: 'Lock',
+    //   icon: LockOutlinedIcon,
+    //   route: '/lock',
+    // },
     {
       key: 'sign-out',
       label: 'Sign Out',

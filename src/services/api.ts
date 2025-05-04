@@ -772,6 +772,8 @@ export const getTrips = async (): Promise<APITripResponse> => {
     }
 };
 
-
+export const logoutUser = async (): Promise<void> => {
+  await api.post('/api/v2/users/logout/');
+};
 
 

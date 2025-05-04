@@ -1,11 +1,14 @@
 import classNames from 'classnames';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import rapidLogo from 'media/rapid-logo.png';
 import { TabItem } from 'utils/sidebar-tabs';
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import LogoutModal from 'routes/Logout';
+import { logoutUser } from 'services/api';
+import { TokenService } from 'services/tokenService';
 
-const MenuItem = ({ tab, level = 0 }: { tab: TabItem; level?: number }) => {
+const MenuItem = ({ tab, level = 0, onSignOut }: { tab: TabItem; level?: number; onSignOut: () => void }) => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const hasChildren = tab.children && tab.children.length > 0;
@@ -28,6 +31,26 @@ const MenuItem = ({ tab, level = 0 }: { tab: TabItem; level?: number }) => {
   const isActive = level > 0 
     ? location.pathname === tab.route
     : tab.route === location.pathname || isChildActive;
+
+  // Special handling for Sign Out
+  if (tab.key === 'sign-out') {
+    return (
+      <div
+        className={classNames(
+          'flex items-center gap-2 hover:bg-gray-50 rounded-md p-1.5 text-sm cursor-pointer',
+          isActive ? 'text-blue-500 font-medium bg-gray-100' : null,
+          level > 0 ? 'ml-6' : ''
+        )}
+        onClick={onSignOut}
+      >
+        {tab.icon && <tab.icon className={classNames(
+          'w-5 h-5',
+          isActive ? 'text-blue-500' : 'text-black/80'
+        )} />}
+        <span>{tab.label}</span>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
@@ -77,7 +100,7 @@ const MenuItem = ({ tab, level = 0 }: { tab: TabItem; level?: number }) => {
       {hasChildren && isOpen && tab.children && (
         <div className="mt-1">
           {tab.children.map(child => (
-            <MenuItem key={child.key} tab={child} level={level + 1} />
+            <MenuItem key={child.key} tab={child} level={level + 1} onSignOut={onSignOut} />
           ))}
         </div>
       )}
@@ -86,6 +109,22 @@ const MenuItem = ({ tab, level = 0 }: { tab: TabItem; level?: number }) => {
 };
 
 export default function Sidebar({ tabs }: { tabs: TabItem[] }) {
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    setLogoutOpen(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    try {
+      await logoutUser();
+    } catch (e) {}
+    TokenService.removeToken();
+    setLogoutOpen(false);
+    navigate('/login');
+  };
+
   return (
     <div className="flex flex-col gap-1 p-4 min-w-60 min-h-screen bg-white border-r border-gray-200">
       <NavLink to="/" className="flex items-center gap-2 mb-4">
@@ -93,8 +132,13 @@ export default function Sidebar({ tabs }: { tabs: TabItem[] }) {
         <span className="text-sm font-bold">Rapid Logistics</span>
       </NavLink>
       {tabs.map(tab => (
-        <MenuItem key={tab.key} tab={tab} />
+        <MenuItem key={tab.key} tab={tab} onSignOut={handleSignOut} />
       ))}
+      <LogoutModal
+        open={logoutOpen}
+        onClose={() => setLogoutOpen(false)}
+        onConfirm={handleLogoutConfirm}
+      />
     </div>
   );
 }
