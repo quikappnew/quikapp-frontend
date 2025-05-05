@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, CircularProgress } from '@mui/material';
+import { Box, Typography, CircularProgress, Button } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
-import { getVendorOnboarding, getVendors } from 'services/api';
+import { getVendorOnboarding } from 'services/api';
 import { useNavigate } from 'react-router-dom';
 import type { Vendor } from 'services/api';
 
@@ -16,7 +16,8 @@ const VendorOnBoardingList: React.FC = () => {
     { label: 'Vendor Name', fieldName: 'name', width: 200 },
     { label: 'SPOC Name', fieldName: 'spoc_name', width: 150 },
     { label: 'SPOC Email', fieldName: 'spoc_email', width: 150 },
-    { label: 'Status', fieldName: 'status', width: 150 },
+    { label: 'Status', fieldName: 'status', width: 150, type: 'STATUS' as const },
+    { label: 'Action', fieldName: 'action', width: 120 },
   ];
 
   useEffect(() => {
@@ -27,7 +28,24 @@ const VendorOnBoardingList: React.FC = () => {
     try {
       setLoading(true);
       const response = await getVendorOnboarding();
-      setVendors(response.data || []);
+      setVendors(
+        (response.data || []).map((vendor: Vendor) => ({
+          ...vendor,
+          action: (
+            <Button
+              variant="contained"
+              color="info"
+              size="small"
+              onClick={e => {
+                e.stopPropagation();
+                navigate(`/vendor/onboarding/${vendor.id}`);
+              }}
+            >
+              View
+            </Button>
+          ),
+        }))
+      );
       setError(null);
     } catch (err) {
       setError('Failed to fetch vendor onboarding list. Please try again.');
@@ -35,10 +53,6 @@ const VendorOnBoardingList: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleRowClick = (vendor: Vendor) => {
-    navigate(`/vendor/onboarding/${vendor.id}`);
   };
 
   return (
@@ -59,7 +73,6 @@ const VendorOnBoardingList: React.FC = () => {
             data={vendors}
             columns={columns}
             searchFields={['name', 'gst', 'pan', 'spoc_name']}
-            onClick={handleRowClick}
           />
         )}
     </SidebarLayout>

@@ -48,6 +48,21 @@ export default function statusEnumToReadable(status: string): {
         label: 'Pending Printing',
         color: '#3949AB',
       };
+    case 'COMPLETED':
+      return {
+        label: 'Completed',
+        color: '#43A047',
+      };
+    case 'approved':
+      return {
+        label: 'Approved',
+        color: '#1976D2',
+      };
+    case 'rejected':
+      return {
+        label: 'Rejected',
+        color: '#E53935',
+      };
     default:
       return {
         label: status,

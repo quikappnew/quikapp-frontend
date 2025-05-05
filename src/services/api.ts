@@ -784,4 +784,23 @@ export const logoutUser = async (): Promise<void> => {
   await api.post('/api/v2/users/logout/');
 };
 
+export const getVendorOnboardingById = async (id: string) => {
+  try {
+    const response = await api.get(`/api/v2/core/vendor-onboarding/${id}`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch vendor details');
+  }
+};
+
+export const updateVendorOnboarding = async (id: string, data: any) => {
+  try {
+    const response = await api.put(`/api/v2/core/vendor-onboarding/${id}/`, data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update vendor onboarding');
+  }
+};
+
+
 

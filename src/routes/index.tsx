@@ -35,6 +35,7 @@ import CreateTrip from './Trips/CreateTrip/CreateTrip';
 import GetOrders from './Orders';
 import OrderDetails from './Orders/orderDetails';
 import UpdateOrder from './Orders/updateOrder';
+import VendorDetails from './Vendor/onboarding/[id]';
 const App: React.FC = () => {
   const router = createBrowserRouter([
     {
@@ -190,6 +191,14 @@ const App: React.FC = () => {
           element: (
             <ProtectedRoute>
               <VendorOnBoardingList />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'onboarding/:id',
+          element: (
+            <ProtectedRoute>
+              <VendorDetails />
             </ProtectedRoute>
           ),
         },
