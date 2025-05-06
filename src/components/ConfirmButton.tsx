@@ -1,49 +1,77 @@
-import { ApolloError } from '@apollo/client';
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { FC, useState } from 'react';
+import { ApiError } from '../types/api';
+import ErrorMessage from './ErrorMessage';
 
-import Button from 'components/Button';
-import ErrorMessage from 'components/ErrorMessage';
-import LoadingButton from 'components/LoadingButton';
-
-// Description: A button that opens a confirmation dialog before executing the action
-
-const ConfirmButton: FC<{
-  children: string | JSX.Element;
-  onConfirm: any;
+interface Props {
+  onConfirm: () => Promise<any>;
+  title: string;
+  description: string;
+  buttonText?: string;
+  error?: ApiError;
   loading?: boolean;
-  error?: ApolloError;
-  title?: string;
-  description?: string;
-  confirmButtonLabel?: string;
-}> = ({ children, onConfirm, loading, error, title, description, confirmButtonLabel }) => {
-  const [showConfirmDialog, toggleConfirmDialog] = useState(false);
+  disabled?: boolean;
+  variant?: 'text' | 'outlined' | 'contained';
+  color?: 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
+}
+
+const ConfirmButton: FC<Props> = ({
+  onConfirm,
+  title,
+  description,
+  buttonText = 'Delete',
+  error,
+  loading = false,
+  disabled = false,
+  variant = 'contained',
+  color = 'error',
+}) => {
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setOpen(true);
+  };
+
+  const handleClose = (event: {}, reason?: "backdropClick" | "escapeKeyDown") => {
+    setOpen(false);
+  };
+
+  const handleConfirm = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await onConfirm();
+    handleClose({});
+  };
 
   return (
     <>
-      <Button variant="contained" onClick={() => toggleConfirmDialog(true)}>
-        {children}
-      </Button>
-      <Dialog open={showConfirmDialog} onClose={() => toggleConfirmDialog(false)}>
-        <DialogTitle>{title || 'Are you sure?'}</DialogTitle>
+      <LoadingButton
+        onClick={handleClickOpen}
+        loading={loading}
+        disabled={disabled}
+        variant={variant}
+        color={color}
+      >
+        {buttonText}
+      </LoadingButton>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{title}</DialogTitle>
         <DialogContent>
-          <DialogContentText>{description || 'Please confirm your action'}</DialogContentText>
-          {error && <ErrorMessage error={error} type="alert" />}
+          <DialogContentText id="alert-dialog-description">{description}</DialogContentText>
+          {error && <ErrorMessage error={error} />}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => toggleConfirmDialog(false)}>Cancel</Button>
-          <LoadingButton
-            variant="contained"
-            loading={loading}
-            onClick={() => onConfirm().then(() => toggleConfirmDialog(false))}
-          >
-            {confirmButtonLabel || 'Confirm'}
+          <LoadingButton onClick={handleClose} color="primary">
+            Cancel
+          </LoadingButton>
+          <LoadingButton onClick={handleConfirm} color="error" loading={loading} autoFocus>
+            Confirm
           </LoadingButton>
         </DialogActions>
       </Dialog>

@@ -1,54 +1,38 @@
-import { gql, useMutation } from '@apollo/client';
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ConfirmButton from '../../../components/ConfirmButton';
+import { deleteUser } from '../../../services/api';
+import { ApiError } from '../../../types/api';
 
-import ConfirmButton from 'components/ConfirmButton';
-
-const REMOVE_USER_MUTATION = gql`
-  mutation RemoveUser($id: ID!) {
-    removeUser(id: $id) {
-      id
-    }
-  }
-`;
-
-const RemoveUserButton: FC<{ id: string }> = ({ id }) => {
+const DeleteUserButton: FC<{ id: string }> = ({ id }) => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<ApiError | undefined>(undefined);
 
-  const [removeUser, { loading, error }] = useMutation(REMOVE_USER_MUTATION, {
-    update(cache, { data }) {
-      if (!data) return;
-      cache.modify({
-        fields: {
-          users(existingUsersRef, { readField }) {
-            const updatedUsersRef = { ...existingUsersRef };
-            updatedUsersRef.nodes = existingUsersRef.nodes.filter(
-              userRef => id !== readField('id', userRef)
-            );
-            return updatedUsersRef;
-          },
-        },
-      });
-    },
-    onCompleted() {
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+      setError(undefined);
+      await deleteUser(id);
       navigate('/users');
-    },
-  });
+    } catch (err) {
+      setError(err as ApiError);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <>
-      <ConfirmButton
-        onConfirm={() => {
-          // removeUser({ variables: { id } })
-        }}
-        loading={loading}
-        error={error}
-        description="This will delete all data concerning this Employee."
-      >
-        Remove
-      </ConfirmButton>
-    </>
+    <ConfirmButton
+      onConfirm={handleDelete}
+      loading={loading}
+      error={error}
+      title="Delete User"
+      description="This will delete all data concerning this user. This action cannot be undone."
+      buttonText="Delete"
+      color="error"
+    />
   );
 };
 
-export default RemoveUserButton;
+export default DeleteUserButton;

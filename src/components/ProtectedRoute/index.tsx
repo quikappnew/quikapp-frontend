@@ -1,13 +1,17 @@
+// src/components/ProtectedRoute/index.tsx
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { TokenService } from 'services/tokenService';
 
-import { isAuthenticated } from 'utils/auth';
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
+  const isAuthenticated = TokenService.isAuthenticated();
 
-export default function ProtectedRoute({ children }: { children: JSX.Element }) {
-  let location = useLocation();
-
-  if (!isAuthenticated()) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return children;
-}
+  return <>{children}</>;
+};
+
+export default ProtectedRoute;

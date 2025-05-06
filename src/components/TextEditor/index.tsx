@@ -1,6 +1,6 @@
-import EditorJS, { OutputData } from '@editorjs/editorjs';
+import EditorJS, { BlockToolConstructable, OutputData } from '@editorjs/editorjs';
 import Header from '@editorjs/header';
-import List from '@editorjs/list';
+import { default as List } from '@editorjs/list';
 import { FC, useId, useRef } from 'react';
 import { useEffect, useState } from 'react';
 
@@ -31,7 +31,7 @@ const Editor = ({
         tools: {
           header: Header,
           list: {
-            class: List,
+            class: List as unknown as BlockToolConstructable,
             inlineToolbar: true,
             config: {
               defaultStyle: 'unordered',

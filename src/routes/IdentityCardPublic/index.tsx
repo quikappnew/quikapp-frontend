@@ -1,9 +1,7 @@
-import { useQuery } from '@apollo/client';
-import { gql } from '__generated__';
-import { CategoryEnumType } from '__generated__/graphql';
 import dayjs from 'dayjs';
 import { FC } from 'react';
 import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 import IdentityLayout from 'layouts/IdentityLayout';
 
@@ -11,74 +9,55 @@ import Button from 'components/Button';
 import DetailsPanel from 'components/DetailsPanel';
 import ErrorMessage from 'components/ErrorMessage';
 import LoadingIndicator from 'components/LoadingIndicator';
+import { getIdentityCardPublic } from 'services/api';
+import { CategoryEnum } from 'types/api';
 
 import cityLogo from 'media/ncdc-logo.png';
 
-import UserDocuments from './Documents';
+import Documents from './Documents';
 import downloadVCF from './contact-generator';
 import theme from './theme.module.scss';
 
-const IDENTITY_CARD_USER_QUERY = gql(`
-  query IdentityCardUser($id: ID!) {
-    identityCard(id: $id) {
-      id
-      user {
-        id
-        fullName
-        firstName
-        middleName
-        lastName
-        email
-        phoneNumber
-        gender
-        dateOfBirth
-        category
-        photo
-        province {
-          name
-          shortName
-          logo
-        }
-        address {
-          line1
-          line2
-          city
-          state
-          country
-        }
-        createdAt
-      }
-      cardNumber
-      issueDate
-      expiryDate
-    }
-  }
-`);
-
 const UserPublicInformation: FC = () => {
-  const { identityCardId } = useParams<{ identityCardId: string }>() as { identityCardId: string };
+  const { identityCardId } = useParams<{ identityCardId: string }>();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [data, setData] = useState<any>(null);
 
-  const { loading, error, data, refetch } = useQuery(IDENTITY_CARD_USER_QUERY, {
-    variables: {
-      id: identityCardId,
-    },
-  });
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!identityCardId) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await getIdentityCardPublic(identityCardId);
+        setData({ identityCard: result });
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [identityCardId]);
 
   function renderContent() {
     if (loading) return <LoadingIndicator />;
 
-    if (error || !data) return <ErrorMessage error={error} refetch={refetch} />;
+    if (error || !data) return <ErrorMessage error={error} />;
 
     const user = data.identityCard.user;
 
-    const getCategoryLabel = (category: CategoryEnumType) => {
+    const getCategoryLabel = (category: CategoryEnum) => {
       switch (category) {
-        case CategoryEnumType.MemberOfParliament:
-          return 'MP';
-        case CategoryEnumType.PublicServant:
-          return 'PS';
-        case CategoryEnumType.NonCitizen:
-          return 'NC';
+        case CategoryEnum.STUDENT:
+          return 'STD';
+        case CategoryEnum.TEACHER:
+          return 'TCH';
+        case CategoryEnum.STAFF:
+          return 'STF';
+        case CategoryEnum.DRIVER:
+          return 'DRV';
       }
     };
 
@@ -92,9 +71,6 @@ const UserPublicInformation: FC = () => {
             <img className={theme.photo} src={user.photo as string} alt="" />
             <div>
               <p className={theme.fullName}>{user.fullName}</p>
-              {/*{user.province.name.includes('Education') && (
-                <p className={theme.division}>{employee?.division.name}</p>
-              )} */}
             </div>
           </div>
           <DetailsPanel
@@ -102,9 +78,6 @@ const UserPublicInformation: FC = () => {
             data={[
               { label: 'First Name', value: user.firstName },
               { label: 'Last Name', value: user.lastName },
-              // { label: 'File Number', value: employee?.fileNumber },
-              // { label: 'Organisation', value: employee?.organisationCode },
-              // { label: 'Designation', value: employee?.designation.name },
               { label: 'Province', value: user.province.name },
               { label: 'Phone Number', value: user.phoneNumber },
               { label: 'Email', value: user.email },
@@ -130,7 +103,7 @@ const UserPublicInformation: FC = () => {
                 } ${user?.address?.city}`,
               },
               { label: 'Province', value: user?.address?.state },
-              { label: 'Country', value: user?.address?.country, type: 'COUNTRY' },
+              { label: 'Country', value: user?.address?.country },
             ]}
           />
           <Button
@@ -140,7 +113,7 @@ const UserPublicInformation: FC = () => {
           >
             Add to Contacts
           </Button>
-          <UserDocuments userId={user.id as string} identityCardId={identityCardId} />
+          <Documents />
         </div>
       </>
     );

@@ -1,4 +1,3 @@
-import { ApolloError } from '@apollo/client';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
@@ -11,13 +10,23 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Paper,
+  TablePagination,
+  Chip,
 } from '@mui/material';
 import dayjs from 'dayjs';
 import { FC, Fragment, ReactNode, useState } from 'react';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SearchIcon from '@mui/icons-material/Search';
 
 import Button from 'components/Button';
 import ErrorMessage from 'components/ErrorMessage';
 import LoadingIndicator from 'components/LoadingIndicator';
+import { ApiError } from '../../types/api';
+import ConfirmButton from '../ConfirmButton';
 
 import binocularsIcon from 'media/icons/binoculars.svg';
 import searchOutline from 'media/icons/search-outline.svg';
@@ -25,6 +34,7 @@ import searchOutline from 'media/icons/search-outline.svg';
 import countryCodeToReadable from 'utils/country-code-to-readable';
 // import fundingSourceToReadable from 'utils/funding-source-to-readable';
 import statusEnumToReadable from 'utils/status-enum-to-readable';
+import tripStatusToReadable from 'utils/trip-status-to-readable';
 
 import theme from './theme.module.scss';
 
@@ -41,20 +51,30 @@ interface Column {
     | 'STATUS'
     | 'BOOLEAN'
     | 'SELECT'
-    //  | 'FUNDING_SOURCE'
     | 'COUNTRY'
-    | 'FILE';
+    | 'FILE'
+    | 'TRIP_STATUS';
+  width: number;
+}
+
+interface PaginationProps {
+  page: number;
+  rowsPerPage: number;
+  totalRows: number;
+  onPageChange: (newPage: number) => void;
+  onRowsPerPageChange: (newRowsPerPage: number) => void;
 }
 
 const DataTableHead: FC<{
   columns: Column[];
   isSelected: boolean;
   onSelectAll: (value: any) => void;
-}> = ({ columns, isSelected, onSelectAll }) => (
+  showAccordion?: boolean;
+}> = ({ columns, isSelected, onSelectAll, showAccordion = false }) => (
   <TableHead>
-    <TableRow>
+    <TableRow sx={{ width: '100%', backgroundColor: '#e0e0e0' }}>
       {columns.map(c => (
-        <TableCell key={c.fieldName + c.label} align={'left'}>
+        <TableCell key={c.fieldName + c.label} align={'left'} style={{ width: c.width }}>
           {c.type === 'SELECT' ? (
             <Checkbox
               size="small"
@@ -70,6 +90,11 @@ const DataTableHead: FC<{
           )}
         </TableCell>
       ))}
+      {showAccordion && (
+        <TableCell align="left" style={{ width: 150 }}>
+          Actions
+        </TableCell>
+      )}
     </TableRow>
   </TableHead>
 );
@@ -88,9 +113,19 @@ const DataTableCell: FC<{
     | 'SELECT'
     | 'FUNDING_SOURCE'
     | 'COUNTRY'
-    | 'FILE';
+    | 'FILE'
+    | 'TRIP_STATUS';
   onSelect?: (value: any) => void;
-}> = ({ value, type, onSelect = () => {} }) => {
+  isActionCell?: boolean;
+}> = ({ value, type, onSelect = () => {}, isActionCell = false }) => {
+  if (isActionCell) {
+    return (
+      <TableCell align="left" onClick={(e) => e.stopPropagation()}>
+        {value}
+      </TableCell>
+    );
+  }
+
   switch (type) {
     case 'SELECT':
       return (
@@ -146,12 +181,12 @@ const DataTableCell: FC<{
     case 'BOOLEAN':
       return <TableCell align="left">{value ? 'TRUE' : 'FALSE'}</TableCell>;
     case 'STATUS':
-      const { label, color } = statusEnumToReadable(value);
+      const { label: statusLabel, color: statusColor } = statusEnumToReadable(value);
       return (
         <TableCell align="left">
           <div className={theme.statusBadge}>
-            <div className={theme.indicator} style={{ backgroundColor: color }} />
-            {label}
+            <div className={theme.indicator} style={{ backgroundColor: statusColor }} />
+            {statusLabel}
           </div>
         </TableCell>
       );
@@ -171,12 +206,31 @@ const DataTableCell: FC<{
           </a>
         </TableCell>
       );
+    case 'TRIP_STATUS':
+      const { label: tripLabel, color: tripColor } = tripStatusToReadable(value);
+      return (
+        <TableCell align="left">
+          <Chip
+            label={tripLabel}
+            sx={{
+              backgroundColor: `${tripColor}20`,
+              color: tripColor,
+              fontSize: '12px',
+              padding: '4px 8px',
+              fontWeight: 500,
+              '& .MuiChip-label': {
+                px: 1,
+              },
+            }}
+          />
+        </TableCell>
+      );
     default:
       return <TableCell align="left">{value}</TableCell>;
   }
 };
 
-const DataTable: FC<{
+interface DataTableProps {
   data: any[];
   columns: Column[];
   searchFields?: string[];
@@ -190,14 +244,19 @@ const DataTable: FC<{
     icon?: ReactNode;
     action: (selectedItems: any[]) => Promise<any>;
     loading?: boolean;
-    error?: ApolloError;
+    error?: ApiError;
   }[];
   onSelect?: (selectedItems: any[]) => void;
   emptyListImage?: string;
   emptyListTitle?: string;
   emptyListDescription?: string;
   totalCount?: number;
-}> = ({
+  customRowRender?: (row: any) => ReactNode;
+  showAccordion?: boolean;
+  pagination?: PaginationProps;
+}
+
+const DataTable: FC<DataTableProps> = ({
   data,
   columns,
   searchFields,
@@ -212,9 +271,13 @@ const DataTable: FC<{
   emptyListTitle,
   emptyListDescription,
   totalCount,
+  customRowRender,
+  showAccordion = false,
+  pagination,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
+  const [expandedRows, setExpandedRows] = useState<number[]>([]);
 
   function getValueByFieldName(fieldName, obj) {
     // Example: fieldName "group.name" looks for obj[group][name]
@@ -230,86 +293,130 @@ const DataTable: FC<{
     onSelect && onSelect(items);
   }
 
+  const handleAccordionChange = (rowId: number) => {
+    setExpandedRows(prev => 
+      prev.includes(rowId) 
+        ? prev.filter(id => id !== rowId)
+        : [...prev, rowId]
+    );
+  };
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    if (pagination) {
+      pagination.onPageChange(newPage);
+    }
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (pagination) {
+      pagination.onRowsPerPageChange(parseInt(event.target.value, 10));
+    }
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    // Reset to the first page when search term changes
+    if (pagination) {
+      pagination.onPageChange(0);
+    }
+  };
+
+  const filteredData = data.filter(item => {
+    if (!searchFields || searchFields.length === 0 || !searchTerm) {
+      return true; // No search fields or search term, return all data
+    }
+    return searchFields.some(field => {
+      const value = item[field];
+      return value && value.toString().toLowerCase().includes(searchTerm.toLowerCase());
+    });
+  });
+
+  const paginatedData = pagination
+    ? filteredData.slice(
+        pagination.page * pagination.rowsPerPage,
+        pagination.page * pagination.rowsPerPage + pagination.rowsPerPage
+      )
+    : filteredData;
+
   return (
-    <Box className={theme.table}>
-      {searchFields && searchFields.length ? (
-        <TextField
-          id="input-with-icon-textfield"
-          size="small"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <img className={theme.logo} src={searchOutline} height={20} alt="search" />
-              </InputAdornment>
-            ),
-          }}
-          variant="outlined"
-          sx={{ margin: '8px 0' }}
-          placeholder="Search"
-          onChange={e => setSearchTerm(e.target.value.toLowerCase())}
-        />
-      ) : null}
-      <TableContainer className={theme.tableContainer}>
-        <Table size="small">
-          <DataTableHead
-            columns={columns}
-            isSelected={selectedItems.length > 0}
-            onSelectAll={checked => {
-              if (!checked) {
-                updateSelectedItems([]);
-                return;
-              }
-              updateSelectedItems(
-                data.map(item => getValueByFieldName(columns[0].fieldName, item))
-              );
+    <Paper sx={{ width: '100%', overflow: 'hidden', boxShadow: 3 }}>
+      {searchFields && searchFields.length > 0 && (
+        <Box sx={{ p: 2 }}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
             }}
           />
+        </Box>
+      )}
+      <TableContainer sx={{ width: '100%' }}>
+        <Table stickyHeader sx={{ width: '100%' }}>
+          <DataTableHead
+            columns={columns}
+            isSelected={selectedItems.length === data.length}
+            onSelectAll={value => {
+              if (value) {
+                updateSelectedItems(data.map(item => item.id));
+              } else {
+                updateSelectedItems([]);
+              }
+            }}
+            showAccordion={showAccordion}
+          />
           <TableBody>
-            {!filterLoading &&
-              data
-                .filter(d => {
-                  if (searchFields && searchFields.length) {
-                    return searchFields.some(sf =>
-                      getValueByFieldName(sf, d).toLowerCase().includes(searchTerm)
-                    );
-                  }
-                  return true;
-                })
-                .map(d => (
-                  <TableRow
-                    hover={!!onClick}
-                    onClick={() => (onClick ? onClick(d) : null)}
-                    tabIndex={-1}
-                    key={d.id}
-                  >
-                    {columns.map(c => (
-                      <DataTableCell
-                        key={c.fieldName + c.label}
-                        type={c.type}
-                        value={
-                          c.type === 'SELECT'
-                            ? selectedItems.includes(getValueByFieldName(c.fieldName, d))
-                            : getValueByFieldName(c.fieldName, d)
-                        }
-                        onSelect={checked => {
-                          if (checked) {
-                            const newSelectedItems = [
-                              ...selectedItems,
-                              getValueByFieldName(c.fieldName, d),
-                            ];
-                            updateSelectedItems(newSelectedItems);
-                            return;
-                          }
-
-                          const newSelectedItems = selectedItems.filter(
-                            item => item !== getValueByFieldName(c.fieldName, d)
-                          );
-                          updateSelectedItems(newSelectedItems);
-                        }}
-                      />
-                    ))}
-                  </TableRow>
-                ))}
+            {paginatedData.map((row, index) => (
+              <Fragment key={row.id}>
+                {customRowRender ? (
+                  customRowRender(row)
+                ) : (
+                  <>
+                    <TableRow
+                      key={index}
+                      onClick={() => onClick && onClick(row)}
+                      sx={{ cursor: onClick ? 'pointer' : 'default' }}
+                    >
+                      {columns.map(column => (
+                        <DataTableCell
+                          key={column.fieldName}
+                          value={getValueByFieldName(column.fieldName, row)}
+                          type={column.type}
+                          isActionCell={column.fieldName === 'action'}
+                        />
+                      ))}
+                    </TableRow>
+                    {showAccordion && (
+                      <TableRow>
+                        <TableCell colSpan={columns.length + 1} sx={{ py: 0 }}>
+                          <Accordion
+                            expanded={expandedRows.includes(row.id)}
+                            onChange={() => handleAccordionChange(row.id)}
+                            sx={{ boxShadow: 'none' }}
+                          >
+                            <AccordionDetails>
+                              <Box sx={{ p: 2 }}>
+                                <h4>Additional Details</h4>
+                                <p>Client ID: {row.id}</p>
+                                <p>Created Date: {new Date().toLocaleDateString()}</p>
+                                {/* Add more details as needed */}
+                              </Box>
+                            </AccordionDetails>
+                          </Accordion>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
+                )}
+              </Fragment>
+            ))}
           </TableBody>
         </Table>
         {filterLoading ? (
@@ -373,7 +480,19 @@ const DataTable: FC<{
           </LoadingButton>
         </div>
       ) : null}
-    </Box>
+
+      {pagination && (
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25, 50]}
+          component="div"
+          count={filteredData.length}
+          rowsPerPage={pagination.rowsPerPage}
+          page={pagination.page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      )}
+    </Paper>
   );
 };
 

@@ -1,106 +1,51 @@
-import { useQuery } from '@apollo/client';
-import { gql } from '__generated__';
-import { IdentityCardAuditType } from '__generated__/graphql';
 import { FC } from 'react';
 import { Outlet, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
-import DataTable from 'components/DataTable';
 import ErrorMessage from 'components/ErrorMessage';
 import LoadingIndicator from 'components/LoadingIndicator';
+import { getIdentityCardScanLogs } from 'services/api';
+import { IdentityCardAudit } from 'types/api';
 
-const SCAN_AUDIT_QUERY = gql(`
-  query IdentityCardScanLogs($identityCardId: ID!, $limit: Int) {
-    identityCard(id: $identityCardId) {
-      id
-      scanAudits(limit: $limit) {
-        nodes {
-          id
-          scannedBy {
-            id
-            fullName
-          }
-          latitude
-          longitude
-          createdAt
-          card {
-            id
-            cardNumber
-          }
-        }
-        pageInfo {
-          cursor
-          hasNextPage
-          totalCount
-        }
-      }
+const IdentityCardScanLogs: FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [scanLogs, setScanLogs] = useState<IdentityCardAudit[]>([]);
+
+  const fetchScanLogs = async () => {
+    if (!id) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getIdentityCardScanLogs(id);
+      setScanLogs(data);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
     }
-  }
-`);
-
-const ScanAuditLogPage: FC = () => {
-  const { cardId } = useParams<{ cardId: string }>();
-
-  const { loading, error, data, refetch, fetchMore } = useQuery(SCAN_AUDIT_QUERY, {
-    variables: {
-      identityCardId: cardId as string,
-      limit: 30,
-    },
-    notifyOnNetworkStatusChange: true,
-  });
-
-  const renderContent = () => {
-    if (loading) return <LoadingIndicator />;
-
-    if (error || !data) return <ErrorMessage error={error} refetch={refetch} />;
-
-    const scanAudit = data.identityCard.scanAudits.nodes;
-    const pageInfo = data.identityCard.scanAudits.pageInfo;
-
-    return (
-      <DataTable
-        data={scanAudit as IdentityCardAuditType[]}
-        columns={[
-          {
-            label: 'Card Number',
-            fieldName: 'card.cardNumber',
-          },
-          {
-            label: 'Scanned By',
-            fieldName: 'scannedBy.fullName',
-          },
-          {
-            label: 'Latitude',
-            fieldName: 'latitude',
-          },
-          {
-            label: 'Longitude',
-            fieldName: 'longitude',
-          },
-          {
-            label: 'Scanned At',
-            fieldName: 'createdAt',
-            type: 'DATETIME',
-          },
-        ]}
-        hasNextPage={pageInfo.hasNextPage as boolean}
-        paginationLoading={loading}
-        onLoadMore={() =>
-          fetchMore({
-            variables: {
-              cursor: pageInfo.cursor,
-            },
-          })
-        }
-      />
-    );
   };
 
+  useEffect(() => {
+    fetchScanLogs();
+  }, [id]);
+
+  if (loading) return <LoadingIndicator />;
+  if (error) return <ErrorMessage error={error} onRetry={fetchScanLogs} />;
+  if (!scanLogs.length) return <div>No scan logs found.</div>;
+
   return (
-    <>
-      {renderContent()}
+    <div>
+      {scanLogs.map(log => (
+        <div key={log.id}>
+          <p>Scanned at: {log.scannedAt}</p>
+          <p>Location: {log.location}</p>
+        </div>
+      ))}
       <Outlet />
-    </>
+    </div>
   );
 };
 
-export default ScanAuditLogPage;
+export default IdentityCardScanLogs;

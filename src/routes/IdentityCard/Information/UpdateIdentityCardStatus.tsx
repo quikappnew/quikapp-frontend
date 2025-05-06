@@ -1,50 +1,44 @@
-import { useMutation } from '@apollo/client';
-import { gql } from '__generated__';
-import { IdentityCardStatusEnumType } from '__generated__/graphql';
 import { FC } from 'react';
+import { useState } from 'react';
 
 import { FormInput, FormPanelWithReadMode } from 'components/FormPanel';
+import { updateIdentityCardStatus } from 'services/api';
+import { IdentityCardStatusEnum } from 'types/api';
 
-const UPDATE_IDENTITY_CARD_MUTATION = gql(`
-  mutation UpdateIdentityCardStatus($id: ID!, $status: IdentityCardStatusEnumType!) {
-    updateIdentityCardStatus(id: $id, status: $status) {
-      id
-      status
-      updatedAt
-    }
-  }
-`);
-
-const UpdateIdentityCardStatus: FC<{
+interface Props {
   id: string;
-  status: IdentityCardStatusEnumType;
-}> = ({ id, status }) => {
-  const [updateIdentityCard, { loading, error }] = useMutation(UPDATE_IDENTITY_CARD_MUTATION);
+  status: IdentityCardStatusEnum;
+}
+
+const UpdateIdentityCardStatus: FC<Props> = ({ id, status }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const handleSubmit = async (values: { status: IdentityCardStatusEnum }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await updateIdentityCardStatus(id, values.status);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <FormPanelWithReadMode
+      title="Update Status"
+      onSubmit={handleSubmit}
       loading={loading}
       error={error}
-      onSubmit={data => {
-        updateIdentityCard({
-          variables: {
-            id,
-            status: data.status,
-          },
-        });
-      }}
-      title="Status"
     >
       <FormInput
-        type="status_select"
         fieldName="status"
         label="Status"
+        type="status_select"
         defaultValue={status}
-        statusOptions={[
-          IdentityCardStatusEnumType.Active,
-          IdentityCardStatusEnumType.Inactive,
-          IdentityCardStatusEnumType.PendingPrinting,
-        ]}
+        statusOptions={Object.values(IdentityCardStatusEnum)}
       />
     </FormPanelWithReadMode>
   );
