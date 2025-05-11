@@ -13,7 +13,7 @@ import {
   FormHelperText,
   Card,
 } from '@mui/material';
-import { vendorOnboarding } from '../../services/api';
+import { vendorOnboarding } from '../../../services/api';
 import { useNavigate } from 'react-router-dom';
 
 interface VendorFormData {
@@ -175,9 +175,8 @@ const VendorForm: React.FC = () => {
     
     return (
       <FormControl fullWidth error={isError} sx={{ mb: 2 }}>
-        <Typography variant="body2" gutterBottom color="textPrimary" sx={{ fontWeight: 600 }}>
-          {label}
-        </Typography>
+  
+        <Typography variant="body2" gutterBottom color="textPrimary" sx={{ fontWeight: 600 }}>{label}</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
             <input
@@ -239,9 +238,7 @@ const VendorForm: React.FC = () => {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc', py: 6 }}>
       <Card sx={{ p: 4, maxWidth: 600, mx: 'auto', my: 4, borderRadius: 3, boxShadow: 6 }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, mb: 3 }}>
-          Vendor Onboarding Form
-        </Typography>
+        <h4 className="text-xl font-bold mb-8 text-gray-500"> Vendor Onboarding Form</h4>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             <Grid item xs={12}>

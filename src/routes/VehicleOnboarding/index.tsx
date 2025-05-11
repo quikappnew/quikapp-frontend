@@ -1,11 +1,10 @@
 import SidebarLayout from "layouts/SidebarLayout";
-import VehicleOnboardingForm from "./vendorOnboardingForm"
+import VehicleOnboardingForm from "./vehicleOnboardingForm"
 
 const VehicleOnboarding = () => {
     return (
         <SidebarLayout>
             <VehicleOnboardingForm />
-            {/* <VehicleOnboardingList /> */}
         </SidebarLayout>
     )
 }
