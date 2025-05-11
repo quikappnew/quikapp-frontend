@@ -51,6 +51,13 @@ const theme = createTheme({
         dense: true,
       },
     },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          zIndex: 2,
+        },
+      },
+    },
   },
 });
 

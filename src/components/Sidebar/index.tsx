@@ -1,7 +1,6 @@
 import classNames from 'classnames';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import rapidLogo from 'media/rapid-logo.png';
 import { TabItem } from 'utils/sidebar-tabs';
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import LogoutModal from 'routes/Logout';
@@ -128,7 +127,7 @@ export default function Sidebar({ tabs }: { tabs: TabItem[] }) {
   return (
     <div className="flex flex-col gap-1 p-4 min-w-60 min-h-screen bg-white border-r border-gray-200">
       <NavLink to="/" className="flex items-center gap-2 mb-4">
-        <img className="h-8" src={rapidLogo} alt="City logo" />
+        <img className="h-8" src="https://quikapp.cc/lovable-uploads/4da932a7-a74d-4dd1-a1a0-1e93bc4da154.png" alt="City logo" />
         <span className="text-sm font-bold">Rapid Logistics</span>
       </NavLink>
       {tabs.map(tab => (

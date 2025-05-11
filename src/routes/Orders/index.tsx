@@ -71,7 +71,7 @@ const columns = [
 
   return (
     <SidebarLayout>
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <div className="flex  min-h-screen bg-gray-50">
         <div className="w-full max-w-6xl bg-white rounded-2xl shadow-lg p-8">
           <h2 className="text-xl font-bold mb-8 text-gray-500">Orders</h2>
           {error && (
