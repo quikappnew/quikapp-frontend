@@ -46,9 +46,12 @@ const handleOTPVerification = async (data: FormData) => {
     });
 
     if (response.user.token) {
+
       const token = response.user.token;
       TokenService.setToken(token);
-      
+      localStorage.setItem('user', JSON.stringify(response.user));
+
+
       // Verify token was set
       const storedToken = TokenService.getToken();
       await new Promise(resolve => setTimeout(resolve, 100));

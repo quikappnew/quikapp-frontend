@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Grid, CircularProgress, Typography } from '@mui/material';
+import { Box, Button, Grid, CircularProgress, Typography, Card } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
 import { getVehicles } from 'services/api';
@@ -51,10 +51,17 @@ const Vehicle = () => {
 
   return (
     <SidebarLayout>
-      <Box p={3}>
-        <Typography variant="h5"  mb={3}>
-          Vehicles
-        </Typography>
+       <Box sx={{ p: 3 }}>
+        <Card
+          sx={{
+            p: 3,
+            borderRadius: 3,
+            boxShadow: 3,
+            background: "#fff",
+
+          }}
+        >
+        <h4 className="text-xl font-bold mb-3 text-gray-500"> Vehicles</h4>
         {loading ? (
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
             <CircularProgress />
@@ -68,6 +75,7 @@ const Vehicle = () => {
             searchFields={['vehicle_number', 'vehicle_owner_display', 'vendor_name']}
           />
         )}
+        </Card>
       </Box>
     </SidebarLayout>
   );

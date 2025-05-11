@@ -6,6 +6,7 @@ import {
   Alert,
   Button,
   Chip,
+  Card,
 } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import { getOnboardedVehicles } from 'services/api';
@@ -108,10 +109,17 @@ const VehicleOnboardingList = () => {
 
   return (
     <SidebarLayout>
-      <Box sx={{ p: { xs: 1, sm: 3 }, background: '#f7f7f9', minHeight: '100vh' }}>
-        <Typography variant="h5" mb={4}>
-          Onboarded Vehicles
-        </Typography>
+ <Box sx={{ p: 3 }}>
+        <Card
+          sx={{
+            p: 3,
+            borderRadius: 3,
+            boxShadow: 3,
+            background: "#fff",
+
+          }}
+        >
+      <h4 className="text-xl font-bold mb-3 text-gray-500"> Onboarded Vehicles</h4>
         {loading ? (
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
             <CircularProgress />
@@ -133,7 +141,8 @@ const VehicleOnboardingList = () => {
             onClick={(row) => navigate(`/vehicle-onboarding/${row.id}`)}
           />
         )}
-      </Box>
+        </Card>
+      </Box>  
     </SidebarLayout>
   );
 };
