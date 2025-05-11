@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Typography, CircularProgress } from '@mui/material';
+import { Box, Button, Typography, CircularProgress, Card } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
 import { getVendors } from 'services/api';
@@ -37,24 +37,21 @@ const Vendor = () => {
     }
   };
 
-  const handleAddVendor = () => {
-    navigate('/vendor/onboarding');
-  };
-
   return (
     <SidebarLayout>
-      {/* <Box sx={{ p: 3 }}> */}
+       <Box sx={{ p: 3 }}>
+        <Card
+          sx={{
+            p: 3,
+            borderRadius: 3,
+            boxShadow: 3,
+            background: "#fff",
+
+          }}
+        >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <Typography variant="h5">
-            Vendors
-          </Typography>
-          {/* <Button 
-            variant="contained" 
-            color="primary"
-            onClick={handleAddVendor}
-          >
-            Add Vendor
-          </Button> */}
+     
+          <h4 className="text-xl font-bold mb-2 text-gray-500"> Vendors</h4>
         </div>
 
         {loading ? (
@@ -72,7 +69,8 @@ const Vendor = () => {
             searchFields={['name', 'gst', 'pan', 'spoc_name']}
           />
         )}
-      {/* </Box> */}
+        </Card>
+</Box>
     </SidebarLayout>
   );
 };

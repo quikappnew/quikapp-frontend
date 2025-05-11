@@ -8,11 +8,11 @@ import {
   Grid,
   FormControl,
   CircularProgress,
-  Snackbar,
-  Alert,
   FormHelperText,
   Card,
 } from '@mui/material';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { vendorOnboarding } from '../../../services/api';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,15 +34,6 @@ const VendorForm: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error';
-  }>({
-    open: false,
-    message: '',
-    severity: 'success',
-  });
 
   const [formData, setFormData] = useState<VendorFormData>({
     name: '',
@@ -103,11 +94,7 @@ const VendorForm: React.FC = () => {
     const missingFiles = requiredFiles.filter(file => !formData[file as keyof VendorFormData]);
     
     if (missingFiles.length > 0) {
-      setSnackbar({
-        open: true,
-        message: 'Please upload all required documents',
-        severity: 'error'
-      });
+      toast.error('Please upload all required documents');
       return;
     }
 
@@ -143,31 +130,19 @@ const VendorForm: React.FC = () => {
       // Call API
       await vendorOnboarding(submitFormData);
       
-      setSnackbar({
-        open: true,
-        message: 'Vendor onboarded successfully!',
-        severity: 'success',
-      });
+      toast.success('Vendor onboarded successfully!');
 
       // Navigate to vendor list after successful submission
       setTimeout(() => {
-        navigate('/vendor/list');
+        navigate('/vendor/onboarding-list');
       }, 2000);
 
     } catch (error) {
       console.error('Error submitting form:', error);
-      setSnackbar({
-        open: true,
-        message: 'Error onboarding vendor. Please try again.',
-        severity: 'error',
-      });
+      toast.error('Error onboarding vendor. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   const FileInput = ({ label, id, name, value }: { label: string; id: string; name: string; value: File | null }) => {
@@ -236,8 +211,19 @@ const VendorForm: React.FC = () => {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc', py: 6 }}>
-      <Card sx={{ p: 4, maxWidth: 600, mx: 'auto', my: 4, borderRadius: 3, boxShadow: 6 }}>
+    <Box sx={{ minHeight: '100vh'}}>
+      <ToastContainer
+        position="top-right"
+        autoClose={6000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+      <Card sx={{ p: 4, maxWidth: 700, mx: 'auto', my: 4, borderRadius: 3, boxShadow: 6 }}>
         <h4 className="text-xl font-bold mb-8 text-gray-500"> Vendor Onboarding Form</h4>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
@@ -377,21 +363,6 @@ const VendorForm: React.FC = () => {
             </Grid>
           </Grid>
         </form>
-
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={6000}
-          onClose={handleCloseSnackbar}
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        >
-          <Alert
-            onClose={handleCloseSnackbar}
-            severity={snackbar.severity}
-            sx={{ width: '100%' }}
-          >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
       </Card>
     </Box>
   );

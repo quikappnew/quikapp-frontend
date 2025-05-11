@@ -174,7 +174,7 @@ const getSidebarTabs = (): TabItem[] => {
       children: [
         {
           key: 'vehicle-details',
-          label: 'Vehicle Details',
+          label: 'Vehicles',
           route: '/vehicle',
         },
         // {

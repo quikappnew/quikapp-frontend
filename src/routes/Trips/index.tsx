@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from "@mui/material";
+import { Box, Button, Card, Grid } from "@mui/material";
 import Navbar from "components/Navbar";
 import SidebarLayout from "layouts/SidebarLayout"
 import { useState, Fragment, useMemo, FC, useEffect } from "react";
@@ -99,12 +99,24 @@ const Trips: FC = () => {
 
     return (
         <SidebarLayout>
-            <h1 style={{marginBottom: "10px"}}>Welcome {client}</h1>
+             <Box sx={{ p: 3 }}>
+        <Card
+          sx={{
+            p: 3,
+            borderRadius: 3,
+            boxShadow: 3,
+            background: "#fff",
+
+          }}
+        >
+           <h4 className="text-xl font-bold mb-2 text-gray-500">Trips</h4>
             <DataTable 
                 data={trips} 
                 columns={columns}
                 searchFields={['vendor_name', 'from_location_name', 'to_location_name', 'reference_id', 'client_name', 'latest_status']}
             />
+            </Card>
+            </Box>
         </SidebarLayout>
     );
 }   
