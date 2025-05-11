@@ -1,25 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
   CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   Alert,
   Button,
   Chip,
+  Card,
 } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import { getOnboardedVehicles } from 'services/api';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
+import DataTable from 'components/DataTable';
 
 const statusColor = (status: string) => {
   switch (status) {
@@ -53,12 +46,80 @@ const VehicleOnboardingList = () => {
     fetchVehicles();
   }, []);
 
+  const columns = [
+    {
+      label: 'Vehicle Number',
+      fieldName: 'vehicle_number',
+      width: 15,
+      type: 'STRING' as const,
+    },
+    {
+      label: 'Owner',
+      fieldName: 'vehicle_owner_display',
+      width: 20,
+      type: 'STRING' as const,
+    },
+    {
+      label: 'Vendor',
+      fieldName: 'vendor_name',
+      width: 15,
+      type: 'STRING' as const,
+    },
+    {
+      label: 'Status',
+      fieldName: 'status',
+      width: 15,
+      type: 'STATUS' as const,
+    },
+    {
+      label: 'Created At',
+      fieldName: 'created_at',
+      width: 15,
+      type: 'DATETIME' as const,
+    },
+    {
+      label: 'Action',
+      fieldName: 'action',
+      width: 20,
+      type: 'STRING' as const,
+      render: (row: any) => (
+        <Button
+          variant="contained"
+          color="info"
+          size="small"
+          sx={{
+            textTransform: 'none',
+            fontWeight: 600,
+            borderRadius: 2,
+            px: 2,
+            boxShadow: 1,
+            background: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)',
+            color: '#fff',
+            '&:hover': {
+              background: 'linear-gradient(90deg, #1565c0 0%, #42a5f5 100%)',
+            },
+          }}
+          onClick={() => navigate(`/vehicle-onboarding/${row.id}`)}
+        >
+          View Details
+        </Button>
+      ),
+    },
+  ];
+
   return (
     <SidebarLayout>
-      <Box sx={{ p: { xs: 1, sm: 3 }, background: '#f7f7f9', minHeight: '100vh' }}>
-        <Typography variant="h5"  mb={4}>
-          Onboarded Vehicles
-        </Typography>
+ <Box sx={{ p: 3 }}>
+        <Card
+          sx={{
+            p: 3,
+            borderRadius: 3,
+            boxShadow: 3,
+            background: "#fff",
+
+          }}
+        >
+      <h4 className="text-xl font-bold mb-3 text-gray-500"> Onboarded Vehicles</h4>
         {loading ? (
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
             <CircularProgress />
@@ -66,88 +127,22 @@ const VehicleOnboardingList = () => {
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : (
-          <Card sx={{ borderRadius: 4, boxShadow: 6 }}>
-            <CardContent>
-              <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
-                <Table stickyHeader>
-                  <TableHead>
-                    <TableRow sx={{ background: '#f0f4f8' }}>
-                      <TableCell sx={{ fontWeight: 700 }}>Vehicle Number</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Owner</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Vendor</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Created At</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>Action</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {vehicles.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} align="center">
-                          No vehicles onboarded yet.
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      vehicles.map((vehicle: any) => (
-                        <TableRow
-                          key={vehicle.id}
-                          hover
-                          sx={{
-                            transition: 'background 0.2s',
-                            '&:hover': { background: '#f5faff' },
-                          }}
-                        >
-                          <TableCell>{vehicle.vehicle_number}</TableCell>
-                          <TableCell>{vehicle.vehicle_owner_display}</TableCell>
-                          <TableCell>{vehicle.vendor_name || '-'}</TableCell>
-                          <TableCell>
-                            <Chip
-                              label={vehicle.status}
-                              color={statusColor(vehicle.status)}
-                              sx={{
-                                fontWeight: 600,
-                                fontSize: '0.6rem',
-                                px: 1.5,
-                              }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {vehicle.created_at
-                              ? dayjs(vehicle.created_at).format('YYYY-MM-DD HH:mm')
-                              : '-'}
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="contained"
-                              color="info"
-                              size="small"
-                              sx={{
-                                textTransform: 'none',
-                                fontWeight: 600,
-                                borderRadius: 2,
-                                px: 2,
-                                boxShadow: 1,
-                                background: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)',
-                                color: '#fff',
-                                '&:hover': {
-                                  background: 'linear-gradient(90deg, #1565c0 0%, #42a5f5 100%)',
-                                },
-                              }}
-                              onClick={() => navigate(`/vehicle-onboarding/${vehicle.id}`)}
-                            >
-                              View Details
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
+          <DataTable
+            columns={columns}
+            data={vehicles}
+            pagination={{
+              page: 0,
+              rowsPerPage: 10,
+              totalRows: vehicles.length,
+              onPageChange: () => {},
+              onRowsPerPageChange: () => {},
+            }}
+            searchFields={['vehicle_number', 'vehicle_owner_display', 'vendor_name']}
+            onClick={(row) => navigate(`/vehicle-onboarding/${row.id}`)}
+          />
         )}
-      </Box>
+        </Card>
+      </Box>  
     </SidebarLayout>
   );
 };

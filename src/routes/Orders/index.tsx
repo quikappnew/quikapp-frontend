@@ -71,9 +71,9 @@ const columns = [
 
   return (
     <SidebarLayout>
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <div className="flex  min-h-screen bg-gray-50">
         <div className="w-full max-w-6xl bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-xl font-bold mb-8 text-gray-500">Orders</h2>
+          <h2 className="text-xl font-bold mb-2 text-gray-500">Orders</h2>
           {error && (
             <div className="mb-4 p-3 rounded bg-red-100 text-red-800 border border-red-300 shadow">
               {error}
@@ -82,7 +82,7 @@ const columns = [
           {loading ? (
             <div className="text-center text-lg text-gray-500">Loading...</div>
           ) : (
-            <div className="overflow-x-auto rounded-lg shadow border border-gray-200">
+            <div className="overflow-x-auto">
               <DataTable
                 data={orders}
                 columns={columns}

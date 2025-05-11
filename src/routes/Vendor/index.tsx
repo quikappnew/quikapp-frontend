@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Typography, CircularProgress } from '@mui/material';
+import { Box, Button, Typography, CircularProgress, Card } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
 import { getVendors } from 'services/api';
@@ -16,7 +16,7 @@ const Vendor = () => {
     { label: 'Vendor Name', fieldName: 'name', width: 200 },
     { label: 'GST Number', fieldName: 'gst', width: 150 },
     { label: 'PAN Number', fieldName: 'pan', width: 150 },
-    { label: 'SPOC Name', fieldName: 'spoc_name', width: 150 }
+    { label: 'SPOC Name', fieldName: 'spoc_name', width: 150 },
   ];
 
   useEffect(() => {
@@ -37,42 +37,36 @@ const Vendor = () => {
     }
   };
 
-  const handleAddVendor = () => {
-    navigate('/vendor/onboarding');
-  };
-
   return (
     <SidebarLayout>
-      {/* <Box sx={{ p: 3 }}> */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <Typography variant="h5">
-            Vendors
-          </Typography>
-          {/* <Button 
-            variant="contained" 
-            color="primary"
-            onClick={handleAddVendor}
-          >
-            Add Vendor
-          </Button> */}
-        </div>
+      <Box sx={{ p: 3 }}>
+        <Card
+          sx={{
+            p: 3,
+            borderRadius: 3,
+            boxShadow: 3,
+            background: '#fff',
+          }}
+        >
+          <h4 className="text-xl font-bold mb-2 text-gray-500"> Vendors</h4>
 
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Typography color="error" sx={{ mt: 2 }}>
-            {error}
-          </Typography>
-        ) : (
-          <DataTable
-            data={vendors}
-            columns={columns}
-            searchFields={['name', 'gst', 'pan', 'spoc_name']}
-          />
-        )}
-      {/* </Box> */}
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Typography color="error" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
+          ) : (
+            <DataTable
+              data={vendors}
+              columns={columns}
+              searchFields={['name', 'gst', 'pan', 'spoc_name']}
+            />
+          )}
+        </Card>
+      </Box>
     </SidebarLayout>
   );
 };

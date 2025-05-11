@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, CircularProgress, Button } from '@mui/material';
+import { Box, Typography, CircularProgress, Button, Paper, InputBase, IconButton, Card } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
 import { getVendorOnboarding } from 'services/api';
 import { useNavigate } from 'react-router-dom';
 import type { Vendor } from 'services/api';
+import SearchIcon from '@mui/icons-material/Search';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+
 
 const VendorOnBoardingList: React.FC = () => {
   const navigate = useNavigate();
@@ -32,17 +36,28 @@ const VendorOnBoardingList: React.FC = () => {
         (response.data || []).map((vendor: Vendor) => ({
           ...vendor,
           action: (
-            <Button
-              variant="contained"
-              color="info"
-              size="small"
-              onClick={e => {
-                e.stopPropagation();
-                navigate(`/vendor/onboarding/${vendor.id}`);
-              }}
-            >
-              View
-            </Button>
+            <>
+              <IconButton
+                color="primary"
+                sx={{ color: "#1976d2" }}
+                onClick={e => {
+                  e.stopPropagation();
+                  navigate(`/vendor/onboarding/${vendor.id}`);
+                }}
+              >
+                <VisibilityIcon />
+              </IconButton>
+              {/* <IconButton
+                color="warning"
+                sx={{ color: "#f9a825", ml: 1 }}
+                onClick={e => {
+                  e.stopPropagation();
+                  navigate(`/vendor/onboarding/${vendor.id}/edit`);
+                }}
+              >
+                <EditIcon />
+              </IconButton> */}
+            </>
           ),
         }))
       );
@@ -57,24 +72,35 @@ const VendorOnBoardingList: React.FC = () => {
 
   return (
     <SidebarLayout>
-        <Typography variant="h5" gutterBottom>
-          Vendor Onboarding List
-        </Typography>
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Typography color="error" sx={{ mt: 2 }}>
-            {error}
-          </Typography>
-        ) : (
-          <DataTable
-            data={vendors}
-            columns={columns}
-            searchFields={['name', 'gst', 'pan', 'spoc_name']}
-          />
-        )}
+      <Box sx={{ p: 3 }}>
+        <Card
+          sx={{
+            p: 3,
+            borderRadius: 3,
+            boxShadow: 3,
+            background: "#fff",
+
+          }}
+        >
+          <h4 className="text-xl font-bold mb-3 text-gray-500"> Vendor Onboarding List</h4>
+     
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Typography color="error" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
+          ) : (
+            <DataTable
+              data={vendors}
+              columns={columns}
+              searchFields={['name', 'gst', 'pan', 'spoc_name']}
+            />
+          )}
+        </Card>
+      </Box>
     </SidebarLayout>
   );
 };

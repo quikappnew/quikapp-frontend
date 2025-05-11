@@ -339,7 +339,7 @@ const DataTable: FC<DataTableProps> = ({
     : filteredData;
 
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden', boxShadow: 3 }}>
+    <Paper sx={{ width: '100%', overflow: 'hidden',border:'none', boxShadow: 'none' }}>
       {searchFields && searchFields.length > 0 && (
         <Box sx={{ p: 2 }}>
           <TextField

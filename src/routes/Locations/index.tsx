@@ -104,7 +104,7 @@ const Locations = () => {
     <SidebarLayout>
       {!isDetailsView ? (
         <>
-          <h2 style={{ marginBottom: '20px' }}>Welcome {client}</h2>
+          {/* <h2 style={{ marginBottom: '20px' }}>Welcome {client}</h2> */}
           <Button
             variant="contained"
             color="info"

@@ -8,12 +8,12 @@ import {
   Grid,
   FormControl,
   CircularProgress,
-  Snackbar,
-  Alert,
   FormHelperText,
   Card,
 } from '@mui/material';
-import { vendorOnboarding } from '../../services/api';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { vendorOnboarding } from '../../../services/api';
 import { useNavigate } from 'react-router-dom';
 
 interface VendorFormData {
@@ -34,15 +34,6 @@ const VendorForm: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error';
-  }>({
-    open: false,
-    message: '',
-    severity: 'success',
-  });
 
   const [formData, setFormData] = useState<VendorFormData>({
     name: '',
@@ -103,11 +94,7 @@ const VendorForm: React.FC = () => {
     const missingFiles = requiredFiles.filter(file => !formData[file as keyof VendorFormData]);
     
     if (missingFiles.length > 0) {
-      setSnackbar({
-        open: true,
-        message: 'Please upload all required documents',
-        severity: 'error'
-      });
+      toast.error('Please upload all required documents');
       return;
     }
 
@@ -143,41 +130,28 @@ const VendorForm: React.FC = () => {
       // Call API
       await vendorOnboarding(submitFormData);
       
-      setSnackbar({
-        open: true,
-        message: 'Vendor onboarded successfully!',
-        severity: 'success',
-      });
+      toast.success('Vendor onboarded successfully!');
 
       // Navigate to vendor list after successful submission
       setTimeout(() => {
-        navigate('/vendor/list');
+        navigate('/vendor/onboarding-list');
       }, 2000);
 
     } catch (error) {
       console.error('Error submitting form:', error);
-      setSnackbar({
-        open: true,
-        message: 'Error onboarding vendor. Please try again.',
-        severity: 'error',
-      });
+      toast.error('Error onboarding vendor. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   const FileInput = ({ label, id, name, value }: { label: string; id: string; name: string; value: File | null }) => {
     const isError = touched[name] && !value;
     
     return (
-      <FormControl fullWidth error={isError}>
-        <Typography variant="body2" gutterBottom color="textPrimary">
-          {label}
-        </Typography>
+      <FormControl fullWidth error={isError} sx={{ mb: 2 }}>
+  
+        <Typography variant="body2" gutterBottom color="textPrimary" sx={{ fontWeight: 600 }}>{label}</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
             <input
@@ -200,7 +174,9 @@ const VendorForm: React.FC = () => {
                     color: isError ? '#d32f2f' : undefined,
                     '&:hover': {
                       borderColor: isError ? '#d32f2f' : undefined,
-                    }
+                    },
+                    fontWeight: 600,
+                    borderRadius: 2
                   }}
                 >
                   Choose File
@@ -235,128 +211,143 @@ const VendorForm: React.FC = () => {
   };
 
   return (
-    <Card sx={{ p: 4, maxWidth: 800, mx: 'auto', my: 2 }}>
-  <Box  sx={{ p: 0, maxWidth: 800, mx: 'auto', my: 2 }}>
-      <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb:2 }}>
-        Vendor Onboarding Form
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Vendor Name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              required
-            />
-          </Grid>
-          
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="SPOC Name"
-              name="spoc_name"
-              value={formData.spoc_name}
-              onChange={handleInputChange}
-              required
-            />
-          </Grid>
+    <Box sx={{ minHeight: '100vh'}}>
+      <ToastContainer
+        position="top-right"
+        autoClose={6000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+      <Card sx={{ p: 4, maxWidth: 700, mx: 'auto', my: 4, borderRadius: 3, boxShadow: 6 }}>
+        <h4 className="text-xl font-bold mb-8 text-gray-500"> Vendor Onboarding Form</h4>
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Vendor Name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+                InputLabelProps={{ sx: { fontWeight: 600 } }}
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="SPOC Name"
+                name="spoc_name"
+                value={formData.spoc_name}
+                onChange={handleInputChange}
+                required
+                InputLabelProps={{ sx: { fontWeight: 600 } }}
+              />
+            </Grid>
 
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="SPOC Phone"
-              name="spoc_phone"
-              value={formData.spoc_phone}
-              onChange={handleInputChange}
-              required
-            />
-          </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="SPOC Phone"
+                name="spoc_phone"
+                value={formData.spoc_phone}
+                onChange={handleInputChange}
+                required
+                InputLabelProps={{ sx: { fontWeight: 600 } }}
+              />
+            </Grid>
 
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="SPOC Email"
-              name="spoc_email"
-              type="email"
-              value={formData.spoc_email}
-              onChange={handleInputChange}
-              required
-            />
-          </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="SPOC Email"
+                name="spoc_email"
+                type="email"
+                value={formData.spoc_email}
+                onChange={handleInputChange}
+                required
+                InputLabelProps={{ sx: { fontWeight: 600 } }}
+              />
+            </Grid>
 
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Alternate Contact Number"
-              name="alternate_contact_number"
-              value={formData.alternate_contact_number}
-              onChange={handleInputChange}
-            />
-          </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Alternate Contact Number"
+                name="alternate_contact_number"
+                value={formData.alternate_contact_number}
+                onChange={handleInputChange}
+                InputLabelProps={{ sx: { fontWeight: 600 } }}
+              />
+            </Grid>
 
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="GST Number"
-              name="gst"
-              value={formData.gst}
-              onChange={handleInputChange}
-              required
-            />
-          </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="GST Number"
+                name="gst"
+                value={formData.gst}
+                onChange={handleInputChange}
+                required
+                InputLabelProps={{ sx: { fontWeight: 600 } }}
+              />
+            </Grid>
 
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="PAN Number"
-              name="pan"
-              value={formData.pan}
-              onChange={handleInputChange}
-              required
-            />
-          </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="PAN Number"
+                name="pan"
+                value={formData.pan}
+                onChange={handleInputChange}
+                required
+                InputLabelProps={{ sx: { fontWeight: 600 } }}
+              />
+            </Grid>
 
-          <Grid item xs={12} md={6}>
-            <FileInput
-              label="GST Certificate"
-              id="gst-certificate"
-              name="gst_certificate_file"
-              value={formData.gst_certificate_file}
-            />
-          </Grid>
+            <Grid item xs={12} md={6}>
+              <FileInput
+                label="GST Certificate"
+                id="gst-certificate"
+                name="gst_certificate_file"
+                value={formData.gst_certificate_file}
+              />
+            </Grid>
 
-          <Grid item xs={12} md={6}>
-            <FileInput
-              label="PAN Card"
-              id="pan-card"
-              name="pan_card_file"
-              value={formData.pan_card_file}
-            />
-          </Grid>
+            <Grid item xs={12} md={6}>
+              <FileInput
+                label="PAN Card"
+                id="pan-card"
+                name="pan_card_file"
+                value={formData.pan_card_file}
+              />
+            </Grid>
 
-          <Grid item xs={12} md={6}>
-            <FileInput
-              label="Address Proof"
-              id="address-proof"
-              name="address_proof_file"
-              value={formData.address_proof_file}
-            />
-          </Grid>
+            <Grid item xs={12} md={6}>
+              <FileInput
+                label="Address Proof"
+                id="address-proof"
+                name="address_proof_file"
+                value={formData.address_proof_file}
+              />
+            </Grid>
 
-          <Grid item xs={12} md={6}>
-            <FileInput
-              label="Cancelled Cheque"
-              id="cancelled-cheque"
-              name="cancelled_cheque_file"
-              value={formData.cancelled_cheque_file}
-            />
-          </Grid>
+            <Grid item xs={12} md={6}>
+              <FileInput
+                label="Cancelled Cheque"
+                id="cancelled-cheque"
+                name="cancelled_cheque_file"
+                value={formData.cancelled_cheque_file}
+              />
+            </Grid>
 
-          <Grid item xs={12}>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+            <Grid item xs={12}>
               <Button
                 type="submit"
                 variant="contained"
@@ -364,31 +355,16 @@ const VendorForm: React.FC = () => {
                 size="large"
                 disabled={loading}
                 startIcon={loading ? <CircularProgress size={20} /> : null}
+                fullWidth
+                sx={{ borderRadius: 2, py: 1.5, fontSize: 18, mt: 2 }}
               >
                 {loading ? 'Submitting...' : 'Submit'}
               </Button>
-            </Box>
+            </Grid>
           </Grid>
-        </Grid>
-      </form>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+        </form>
+      </Card>
     </Box>
-    </Card>
-  
   );
 };
 
