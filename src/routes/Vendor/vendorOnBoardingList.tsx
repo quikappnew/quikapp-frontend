@@ -82,7 +82,7 @@ const VendorOnBoardingList: React.FC = () => {
 
           }}
         >
-          <h4 className="text-xl font-bold mb-8 text-gray-500"> Vendor Onboarding List</h4>
+          <h4 className="text-xl font-bold mb-3 text-gray-500"> Vendor Onboarding List</h4>
      
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>

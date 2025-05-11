@@ -16,7 +16,7 @@ const Vendor = () => {
     { label: 'Vendor Name', fieldName: 'name', width: 200 },
     { label: 'GST Number', fieldName: 'gst', width: 150 },
     { label: 'PAN Number', fieldName: 'pan', width: 150 },
-    { label: 'SPOC Name', fieldName: 'spoc_name', width: 150 }
+    { label: 'SPOC Name', fieldName: 'spoc_name', width: 150 },
   ];
 
   useEffect(() => {
@@ -39,38 +39,34 @@ const Vendor = () => {
 
   return (
     <SidebarLayout>
-       <Box sx={{ p: 3 }}>
+      <Box sx={{ p: 3 }}>
         <Card
           sx={{
             p: 3,
             borderRadius: 3,
             boxShadow: 3,
-            background: "#fff",
-
+            background: '#fff',
           }}
         >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-     
           <h4 className="text-xl font-bold mb-2 text-gray-500"> Vendors</h4>
-        </div>
 
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Typography color="error" sx={{ mt: 2 }}>
-            {error}
-          </Typography>
-        ) : (
-          <DataTable
-            data={vendors}
-            columns={columns}
-            searchFields={['name', 'gst', 'pan', 'spoc_name']}
-          />
-        )}
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Typography color="error" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
+          ) : (
+            <DataTable
+              data={vendors}
+              columns={columns}
+              searchFields={['name', 'gst', 'pan', 'spoc_name']}
+            />
+          )}
         </Card>
-</Box>
+      </Box>
     </SidebarLayout>
   );
 };
