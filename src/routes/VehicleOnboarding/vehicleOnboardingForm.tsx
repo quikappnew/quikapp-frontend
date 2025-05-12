@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -19,8 +19,9 @@ import {
 } from '@mui/material';
 import { CloudUpload } from '@mui/icons-material';
 import SidebarLayout from 'layouts/SidebarLayout';
-import { vehicleOnboarding } from 'services/api';
+import { getVendors, vehicleOnboarding } from 'services/api';
 import { useNavigate } from 'react-router-dom';
+import SelectInput from 'react-select';
 
 const initialState = {
   vehicle_number: '',
@@ -50,6 +51,8 @@ const VehicleOnboardingForm = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [vendorOptions, setVendorOptions] = useState<{ value: string; label: string }[]>([]);
+  const [isLoadingVendors, setIsLoadingVendors] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,6 +93,17 @@ const VehicleOnboardingForm = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (form.vehicle_owner === '1') {
+      setIsLoadingVendors(true);
+      getVendors().then(res => {
+        setVendorOptions(
+          (res.data || []).map(v => ({ value: v.id, label: v.name }))
+        );
+      }).finally(() => setIsLoadingVendors(false));
+    }
+  }, [form.vehicle_owner]);
 
   return (
     <Box
@@ -151,30 +165,92 @@ const VehicleOnboardingForm = () => {
             </FormControl>
           </Grid>
           {form.vehicle_owner === '1' && (
-            <Grid item xs={6}>
-              <TextField {...{
-                label: "Vendor ID ",
-                name: "vendor_id",
-                value: form.vendor_id,
-                onChange: handleChange,
-                fullWidth: true,
-                required: true,
-                sx: { borderRadius: 2, background: '#fafbfc' },
-                InputProps: { style: { borderRadius: 6 } },
-              }} />
+            <Grid item xs={6} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', mt: '-10px', position: 'relative'  }}>
+              <InputLabel sx={{ fontWeight: 600, mb: 0.5, ml: '2px' }}>Vendor</InputLabel>
+              <Box sx={{
+                background: '#fafbfc',
+                borderRadius: 1.5,
+                border: '1px solid #c4c4c4',
+                height: 40,
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                p: 0,
+                position: 'absolute',
+              }}>
+                <SelectInput
+                  options={vendorOptions}
+                  value={vendorOptions.find(opt => opt.value === form.vendor_id) || null}
+                  onChange={option => setForm(f => ({ ...f, vendor_id: option ? option.value : '' }))}
+                  isLoading={isLoadingVendors}
+                  placeholder="Search and select vendor..."
+                  isClearable
+                  menuPortalTarget={typeof window !== 'undefined' ? document.body : null}
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      minHeight: 38,
+                      height: 38,
+                      border: 'none',
+                      boxShadow: 'none',
+                      background: 'transparent',
+                    }),
+                    valueContainer: (base) => ({
+                      ...base,
+                      height: 38,
+                      padding: '0 8px',
+                    }),
+                    input: (base) => ({
+                      ...base,
+                      margin: 0,
+                      padding: 0,
+                    }),
+                    indicatorsContainer: (base) => ({
+                      ...base,
+                      height: 38,
+                    }),
+                    menu: (base) => ({
+                      ...base,
+                      zIndex: 9999,
+                    }),
+                  }}
+                  theme={theme => ({
+                    ...theme,
+                    borderRadius: 6,
+                    colors: {
+                      ...theme.colors,
+                      primary25: '#e3f2fd',
+                      primary: '#1976d2',
+                    },
+                  })}
+                />
+              </Box>
             </Grid>
           )}
           <Grid item xs={6}>
-            <TextField {...{
-              label: "Truck Length (feet) ",
-              name: "truck_length_feet",
-              value: form.truck_length_feet,
-              onChange: handleChange,
-              fullWidth: true,
-              required: true,
-              sx: { borderRadius: 2, background: '#fafbfc' },
-              InputProps: { style: { borderRadius: 6 } },
-            }} />
+            <FormControl fullWidth required sx={{ borderRadius: 2, background: '#fafbfc' }}>
+              <InputLabel id="truck-length-label">Truck Length (feet)</InputLabel>
+              <Select
+                labelId="truck-length-label"
+                id="truck_length_feet"
+                name="truck_length_feet"
+                value={form.truck_length_feet}
+                label="Truck Length (feet)"
+                onChange={handleSelectChange}
+                sx={{ borderRadius: 2 }}
+              >
+                <MenuItem value="7ft">7 Feet</MenuItem>
+                <MenuItem value="8ft">8 Feet</MenuItem>
+                <MenuItem value="10ft">10 Feet</MenuItem>
+                <MenuItem value="14ft">14 Feet</MenuItem>
+                <MenuItem value="17ft">17 Feet</MenuItem>
+                <MenuItem value="20ft">20 Feet</MenuItem>
+                <MenuItem value="22ft">22 Feet</MenuItem>
+                <MenuItem value="24ft">24 Feet</MenuItem>
+                <MenuItem value="32ft">32 Feet</MenuItem>
+                <MenuItem value="40ft">40 Feet</MenuItem>
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={6}>
             <TextField {...{
