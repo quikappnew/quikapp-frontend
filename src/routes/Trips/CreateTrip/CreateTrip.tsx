@@ -42,7 +42,7 @@ interface ClientOption {
 
 interface TripFormData {
   vendor_id: string;
-  order: string;
+  order_id: string;
   reference_id: string;
   payment_status: PaymentStatusEnum;
 }
@@ -171,7 +171,7 @@ const CreateTrip: React.FC = () => {
                 <Grid item xs={12}>
                   <label className="block text-base font-medium text-gray-800 mb-2">Order</label>
                   <Controller
-                    name="order"
+                    name="order_id"
                     control={control}
                     rules={{ required: 'Order is required' }}
                     render={({ field: { onChange, value } }) => (
@@ -186,7 +186,7 @@ const CreateTrip: React.FC = () => {
                       />
                     )}
                   />
-                  {errors.order && <p className="text-red-500 text-sm mt-1">{errors.order.message}</p>}
+                  {errors.order_id && <p className="text-red-500 text-sm mt-1">{errors.order_id.message}</p>}
                 </Grid>
                 <Grid item xs={12}>
                   <label className="block text-base font-medium text-gray-800 mb-2">Reference ID</label>
