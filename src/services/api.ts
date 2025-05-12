@@ -744,7 +744,7 @@ export enum PaymentStatusEnum {
 
 interface Trip {
     vendor_id: string;
-    order: string;
+    order_id: string;
     reference_id: string;
     payment_status: PaymentStatusEnum;
 }

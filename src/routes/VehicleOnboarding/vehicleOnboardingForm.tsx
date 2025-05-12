@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -13,16 +13,21 @@ import {
   Chip,
   Divider,
   InputLabel,
+  MenuItem,
+  Select,
+  FormControl,
 } from '@mui/material';
 import { CloudUpload } from '@mui/icons-material';
 import SidebarLayout from 'layouts/SidebarLayout';
-import { vehicleOnboarding } from 'services/api';
+import { getVendors, vehicleOnboarding } from 'services/api';
+import { useNavigate } from 'react-router-dom';
+import SelectInput from 'react-select';
 
 const initialState = {
   vehicle_number: '',
   chassis_number: '',
   vehicle_owner: '',
-  vendor: '',
+  vendor_id: '',
   truck_length_feet: '',
   registration_date: '',
   fitness_certificate_expiry: '',
@@ -32,12 +37,12 @@ const initialState = {
 };
 
 const fileFields = [
-  { name: 'fitness_certificate_file', label: 'Fitness Certificate File' },
-  { name: 'tax_certificate_file', label: 'Tax Certificate File' },
-  { name: 'insurance_file', label: 'Insurance File' },
-  { name: 'national_permit_file', label: 'National Permit File' },
-  { name: 'rc_documents_file', label: 'RC Documents File' },
-  { name: 'pucc_file', label: 'PUCC File' },
+  { name: 'fitness_certificate_file', label: 'Fitness Certificate File', required: true },
+  { name: 'tax_certificate_file', label: 'Tax Certificate File', required: true },
+  { name: 'insurance_file', label: 'Insurance File', required: true },
+  { name: 'national_permit_file', label: 'National Permit File', required: true },
+  { name: 'rc_documents_file', label: 'RC Documents File', required: true },
+  { name: 'pucc_file', label: 'PUCC File', required: true },
 ];
 
 const VehicleOnboardingForm = () => {
@@ -46,8 +51,15 @@ const VehicleOnboardingForm = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [vendorOptions, setVendorOptions] = useState<{ value: string; label: string }[]>([]);
+  const [isLoadingVendors, setIsLoadingVendors] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSelectChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -74,6 +86,7 @@ const VehicleOnboardingForm = () => {
       setSuccess(true);
       setForm(initialState);
       setFiles({});
+      navigate('/vehicle-onboarding');
     } catch (err: any) {
       setError(err.message || 'Failed to onboard vehicle');
     } finally {
@@ -81,142 +94,287 @@ const VehicleOnboardingForm = () => {
     }
   };
 
+  useEffect(() => {
+    if (form.vehicle_owner === '1') {
+      setIsLoadingVendors(true);
+      getVendors().then(res => {
+        setVendorOptions(
+          (res.data || []).map(v => ({ value: v.id, label: v.name }))
+        );
+      }).finally(() => setIsLoadingVendors(false));
+    }
+  }, [form.vehicle_owner]);
+
   return (
     <Box
       sx={{
-        maxWidth: 600,
+        maxWidth: 700,
         mx: 'auto',
         my: 4,
-        p: 4,
+        p: { xs: 2, sm: 4 },
         background: '#fff',
-        borderRadius: 3,
-        boxShadow: 3,
+        borderRadius: 4,
+        boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)',
       }}
     >
-      <h4 className="text-xl font-bold mb-8 text-gray-500"> Vehicle Onboarding Form</h4>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <TextField label="Vendor Name *" fullWidth size="medium" />
+    
+      <h4 className="text-xl font-bold mb-8 text-gray-500">Vehicle Onboarding</h4>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {success && <Alert severity="success" sx={{ mb: 2 }}>Vehicle onboarded successfully!</Alert>}
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <Grid container spacing={3}>
+          <Grid item xs={6}>
+            <TextField {...{
+              label: "Vehicle Number",
+              name: "vehicle_number",
+              value: form.vehicle_number,
+              onChange: handleChange,
+              fullWidth: true,
+              required: true,
+              sx: { borderRadius: 2, background: '#fafbfc' },
+              InputProps: { style: { borderRadius: 6 } },
+            }} />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField {...{
+              label: "Chassis Number ",
+              name: "chassis_number",
+              value: form.chassis_number,
+              onChange: handleChange,
+              fullWidth: true,
+              required: true,
+              sx: { borderRadius: 2, background: '#fafbfc' },
+              InputProps: { style: { borderRadius: 6 } },
+            }} />
+          </Grid>
+          <Grid item xs={6}>
+            <FormControl fullWidth required sx={{ borderRadius: 2, background: '#fafbfc' }}>
+              <InputLabel id="vehicle-owner-label">Vehicle Owner</InputLabel>
+              <Select
+                labelId="vehicle-owner-label"
+                id="vehicle_owner"
+                name="vehicle_owner"
+                value={form.vehicle_owner}
+                label="Vehicle Owner"
+                onChange={handleSelectChange}
+                sx={{ borderRadius: 2 }}
+              >
+                <MenuItem value="0">Own fleet</MenuItem>
+                <MenuItem value="1">Vendor fleet</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          {form.vehicle_owner === '1' && (
+            <Grid item xs={6} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', mt: '-10px', position: 'relative'  }}>
+              <InputLabel sx={{ fontWeight: 600, mb: 0.5, ml: '2px' }}>Vendor</InputLabel>
+              <Box sx={{
+                background: '#fafbfc',
+                borderRadius: 1.5,
+                border: '1px solid #c4c4c4',
+                height: 40,
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                p: 0,
+                position: 'absolute',
+              }}>
+                <SelectInput
+                  options={vendorOptions}
+                  value={vendorOptions.find(opt => opt.value === form.vendor_id) || null}
+                  onChange={option => setForm(f => ({ ...f, vendor_id: option ? option.value : '' }))}
+                  isLoading={isLoadingVendors}
+                  placeholder="Search and select vendor..."
+                  isClearable
+                  menuPortalTarget={typeof window !== 'undefined' ? document.body : null}
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      minHeight: 38,
+                      height: 38,
+                      border: 'none',
+                      boxShadow: 'none',
+                      background: 'transparent',
+                    }),
+                    valueContainer: (base) => ({
+                      ...base,
+                      height: 38,
+                      padding: '0 8px',
+                    }),
+                    input: (base) => ({
+                      ...base,
+                      margin: 0,
+                      padding: 0,
+                    }),
+                    indicatorsContainer: (base) => ({
+                      ...base,
+                      height: 38,
+                    }),
+                    menu: (base) => ({
+                      ...base,
+                      zIndex: 9999,
+                    }),
+                  }}
+                  theme={theme => ({
+                    ...theme,
+                    borderRadius: 6,
+                    colors: {
+                      ...theme.colors,
+                      primary25: '#e3f2fd',
+                      primary: '#1976d2',
+                    },
+                  })}
+                />
+              </Box>
+            </Grid>
+          )}
+          <Grid item xs={6}>
+            <FormControl fullWidth required sx={{ borderRadius: 2, background: '#fafbfc' }}>
+              <InputLabel id="truck-length-label">Truck Length (feet)</InputLabel>
+              <Select
+                labelId="truck-length-label"
+                id="truck_length_feet"
+                name="truck_length_feet"
+                value={form.truck_length_feet}
+                label="Truck Length (feet)"
+                onChange={handleSelectChange}
+                sx={{ borderRadius: 2 }}
+              >
+                <MenuItem value="7ft">7 Feet</MenuItem>
+                <MenuItem value="8ft">8 Feet</MenuItem>
+                <MenuItem value="10ft">10 Feet</MenuItem>
+                <MenuItem value="14ft">14 Feet</MenuItem>
+                <MenuItem value="17ft">17 Feet</MenuItem>
+                <MenuItem value="20ft">20 Feet</MenuItem>
+                <MenuItem value="22ft">22 Feet</MenuItem>
+                <MenuItem value="24ft">24 Feet</MenuItem>
+                <MenuItem value="32ft">32 Feet</MenuItem>
+                <MenuItem value="40ft">40 Feet</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={6}>
+            <TextField {...{
+              label: "Registration Date ",
+              name: "registration_date",
+              type: "date",
+              value: form.registration_date,
+              onChange: handleChange,
+              fullWidth: true,
+              required: true,
+              InputLabelProps: { shrink: true },
+              sx: { borderRadius: 2, background: '#fafbfc' },
+              InputProps: { style: { borderRadius: 6 } },
+            }} />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField {...{
+              label: "Fitness Certificate Expiry ",
+              name: "fitness_certificate_expiry",
+              type: "date",
+              value: form.fitness_certificate_expiry,
+              onChange: handleChange,
+              fullWidth: true,
+              required: true,
+              InputLabelProps: { shrink: true },
+              sx: { borderRadius: 2, background: '#fafbfc' },
+              InputProps: { style: { borderRadius: 6 } },
+            }} />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField {...{
+              label: "Tax Expiry Date ",
+              name: "tax_expiry_date",
+              type: "date",
+              value: form.tax_expiry_date,
+              onChange: handleChange,
+              fullWidth: true,
+              required: true,
+              InputLabelProps: { shrink: true },
+              sx: { borderRadius: 2, background: '#fafbfc' },
+              InputProps: { style: { borderRadius: 6 } },
+            }} />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField {...{
+              label: "Insurance Expiry Date ",
+              name: "insurance_expiry_date",
+              type: "date",
+              value: form.insurance_expiry_date,
+              onChange: handleChange,
+              fullWidth: true,
+              required: true,
+              InputLabelProps: { shrink: true },
+              sx: { borderRadius: 2, background: '#fafbfc' },
+              InputProps: { style: { borderRadius: 6 } },
+            }} />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField {...{
+              label: "National Permit Validity ",
+              name: "national_permit_validity",
+              type: "date",
+              value: form.national_permit_validity,
+              onChange: handleChange,
+              fullWidth: true,
+              required: true,
+              InputLabelProps: { shrink: true },
+              sx: { borderRadius: 2, background: '#fafbfc' },
+              InputProps: { style: { borderRadius: 6 } },
+            }} />
+          </Grid>
+          {/* File Uploads */}
+          {fileFields.map((field) => (
+            <Grid item xs={6} key={field.name}>
+              <InputLabel sx={{ fontWeight: 600, mb: 1 }}>{field.label} {field.required ? '*' : ''}</InputLabel>
+              <Button
+                variant="outlined"
+                component="label"
+                sx={{
+                  color: '#ff9800',
+                  borderColor: '#ff9800',
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  px: 2,
+                  py: 1,
+                  '&:hover': { borderColor: '#fb8c00', background: '#fff3e0' },
+                }}
+                fullWidth={false}
+              >
+                Choose File
+                <input type="file" name={field.name} hidden onChange={handleFileChange} required />
+              </Button>
+              <Typography variant="body2" sx={{ ml: 2, display: 'inline', color: '#888' }}>
+                {files[field.name]?.name ? files[field.name].name : 'No file chosen'}
+              </Typography>
+            </Grid>
+          ))}
+          <Grid item xs={6}>
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              sx={{
+                mt: 2,
+                py: 1.5,
+                fontWeight: 700,
+                fontSize: '1.1rem',
+                background: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)',
+                color: '#fff',
+                borderRadius: 3,
+                boxShadow: 2,
+                '&:hover': {
+                  background: 'linear-gradient(90deg, #1565c0 0%, #42a5f5 100%)',
+                },
+              }}
+              disabled={loading}
+              startIcon={loading && <CircularProgress size={20} color="inherit" />}
+            >
+              {loading ? 'Submitting...' : 'Submit'}
+            </Button>
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <TextField label="SPOC Name *" fullWidth size="medium" />
-        </Grid>
-        <Grid item xs={6}>
-          <TextField label="SPOC Phone *" fullWidth size="medium" />
-        </Grid>
-        <Grid item xs={6}>
-          <TextField label="SPOC Email *" fullWidth size="medium" />
-        </Grid>
-        <Grid item xs={12}>
-          <TextField label="Alternate Contact Number" fullWidth size="medium" />
-        </Grid>
-        <Grid item xs={6}>
-          <TextField label="GST Number *" fullWidth size="medium" />
-        </Grid>
-        <Grid item xs={6}>
-          <TextField label="PAN Number *" fullWidth size="medium" />
-        </Grid>
-        {/* File Uploads */}
-        <Grid item xs={6}>
-          <InputLabel sx={{ fontWeight: 600, mb: 1 }}>GST Certificate</InputLabel>
-          <Button
-            variant="outlined"
-            component="label"
-            sx={{
-              color: '#ff9800',
-              borderColor: '#ff9800',
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              '&:hover': { borderColor: '#fb8c00', background: '#fff3e0' },
-            }}
-            fullWidth
-          >
-            Choose File
-            <input type="file" hidden />
-          </Button>
-        </Grid>
-        <Grid item xs={6}>
-          <InputLabel sx={{ fontWeight: 600, mb: 1 }}>PAN Card</InputLabel>
-          <Button
-            variant="outlined"
-            component="label"
-            sx={{
-              color: '#ff9800',
-              borderColor: '#ff9800',
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              '&:hover': { borderColor: '#fb8c00', background: '#fff3e0' },
-            }}
-            fullWidth
-          >
-            Choose File
-            <input type="file" hidden />
-          </Button>
-        </Grid>
-        <Grid item xs={6}>
-          <InputLabel sx={{ fontWeight: 600, mb: 1 }}>Address Proof</InputLabel>
-          <Button
-            variant="outlined"
-            component="label"
-            sx={{
-              color: '#ff9800',
-              borderColor: '#ff9800',
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              '&:hover': { borderColor: '#fb8c00', background: '#fff3e0' },
-            }}
-            fullWidth
-          >
-            Choose File
-            <input type="file" hidden />
-          </Button>
-        </Grid>
-        <Grid item xs={6}>
-          <InputLabel sx={{ fontWeight: 600, mb: 1 }}>Cancelled Cheque</InputLabel>
-          <Button
-            variant="outlined"
-            component="label"
-            sx={{
-              color: '#ff9800',
-              borderColor: '#ff9800',
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              '&:hover': { borderColor: '#fb8c00', background: '#fff3e0' },
-            }}
-            fullWidth
-          >
-            Choose File
-            <input type="file" hidden />
-          </Button>
-        </Grid>
-        {/* Submit Button */}
-        <Grid item xs={12}>
-          <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            sx={{
-              mt: 2,
-              py: 1.5,
-              fontWeight: 700,
-              fontSize: '1.1rem',
-              background: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)',
-              color: '#fff',
-              borderRadius: 2,
-              boxShadow: 2,
-              '&:hover': {
-                background: 'linear-gradient(90deg, #1565c0 0%, #42a5f5 100%)',
-              },
-            }}
-          >
-            Submit
-          </Button>
-        </Grid>
-      </Grid>
+      </form>
     </Box>
   );
 };
