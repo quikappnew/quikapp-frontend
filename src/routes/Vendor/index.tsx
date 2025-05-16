@@ -13,10 +13,13 @@ const Vendor = () => {
   const [error, setError] = useState<string | null>(null);
 
   const columns = [
-    { label: 'Vendor Name', fieldName: 'name', width: 200 },
-    { label: 'GST Number', fieldName: 'gst', width: 150 },
-    { label: 'PAN Number', fieldName: 'pan', width: 150 },
-    { label: 'SPOC Name', fieldName: 'spoc_name', width: 150 },
+    { label: 'Vendor', fieldName: 'name', width: 200 },
+    { label: 'GST', fieldName: 'gst', width: 150 },
+    { label: 'PAN ', fieldName: 'pan', width: 150 },
+    { label: 'SPOC', fieldName: 'spoc_name', width: 150 },
+    { label: 'Email', fieldName: 'spoc_email', width: 130 },
+    { label: 'Phone', fieldName: 'spoc_phone', width: 130 },
+    { label: 'Alternate', fieldName: 'alternate_contact_number', width: 100 },
   ];
 
   useEffect(() => {
