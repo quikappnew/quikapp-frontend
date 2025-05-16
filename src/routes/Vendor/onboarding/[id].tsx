@@ -3,12 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Paper, Link as MuiLink, Button, Stack, Divider, Grid, Chip } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import { getVendorOnboardingById, updateVendorOnboarding } from 'services/api';
+import { getAbsoluteUrl } from 'utils/commonFunctions';
 
-function getAbsoluteUrl(url: string) {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return 'https://' + url;
-}
+
 
 function getStatusColor(status: string) {
   switch (status?.toUpperCase()) {

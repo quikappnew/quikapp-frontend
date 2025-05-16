@@ -7,12 +7,16 @@ import {
   Button,
   Chip,
   Card,
+  TableCell,
 } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import { getOnboardedVehicles } from 'services/api';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import DataTable from 'components/DataTable';
+import IconButton from '@mui/material/IconButton';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
 
 const statusColor = (status: string) => {
   switch (status) {
@@ -36,7 +40,35 @@ const VehicleOnboardingList = () => {
       try {
         setLoading(true);
         const response = await getOnboardedVehicles();
-        setVehicles(response.data || []);
+        // add action column
+        setVehicles(
+          (response.data || []).map(vehicle => ({
+            ...vehicle,
+            action: (
+              <>
+                <IconButton
+                  sx={{ color: "#72787e" }}
+                  onClick={e => {
+                    e.stopPropagation();
+                    navigate(`/vehicle-onboarding/${vehicle.id}`);
+                  }}
+                >
+                  <VisibilityIcon />
+                </IconButton>
+                {/* <IconButton
+                  color="warning"
+                  sx={{ color: "#f9a825", ml: 1 }}
+                  onClick={e => {
+                    e.stopPropagation();
+                    navigate(`/vehicle-onboarding/${vehicle.id}/edit`);
+                  }}
+                >
+                  <EditIcon />
+                </IconButton> */}
+              </>
+            ),
+          }))
+        );
       } catch (err: any) {
         setError(err.message || 'Failed to fetch onboarded vehicles');
       } finally {
@@ -71,12 +103,12 @@ const VehicleOnboardingList = () => {
       width: 15,
       type: 'STATUS' as const,
     },
-    {
-      label: 'Created At',
-      fieldName: 'created_at',
-      width: 15,
-      type: 'DATETIME' as const,
-    },
+    // {
+    //   label: 'Created At',
+    //   fieldName: 'created_at',
+    //   width: 15,
+    //   type: 'DATETIME' as const,
+    // },
     {
       label: 'Action',
       fieldName: 'action',
@@ -101,7 +133,7 @@ const VehicleOnboardingList = () => {
           }}
           onClick={() => navigate(`/vehicle-onboarding/${row.id}`)}
         >
-          View Details
+          View
         </Button>
       ),
     },
