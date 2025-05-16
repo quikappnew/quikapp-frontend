@@ -112,7 +112,7 @@ const VehicleDetails = () => {
 
   const handleApprove = async () => {
     const formData = new FormData();
-    formData.append('status', 'approved');
+    formData.append('status', 'Completed');
     const response = await updateVehicleOnboarding(id!, formData);
     console.log(response);
     if (response.success) {
@@ -126,7 +126,7 @@ const VehicleDetails = () => {
   };
   const handleReject = async () => {
     const formData = new FormData();
-    formData.append('status', 'rejected');
+    formData.append('status', 'Rejected');
     const response = await updateVehicleOnboarding(id!, formData);
     if (response.success) {
       toast.success('Vehicle rejected successfully');

@@ -688,13 +688,7 @@ export const vehicleOnboarding = async (formData: FormData): Promise<any> => {
       throw ApiError.fromAxiosError(error, 'Failed to fetch vehicle details');
     }
   };
-  
-  export const approveVehicle = async (id: string) => {
-    return api.post(`/api/v2/core/vehicle-onboarding/${id}/approve/`);
-  };
-  export const rejectVehicle = async (id: string) => {
-    return api.post(`/api/v2/core/vehicle-onboarding/${id}/reject/`);
-  };
+
   
 export interface OrderData {
   order_id: string;

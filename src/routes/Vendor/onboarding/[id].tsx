@@ -52,7 +52,7 @@ const VendorDetails: React.FC = () => {
 
   const handleApprove = async () => {
     try {
-      await updateVendorOnboarding(id!, { status: 'COMPLETED' });
+      await updateVendorOnboarding(id!, { status: 'Completed' });
       alert('Vendor approved successfully!');
       fetchVendor();
       navigate('/vendor/list');
@@ -63,7 +63,7 @@ const VendorDetails: React.FC = () => {
 
   const handleReject = async () => {
     try {
-      await updateVendorOnboarding(id!, { status: 'REJECTED' });
+      await updateVendorOnboarding(id!, { status: 'Rejected' });
       alert('Vendor rejected successfully!');
       fetchVendor();
       navigate(-1);
