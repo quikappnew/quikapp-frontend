@@ -78,7 +78,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
           position: 'fixed',
           top: '1rem',
           left: '1rem',
-          zIndex: 1200,
+          zIndex: 1,
           display: { xs: 'block', md: 'none' },
           backgroundColor: 'white',
           '&:hover': {

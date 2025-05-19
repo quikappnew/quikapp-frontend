@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
-import { getVendors, getLocationList, getVendor, getOrders, getClients, createTrip, PaymentStatusEnum } from 'services/api';
+import { getVendors, getLocationList, getVendor, getOrders, getClients, createTrip, PaymentStatusEnum, getVehicles } from 'services/api';
 import { toast } from 'react-toastify';
 import { Card, CardContent, Typography, Box, Button, Grid } from '@mui/material';
 
@@ -23,6 +23,11 @@ interface Client {
   name: string;
   gst?: string;
   spoc_name?: string;
+}
+
+interface Vehicle {
+  id: string;
+  vehicle_number: string;
 }
 
 interface VendorOption {
@@ -45,6 +50,7 @@ interface TripFormData {
   order_id: string;
   reference_id: string;
   payment_status: PaymentStatusEnum;
+  vehicle_id: string;
 }
 
 const paymentStatusOptions = [
@@ -57,10 +63,12 @@ const paymentStatusOptions = [
 const CreateTrip: React.FC = () => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [orders, setOrders] = useState<{ id: string; order_id: string }[]>([]);
   const [isLoadingVendors, setIsLoadingVendors] = useState(false);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [isLoadingVehicles, setIsLoadingVehicles] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { control, register, handleSubmit, formState: { errors } } = useForm<TripFormData>();
 
@@ -69,6 +77,7 @@ const CreateTrip: React.FC = () => {
   useEffect(() => {
     fetchVendors();
     fetchOrders();
+    fetchVehicles();
   }, []);
 
   const fetchVendors = async () => {
@@ -95,6 +104,19 @@ const CreateTrip: React.FC = () => {
       console.error('Error fetching orders:', err);
     } finally {
       setIsLoadingOrders(false);
+    }
+  };
+
+  const fetchVehicles = async () => {
+    try {
+      const response = await getVehicles();
+      console.log(response);
+      setVehicles(response.data || []);
+    } catch (err) {
+      setError('Failed to fetch vehicles. Please try again.');
+      console.error('Error fetching vehicles:', err);
+    } finally {
+      setIsLoadingVehicles(false);
     }
   };
 
@@ -133,6 +155,12 @@ const CreateTrip: React.FC = () => {
 
   const orderOptions = orders.map(order => ({ value: order.id, label: order.order_id }));
 
+  const vehicleOptions = vehicles.map(vehicle => ({
+    value: vehicle.id,
+    label: vehicle.vehicle_number
+  }));
+
+  console.log("vehicleOptions", vehicleOptions);
   return (
     <SidebarLayout>
       <Box className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -188,6 +216,30 @@ const CreateTrip: React.FC = () => {
                   />
                   {errors.order_id && <p className="text-red-500 text-sm mt-1">{errors.order_id.message}</p>}
                 </Grid>
+                <Grid item xs={12}>
+                  <label className="block text-base font-medium text-gray-800 mb-2">Vehicle</label>
+      
+                  <Controller
+                    name="vehicle_id"
+                    control={control}
+                    rules={{ required: 'Vehicle is required' }}
+                    render={({ field: { onChange, value } }) => (
+                      <Select
+                        options={vehicleOptions}
+                        value={vehicleOptions.find(option => option.value === value) || null}
+                        onChange={option => onChange(option ? option.value : '')}
+                        isLoading={isLoadingVehicles} 
+                        classNamePrefix="react-select"
+                        placeholder="Search and select vehicle..."
+                        isClearable
+                      />
+                    )}
+                  />
+                
+                {errors.vehicle_id && <p className="text-red-500 text-sm mt-1">{errors.vehicle_id.message}</p>}
+                </Grid>
+
+
                 <Grid item xs={12}>
                   <label className="block text-base font-medium text-gray-800 mb-2">Reference ID</label>
                   <input

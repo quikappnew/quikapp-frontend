@@ -9,6 +9,7 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 import App from './routes';
 import { FormProvider } from 'context/FormContext';
+import { ToastContainer } from 'react-toastify';
 
 
 const theme = createTheme({
@@ -66,6 +67,7 @@ const root = createRoot(container!);
 
 root.render(
   <React.StrictMode>
+    <ToastContainer />
     <ThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
       <FormProvider>
@@ -73,6 +75,7 @@ root.render(
     </FormProvider>
       </LocalizationProvider>
     </ThemeProvider>
+    
   </React.StrictMode>
 );
 

@@ -38,8 +38,7 @@ const VendorOnBoardingList: React.FC = () => {
           action: (
             <>
               <IconButton
-                color="primary"
-                sx={{ color: "#1976d2" }}
+                sx={{ color: "#72787e" }}
                 onClick={e => {
                   e.stopPropagation();
                   navigate(`/vendor/onboarding/${vendor.id}`);
