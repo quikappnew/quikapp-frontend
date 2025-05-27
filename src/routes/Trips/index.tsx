@@ -67,13 +67,14 @@ const Trips: FC = () => {
     };
 
     const columns = [
-        { label: 'Vendor Name', fieldName: 'vendor_name', width: 200, type: 'STRING' as const },
-        { label: 'From Location', fieldName: 'from_location_name', width: 200, type: 'STRING' as const },
-        { label: 'To Location', fieldName: 'to_location_name', width: 200, type: 'STRING' as const },
-        { label: 'Reference ID', fieldName: 'reference_id', width: 150, type: 'STRING' as const },
-        { label: 'Client Name', fieldName: 'client_name', width: 150, type: 'STRING' as const },
+        { label: 'Vendor', fieldName: 'vendor_name', width: 200, type: 'STRING' as const },
+        { label: 'From ', fieldName: 'from_location_name', width: 200, type: 'STRING' as const },
+        { label: 'To ', fieldName: 'to_location_name', width: 200, type: 'STRING' as const },
+        { label: 'Ref ID', fieldName: 'reference_id', width: 150, type: 'STRING' as const },
+        { label: 'Client', fieldName: 'client_name', width: 150, type: 'STRING' as const },
+        { label: 'Vehicle', fieldName: 'vehicle_number', width: 150, type: 'STRING' as const },
         { label: 'Status', fieldName: 'latest_status', width: 150, type: 'STRING' as const },
-        { label: 'Created At', fieldName: 'created_at', width: 200, type: 'DATE' as const },
+        { label: 'Created', fieldName: 'created_at', width: 200, type: 'DATE' as const },
         // { label: 'Action', fieldName: 'action', width: 150, type: 'STRING' as const },
     ];
 
