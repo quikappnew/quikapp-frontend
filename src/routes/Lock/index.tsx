@@ -1,67 +1,71 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Button, Modal, Paper, CircularProgress, Divider, Stack } from '@mui/material';
+import { getLocks, Lock, getLockOtpByPhoneNumber, LockOtpDetails, getLockStatusByPhoneNumber, LockStatusDetails } from 'services/api';
+import dayjs from 'dayjs';
 
-const Lock = () => {
+const LockPage = () => {
+    const [locks, setLocks] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedLock, setSelectedLock] = useState<LockOtpDetails | null>(null);
+    const [selectedLockStatus, setSelectedLockStatus] = useState<LockStatusDetails | null>(null);
+    const [modalLoading, setModalLoading] = useState(false);
+
     // Define columns for the table
     const columns = [
-        { label: 'Lock ID', fieldName: 'lockId', width: 120 },
-        { label: 'Location', fieldName: 'location', width: 200 },
-        { label: 'Status', fieldName: 'status', width: 120 },
-        { label: 'Battery Level', fieldName: 'batteryLevel', width: 150 },
-        { label: 'Last Active', fieldName: 'lastActive', width: 180 },
-        { label: 'Assigned To', fieldName: 'assignedTo', width: 200 }
+        // { label: 'Lock ID', fieldName: 'id', width: 300 },
+        { label: 'Phone Number', fieldName: 'phone_number', width: 200 },
+        { label: 'Action', fieldName: 'action', width: 120 },
     ];
 
-    // Dummy data for the table
-    const data = [
-        {
-            id: 1,
-            lockId: 'LCK001',
-            location: 'Warehouse A',
-            status: 'Active',
-            batteryLevel: '85%',
-            lastActive: '2024-03-19 10:30 AM',
-            assignedTo: 'John Doe'
-        },
-        {
-            id: 2,
-            lockId: 'LCK002',
-            location: 'Gate B',
-            status: 'Inactive',
-            batteryLevel: '45%',
-            lastActive: '2024-03-19 09:15 AM',
-            assignedTo: 'Jane Smith'
-        },
-        {
-            id: 3,
-            lockId: 'LCK003',
-            location: 'Storage Room C',
-            status: 'Active',
-            batteryLevel: '92%',
-            lastActive: '2024-03-19 11:45 AM',
-            assignedTo: 'Mike Johnson'
-        },
-        {
-            id: 4,
-            lockId: 'LCK004',
-            location: 'Main Entrance',
-            status: 'Active',
-            batteryLevel: '78%',
-            lastActive: '2024-03-19 10:00 AM',
-            assignedTo: 'Sarah Wilson'
-        },
-        {
-            id: 5,
-            lockId: 'LCK005',
-            location: 'Loading Dock',
-            status: 'Inactive',
-            batteryLevel: '25%',
-            lastActive: '2024-03-18 05:30 PM',
-            assignedTo: 'Tom Brown'
-        }
-    ];
+    useEffect(() => {
+        const fetchLocks = async () => {
+            setLoading(true);
+            try {
+                const response = await getLocks();
+                // Add an action button to each row
+                const locksWithAction = response.data.map((lock: Lock) => ({
+                    ...lock,
+                    action: (
+                        <Button
+                            variant="contained"
+                            color="info"
+                            size="small"
+                            onClick={async e => {
+                                e.stopPropagation();
+                                setModalOpen(true);
+                                setModalLoading(true);
+                                setSelectedLock(null);
+                                setSelectedLockStatus(null);
+                                try {
+                                    const details = await getLockOtpByPhoneNumber(lock.phone_number);
+                                    const status = await getLockStatusByPhoneNumber(lock.phone_number);
+                                    setSelectedLock(details.data);
+                                    setSelectedLockStatus(status.data);
+                                } catch {
+                                    setSelectedLock(null);
+                                    setSelectedLockStatus(null);
+                                } finally {
+                                    setModalLoading(false);
+                                }
+                            }}
+                            sx={{ minWidth: 100 }}
+                        >
+                            Get OTP
+                        </Button>
+                    ),
+                }));
+                setLocks(locksWithAction);
+            } catch (error) {
+                setLocks([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchLocks();
+    }, []);
 
     return (
         <SidebarLayout>
@@ -69,14 +73,68 @@ const Lock = () => {
                 <Typography variant="h5" gutterBottom>
                     Lock Management
                 </Typography>
-                <DataTable 
-                    data={data}
+                <DataTable
+                    data={locks}
                     columns={columns}
-                    searchFields={['lockId', 'location', 'status', 'assignedTo']}
+                    searchFields={['id', 'phone_number']}
+                    filterLoading={loading}
                 />
+                <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+                    <Paper sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', p: 4, minWidth: 380, borderRadius: 3, boxShadow: 8 }}>
+                        <Typography variant="h6" gutterBottom fontWeight={600}>
+                            Lock OTP Details
+                        </Typography>
+                        <Divider sx={{ mb: 2 }} />
+                        {modalLoading ? (
+                            <Box display="flex" justifyContent="center" alignItems="center" minHeight={120}>
+                                <CircularProgress />
+                            </Box>
+                        ) : selectedLock ? (
+                            <Stack spacing={1.5}>
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">Lock ID</Typography>
+                                    <Typography variant="body1" fontWeight={500}>{selectedLock.lock_id}</Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">Phone</Typography>
+                                    <Typography variant="body1" fontWeight={500}>{selectedLock.lock_phone_number}</Typography>
+                                </Box>
+                                {selectedLockStatus && (
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">Lock Status</Typography>
+                                    <Typography variant="body1" fontWeight={500}>{selectedLockStatus.status_display}</Typography>
+                                </Box>
+                                )}
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">OTP</Typography>
+                                    <Typography variant="body1" fontWeight={500}>{selectedLock.otp}</Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">Is Used</Typography>
+                                    <Typography variant="body1" fontWeight={500}>{selectedLock.is_used ? 'Yes' : 'No'}</Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">Created At</Typography>
+                                    <Typography variant="body1" fontWeight={500}>{dayjs(selectedLock.createdAt).format('YYYY-MM-DD HH:mm:ss')}</Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">Updated At</Typography>
+                                    <Typography variant="body1" fontWeight={500}>{dayjs(selectedLock.updatedAt).format('YYYY-MM-DD HH:mm:ss')}</Typography>
+                                </Box>
+                            </Stack>
+                        ) : (
+                            <Typography color="error">Failed to load lock OTP details.</Typography>
+                        )}
+                        <Box mt={4} display="flex" justifyContent="flex-end">
+                            <Button variant="contained" color="warning" onClick={() => setModalOpen(false)} sx={{ minWidth: 100 }}>
+                                Close
+                            </Button>
+                        </Box>
+                    </Paper>
+                </Modal>
             </Box>
         </SidebarLayout>
     );
 };
 
-export default Lock;
+export default LockPage;

@@ -803,5 +803,95 @@ export const updateVendorOnboarding = async (id: string, data: any) => {
   }
 };
 
+// Add Lock interfaces based on API response
+export interface Lock {
+  id: string;
+  phone_number: string;
+}
+
+export interface GetLocksResponse {
+  success: boolean;
+  data: Lock[];
+}
+
+// Add getLocks API function
+export const getLocks = async (): Promise<GetLocksResponse> => {
+  try {
+    const response = await api.get<GetLocksResponse>("/api/v2/locks/");
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, "Failed to fetch locks");
+  }
+};
+
+export interface LockDetails {
+  id: string;
+  phone_number: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetLockByIdResponse {
+  success: boolean;
+  data: LockDetails;
+}
+
+export const getLockById = async (phone_number: string): Promise<GetLockByIdResponse> => {
+  try {
+    const response = await api.get<GetLockByIdResponse>(`/api/v2/locks/${phone_number}/`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch lock by ID');
+  }
+};
+
+export interface LockOtpDetails {
+  lock_id: string;
+  lock_phone_number: string;
+  otp: string;
+  is_used: boolean;
+  createdAt: string;
+  updatedAt: string;
+  status_display: string;
+}
+
+export interface GetLockOtpResponse {
+  success: boolean;
+  data: LockOtpDetails;
+}
+
+export const getLockOtpByPhoneNumber = async (phone_number: string): Promise<GetLockOtpResponse> => {
+  try {
+    const response = await api.get<GetLockOtpResponse>(`/api/v2/locks/otp/${phone_number}/get/`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch lock OTP');
+  }
+};
+
+export interface LockStatusDetails {
+  lock_id: string;
+  lock_phone_number: string;
+  status: string;
+  status_display: string;
+  latitude: string;
+  longitude: string;
+  timestamp: string;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface GetLockStatusResponse {
+  success: boolean;
+  data: LockStatusDetails;
+}
+
+export const getLockStatusByPhoneNumber = async (phone_number: string): Promise<GetLockStatusResponse> => {
+  try {
+    const response = await api.get<GetLockStatusResponse>(`/api/v2/locks/status/${phone_number}/get/`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch lock status');
+  }
+};
 
 
