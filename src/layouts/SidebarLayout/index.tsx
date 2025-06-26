@@ -37,6 +37,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import Sidebar from 'components/Sidebar';
 import getSidebarTabs from 'utils/sidebar-tabs';
+import { getCurrentUser } from 'services/api';
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
@@ -46,6 +47,15 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isOpen, setIsOpen] = useState(!isMobile);
+  const [userRole, setUserRole] = useState<number | undefined>(undefined);
+
+  // Get user role on component mount
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (user) {
+      setUserRole(typeof user.role === 'string' ? parseInt(user.role, 10) : user.role);
+    }
+  }, []);
 
   // Update sidebar state when screen size changes
   useEffect(() => {
@@ -65,7 +75,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
         borderRight: '1px solid rgba(0, 0, 0, 0.12)',
       }}
     >
-      <Sidebar tabs={getSidebarTabs()} />
+      <Sidebar tabs={getSidebarTabs(userRole)} />
     </Box>
   );
 

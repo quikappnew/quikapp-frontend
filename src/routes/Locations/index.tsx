@@ -50,7 +50,7 @@ const Locations = () => {
     });
   }, []);
 
-  console.log(locationList);
+  
 
   // Memoize the generated colors
   const cardColors = useMemo(() => {
@@ -65,7 +65,7 @@ const Locations = () => {
       const response = await getLocationList();
       setLocationList(response.data);
     } catch (error) {
-      console.error('Error deleting location:', error);
+      
     } finally {
       setLoading(null);
     }

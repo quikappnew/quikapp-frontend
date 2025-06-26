@@ -2,7 +2,12 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Select, MenuItem, TextareaAutosize, FormControl, InputLabel } from '@mui/material';
 
-const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) => {
+interface VehicleFormProps {
+  onSubmit: (data: any) => void;
+  disabled?: boolean;
+}
+
+const VehicleForm: React.FC<VehicleFormProps> = ({ onSubmit, disabled = false }) => {
   const [vehicleNumber, setVehicleNumber] = useState('');
   const [model, setModel] = useState('');
   const [capacity, setCapacity] = useState('');
@@ -12,7 +17,16 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ vehicleNumber, model, capacity, chassisNumber });
+    if (!disabled) {
+      onSubmit({ 
+        vehicle_number: vehicleNumber,
+        vehicle_model: model,
+        capacity,
+        chassis_number: chassisNumber,
+        remarks,
+        vehicle_type: vehicleType
+      });
+    }
   };
 
   return (
@@ -25,6 +39,7 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
         value={vehicleNumber}
         onChange={(e) => setVehicleNumber(e.target.value)}
         required
+        disabled={disabled}
         sx={{ mb: 2 }}
       />
       <TextField
@@ -34,6 +49,7 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
         value={model}
         onChange={(e) => setModel(e.target.value)}
         required
+        disabled={disabled}
         sx={{ mb: 2 }}
       />
       <TextField
@@ -43,6 +59,7 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
         value={capacity}
         onChange={(e) => setCapacity(e.target.value)}
         required
+        disabled={disabled}
         sx={{ mb: 2 }}
       />
       <TextField
@@ -52,6 +69,7 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
         value={chassisNumber}
         onChange={(e) => setChassisNumber(e.target.value)}
         required
+        disabled={disabled}
         sx={{ mb: 2 }}
       />
       <TextField
@@ -62,6 +80,7 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
         onChange={(e) => setRemarks(e.target.value)}
         multiline
         rows={4}
+        disabled={disabled}
         sx={{ mb: 2 }}
       />
       <FormControl fullWidth variant="outlined">
@@ -72,6 +91,7 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
           label="Vehicle Type"
           value={vehicleType}
           onChange={(e) => setVehicleType(e.target.value)}
+          disabled={disabled}
           sx={{ mb: 2 }}
           required
         >
@@ -80,8 +100,14 @@ const VehicleForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) 
         </Select>
       </FormControl>
  
-      <Button type="submit" variant="contained" color="primary">
-        Submit
+      <Button 
+        type="submit" 
+        variant="contained" 
+        color="primary"
+        disabled={disabled}
+        fullWidth
+      >
+        {disabled ? 'Creating...' : 'Create Vehicle'}
       </Button>
     </Box>
   );

@@ -1,9 +1,8 @@
 import React, { FC, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
-import { Button } from '@mui/material';
 import { FormContext } from 'context/FormContext';
-import { LoginForm, OTPForm, RegisterForm } from './component';
+import { LoginForm, OTPForm, AuthMethodSelector, PasswordForm } from './component';
 import { useAuth } from './hooks';
 
 export const pngLogo = 'https://quikapp.cc/lovable-uploads/4da932a7-a74d-4dd1-a1a0-1e93bc4da154.png';
@@ -15,22 +14,36 @@ const Login: FC = () => {
   const redirectTo = searchParams.get('redirectTo');
   const { dispatch } = useContext(FormContext);
 
-  const { formState, handleLogin, handleOTPVerification, handleRegister } = 
+  const { formState, handleLogin, handleOTPVerification, handlePasswordLogin } = 
     useAuth(redirectTo, navigate);
 
-  const toggleRegistration = () => {
-    dispatch({ type: 'SET_IS_REGISTERING', payload: !formState.isRegistering });
-    dispatch({ type: 'SET_ERROR', payload: null });
-    dispatch({ type: 'HIDE_OTP' });
-  };
-
   const renderForm = () => {
+    // Show initial login form if no auth options are set yet
+    if (!formState.authOptions || !formState.uiMarkers) {
+      return <LoginForm onSubmit={handleLogin} formState={formState} />;
+    }
+
+    // Show OTP form if OTP is being used
     if (formState.showOTP) {
       return <OTPForm onSubmit={handleOTPVerification} formState={formState} />;
     }
-    return formState.isRegistering 
-      ? <RegisterForm onSubmit={handleRegister} formState={formState} />
-      : <LoginForm onSubmit={handleLogin} formState={formState} />;
+
+    // Show password form if password method is selected
+    if (formState.selectedAuthMethod === 'password' && !formState.showOTP) {
+      return <PasswordForm onSubmit={handlePasswordLogin} formState={formState} />;
+    }
+
+    // Show auth method selector if user has choices
+    return (
+      <>
+        <AuthMethodSelector formState={formState} />
+        {formState.selectedAuthMethod === 'otp' ? (
+          <OTPForm onSubmit={handleOTPVerification} formState={formState} />
+        ) : (
+          <PasswordForm onSubmit={handlePasswordLogin} formState={formState} />
+        )}
+      </>
+    );
   };
 
   return (
@@ -40,14 +53,9 @@ const Login: FC = () => {
           <img className="h-16 w-20" src={pngLogo} alt="PNG logo" />
         </NavLink>
         {!formState.showOTP &&
-          <h2 className='my-2'>Please {formState.isRegistering ? 'Register' : 'Sign in'}</h2>}
+          <h2 className='my-2'>Please Sign in</h2>}
       </div>
       {renderForm()}
-      <div className="mt-4 text-center">
-        <Button variant="text" onClick={toggleRegistration}>
-          {formState.isRegistering ? 'Already have an account? Sign in' : "Don't have an account? Register"}
-        </Button>
-      </div>
     </div>
   );
 };

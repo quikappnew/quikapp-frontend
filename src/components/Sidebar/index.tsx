@@ -6,6 +6,7 @@ import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import LogoutModal from 'routes/Logout';
 import { logoutUser } from 'services/api';
 import { TokenService } from 'services/tokenService';
+import UserProfile from './UserProfile';
 
 const MenuItem = ({ tab, level = 0, onSignOut }: { tab: TabItem; level?: number; onSignOut: () => void }) => {
   const location = useLocation();
@@ -130,6 +131,10 @@ export default function Sidebar({ tabs }: { tabs: TabItem[] }) {
         <img className="h-8" src="https://quikapp.cc/lovable-uploads/4da932a7-a74d-4dd1-a1a0-1e93bc4da154.png" alt="City logo" />
         {/* <span className="text-sm font-bold">Rapid Logistics</span> */}
       </NavLink>
+      
+      {/* User Profile Section */}
+      <UserProfile />
+      
       {tabs.map(tab => (
         <MenuItem key={tab.key} tab={tab} onSignOut={handleSignOut} />
       ))}

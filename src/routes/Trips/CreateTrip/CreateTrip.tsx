@@ -88,7 +88,7 @@ const CreateTrip: React.FC = () => {
       setError(null);
     } catch (err) {
       setError('Failed to fetch vendors. Please try again.');
-      console.error('Error fetching vendors:', err);
+      
     } finally {
       setIsLoadingVendors(false);
     }
@@ -101,7 +101,7 @@ const CreateTrip: React.FC = () => {
       setOrders(response.data || []);
     } catch (err) {
       setError('Failed to fetch orders. Please try again.');
-      console.error('Error fetching orders:', err);
+      
     } finally {
       setIsLoadingOrders(false);
     }
@@ -110,11 +110,10 @@ const CreateTrip: React.FC = () => {
   const fetchVehicles = async () => {
     try {
       const response = await getVehicles();
-      console.log(response);
       setVehicles(response.data || []);
     } catch (err) {
       setError('Failed to fetch vehicles. Please try again.');
-      console.error('Error fetching vehicles:', err);
+      
     } finally {
       setIsLoadingVehicles(false);
     }
@@ -123,7 +122,6 @@ const CreateTrip: React.FC = () => {
   const onSubmit = async (data: TripFormData) => {
     try {
        const response = await createTrip(data);
-       console.log(response);
        toast.success('Trip created successfully');
        navigate('/trips');
       
@@ -132,9 +130,7 @@ const CreateTrip: React.FC = () => {
       }
 
       // Handle success
-      console.log('Trip created successfully');
     } catch (error) {
-      console.error('Error creating trip:', error);
     }
   };
 
@@ -160,7 +156,7 @@ const CreateTrip: React.FC = () => {
     label: vehicle.vehicle_number
   }));
 
-  console.log("vehicleOptions", vehicleOptions);
+
   return (
     <SidebarLayout>
       <Box className="flex justify-center items-center min-h-screen bg-gray-50">

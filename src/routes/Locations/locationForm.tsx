@@ -30,7 +30,7 @@ const LocationForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit })
     };
     try {
       const response = await addLocation(location);
-      console.log(response);
+      
       setSnackbar({ 
         open: true,
         message: 'Location added successfully!',
@@ -39,7 +39,7 @@ const LocationForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit })
       onSubmit(location);
       navigate('/locations');
     } catch (error) {
-      console.error('Error adding location:', error);
+      
     }
   };
 
@@ -54,7 +54,7 @@ const LocationForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit })
         try {
           const response = await fetch(`https://api.postalpincode.in/pincode/${pinCode}`);
           const data = await response.json();
-          console.log(data);
+  
           if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
             const postOffice = data[0].PostOffice[0];
             setLocationName(postOffice.Name);
@@ -68,7 +68,7 @@ const LocationForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit })
             setPinCodeError(data[0]?.Message || 'Pin code not found.');
           }
         } catch (error) {
-          console.error('Error fetching pincode data:', error);
+  
           setDistrict('');
           setState('');
           setLocationName('');

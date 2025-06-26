@@ -138,7 +138,7 @@ const VendorForm: React.FC = () => {
       }, 2000);
 
     } catch (error) {
-      console.error('Error submitting form:', error);
+      
       toast.error('Error onboarding vendor. Please try again.');
     } finally {
       setLoading(false);

@@ -54,7 +54,7 @@ const Client = () => {
     }, []); // Empty dependency array means this runs once
 
     const handleViewTrips = (clientName: string) => {
-        console.log(`Viewing trips for ${clientName}`);
+    
     };
 
     const handleViewDetails = (clientId: string) => {

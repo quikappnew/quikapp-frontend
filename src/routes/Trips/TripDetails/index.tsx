@@ -82,17 +82,17 @@ const TripDetails: FC<TripDetailsProps> = ({
 
   const handleUploadSubmit = (files: { [key: string]: File }) => {
     // Handle the uploaded files here
-    console.log('Uploaded files:', files);
+
   };
 
   const handleCommentSubmit = (comment: { text: string; priority: string }) => {
     // Handle the comment submission here
-    console.log('New comment:', comment);
+
   };
 
   const handleHaltingDaysSubmit = (days: number) => {
     // Handle the halting days submission here
-    console.log('Halting days:', days);
+
   };
 
   return (

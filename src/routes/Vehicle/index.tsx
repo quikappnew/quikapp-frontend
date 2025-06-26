@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, Grid, CircularProgress, Typography, Card } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
+import VehicleModal from './vehicalModal';
 import { getVehicles } from 'services/api';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,36 +19,42 @@ const Vehicle = () => {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
+  const fetchVehicles = async () => {
+    try {
+      setLoading(true);
+      const response = await getVehicles();
+      setVehicles(
+        (response.data || []).map((item: any) => ({
+          ...item,
+          action: (
+            <Button
+              variant="contained"
+              color="info"
+              size="small"
+              onClick={() => navigate(`/vehicle/${item.id}`)}
+            >
+              View Details
+            </Button>
+          ),
+        }))
+      );
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch vehicles');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchVehicles = async () => {
-      try {
-        setLoading(true);
-        const response = await getVehicles();
-        setVehicles(
-          (response.data || []).map((item: any) => ({
-            ...item,
-            action: (
-              <Button
-                variant="contained"
-                color="info"
-                size="small"
-                onClick={() => navigate(`/vehicle/${item.id}`)}
-              >
-                View Details
-              </Button>
-            ),
-          }))
-        );
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch vehicles');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchVehicles();
   }, [navigate]);
+
+  const handleModalSuccess = () => {
+    fetchVehicles(); // Refresh the vehicles list
+  };
 
   return (
     <SidebarLayout>
@@ -61,7 +68,17 @@ const Vehicle = () => {
 
           }}
         >
-        <h4 className="text-xl font-bold mb-3 text-gray-500"> Vehicles</h4>
+        <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+          <h4 className="text-xl font-bold text-gray-500">Vehicles</h4>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Add Vehicle
+          </Button>
+        </Box>
+        
         {loading ? (
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
             <CircularProgress />
@@ -76,6 +93,12 @@ const Vehicle = () => {
           />
         )}
         </Card>
+        
+        <VehicleModal
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={handleModalSuccess}
+        />
       </Box>
     </SidebarLayout>
   );
