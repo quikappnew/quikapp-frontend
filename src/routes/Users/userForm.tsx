@@ -55,12 +55,12 @@ export const UserForm: React.FC<UserFormProps> = ({ onSubmit, user, onClose }) =
   };
 
   const handleDeactivateClick = () => {
-    console.log('Opening deactivate modal');
+
     setConfirmDeactivate(true);
   };
 
   const handleDeactivate = () => {
-    console.log('Confirming deactivation');
+
     onSubmit({
       ...formData,
       status: 'Inactive'
@@ -214,7 +214,7 @@ export const UserForm: React.FC<UserFormProps> = ({ onSubmit, user, onClose }) =
       <ConfirmDeactivateModal
         open={confirmDeactivate}
         onClose={() => {
-          console.log('Closing deactivate modal');
+      
           setConfirmDeactivate(false);
         }}
         onConfirm={handleDeactivate}

@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import { toast } from 'react-toastify';
 import { getToken } from 'utils/auth';
 import type {
   ApiError as ApiErrorInterface,
@@ -40,7 +41,7 @@ export class ApiError extends Error implements ApiErrorInterface {
       const status = error.response?.data?.status || error.response?.statusText || 'error';
       const code = error.response?.data?.code || error.response?.status || 500;
       return new ApiError(
-        error.response?.data?.message || defaultMessage,
+        error.response?.data?.message || error.response?.data?.error || defaultMessage,
         status,
         code
       );
@@ -54,7 +55,6 @@ api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = TokenService.getToken();
 
-    console.log(token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -69,9 +69,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 || error.response?.status === 403) {
       TokenService.removeToken();
-      window.location.href = '/login';
+      // Clear any stored user data
+      localStorage.removeItem('user');
+      // Show session expired message before redirecting
+      toast.error('Your session has expired. Please login again.');
+      // Small delay to ensure toast is visible before redirect
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1500);
     }
     return Promise.reject(error);
   }
@@ -87,18 +94,47 @@ interface GetUsersParams {
   };
 }
 
-export const getUsers = async (params: GetUsersParams = {}): Promise<PaginatedResponse<User>> => {
+export const getUsers = async (params: GetUsersParams = {}): Promise<any> => {
   try {
-    const response = await api.get('/users', { params });
+    // Try both token methods to see which one works
+    const token1 = getToken();
+    const token2 = TokenService.getToken();
+
+
+
+    const token = token2 || token1; // Prefer TokenService token
+
+    if (!token) {
+      throw new ApiError('No authentication token found. Please log in again.', 'UNAUTHORIZED', 401);
+    }
+
+
+
+    const response = await api.post('/api/v2/users/list_users/', {
+      auth_token: token,
+      ...params
+    });
+
+
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
+
     throw ApiError.fromAxiosError(error, 'Failed to fetch users');
   }
 };
 
 export const deleteUser = async (id: string): Promise<void> => {
   try {
-    await api.delete(`/users/${id}`);
+    const token = TokenService.getToken() || getToken();
+
+    if (!token) {
+      throw new ApiError('No authentication token found. Please log in again.', 'UNAUTHORIZED', 401);
+    }
+
+    await api.post('/api/v2/users/delete_user/', {
+      auth_token: token,
+      user_id: id
+    });
   } catch (error) {
     throw ApiError.fromAxiosError(error, 'Failed to delete user');
   }
@@ -444,15 +480,37 @@ export const register = async (data: RegisterData): Promise<any> => {
 
 interface VerifyOTPData {
   phone_number: string;
-  otp: string;
+  otp?: string;
+  password?: string;
+  use_password: boolean;
 }
 
-export const verifyOTP = async (data: VerifyOTPData): Promise< VerifyOTPResponse> => {
+export const verifyOTP = async (data: VerifyOTPData): Promise<VerifyOTPResponse> => {
   const response = await api.post('/api/v2/users/verify_otp/', data);
   return response.data;
-  };
+};
 
-export default api; 
+interface ValidateTokenData {
+  token: string;
+}
+
+interface ValidateTokenResponse {
+  valid: boolean;
+  user: {
+    id: string;
+    phone_number: string;
+    full_name: string;
+    email: string;
+    role: number;
+  };
+}
+
+export const validateToken = async (token: string): Promise<ValidateTokenResponse> => {
+  const response = await api.post('/api/v2/users/validate_token/', { token });
+  return response.data;
+};
+
+export default api;
 
 export const vendorOnboarding = async (formData: FormData): Promise<any> => {
   try {
@@ -532,7 +590,7 @@ export const getVendorOnboardingList = async (): Promise<any> => {
   } catch (error) {
     throw ApiError.fromAxiosError(error, 'Failed to fetch vendor onboarding list');
   }
-};  
+};
 
 export const getLocationList = async (): Promise<{ success: boolean; data: Location[] }> => {
   try {
@@ -562,10 +620,10 @@ interface Location {
 
 export const deleteLocation = async (id: string): Promise<any> => {
   try {
-    const response = await api.delete(`api/v2/core/locations/${id}/`);   
+    const response = await api.delete(`api/v2/core/locations/${id}/`);
     return response.data;
   } catch (error) {
-    throw ApiError.fromAxiosError(error, 'Failed to delete location');  
+    throw ApiError.fromAxiosError(error, 'Failed to delete location');
   }
 };
 
@@ -630,66 +688,74 @@ interface Vehicle {
 export const vehicleOnboarding = async (formData: FormData): Promise<any> => {
   try {
     const response = await api.post('/api/v2/core/vehicle-onboarding/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return response.data;
-    } catch (error) {
-      throw ApiError.fromAxiosError(error, 'Failed to onboard vehicle');
-    }
-  };
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to onboard vehicle');
+  }
+};
 
-  export const getOnboardedVehicles = async (): Promise<any> => {
-    try {
-      const response = await api.get('/api/v2/core/vehicle-onboarding/');
-      return response.data;
-    } catch (error) {
-      throw ApiError.fromAxiosError(error, 'Failed to fetch onboarded vehicles');
-    }
-  };
+export const getOnboardedVehicles = async (): Promise<any> => {
+  try {
+    const response = await api.get('/api/v2/core/vehicle-onboarding/');
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch onboarded vehicles');
+  }
+};
 
-  export const getVehicleOnboardingDetails = async (id: string): Promise<any> => {
-    try {
-      const response = await api.get(`/api/v2/core/vehicle-onboarding/${id}/`);
-      return response.data;
-    } catch (error) {
-      throw ApiError.fromAxiosError(error, 'Failed to fetch vehicle details');
-    }
-  };
+export const getVehicleOnboardingDetails = async (id: string): Promise<any> => {
+  try {
+    const response = await api.get(`/api/v2/core/vehicle-onboarding/${id}/`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch vehicle details');
+  }
+};
 
-  export const updateVehicleOnboarding = async (id: string, data: FormData): Promise<any> => {
-    try {
-      const response = await api.put(`/api/v2/core/vehicle-onboarding/${id}/`, data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return response.data;
-    } catch (error) {
-      throw ApiError.fromAxiosError(error, 'Failed to update vehicle onboarding');
-    }
-  };
+export const updateVehicleOnboarding = async (id: string, data: FormData): Promise<any> => {
+  try {
+    const response = await api.put(`/api/v2/core/vehicle-onboarding/${id}/`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update vehicle onboarding');
+  }
+};
 
-  export const getVehicles = async (): Promise<any> => {
-    try {
-      const response = await api.get('/api/v2/core/vehicles/');
-      return response.data;
-    } catch (error) {
-      throw ApiError.fromAxiosError(error, 'Failed to fetch vehicles');
-    }
-  };
+export const getVehicles = async (): Promise<any> => {
+  try {
+    const response = await api.get('/api/v2/core/vehicles/');
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch vehicles');
+  }
+};
 
-  export const getVehicleById = async (id: string): Promise<any> => {
-    try {
-      const response = await api.get(`/api/v2/core/vehicles/${id}`);
-      return response.data;
-    } catch (error) {
-      throw ApiError.fromAxiosError(error, 'Failed to fetch vehicle details');
-    }
-  };
+export const getVehicleById = async (id: string): Promise<any> => {
+  try {
+    const response = await api.get(`/api/v2/core/vehicles/${id}`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch vehicle details');
+  }
+};
 
-  
+export const createVehicle = async (vehicleData: any): Promise<any> => {
+  try {
+    const response = await api.post('/api/v2/core/vehicles/', vehicleData);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to create vehicle');
+  }
+};
+
 export interface OrderData {
   order_id: string;
   order_date: string;
@@ -737,17 +803,17 @@ export const updateOrder = async (orderId: string, data: OrderData) => {
 
 //trip
 export enum PaymentStatusEnum {
-    PENDING = 0,
-    PAID = 1,
-    PARTIALLY_PAID = 2,
-    OVERDUE = 3
+  PENDING = 0,
+  PAID = 1,
+  PARTIALLY_PAID = 2,
+  OVERDUE = 3
 }
 
 interface Trip {
-    vendor_id: string;
-    order_id: string;
-    reference_id: string;
-    payment_status: PaymentStatusEnum;
+  vendor_id: string;
+  order_id: string;
+  reference_id: string;
+  payment_status: PaymentStatusEnum;
 }
 
 export const createTrip = async (tripData: Trip) => {
@@ -756,33 +822,145 @@ export const createTrip = async (tripData: Trip) => {
 };
 
 export interface TripDetails {
-    id: string;
-    vendor_name: string;
-    from_location_name: string;
-    to_location_name: string;
-    reference_id: string;
-    client_name: string;
-    payment_status: number;
-    latest_status: string;
-    created_at: string;
+  id: string;
+  vendor_name: string;
+  from_location_name: string;
+  to_location_name: string;
+  reference_id: string;
+  client_name: string;
+  payment_status: number;
+  latest_status: string;
+  created_at: string;
 }
 
 export interface APITripResponse {
-    success: boolean;
-    data: TripDetails[];
+  success: boolean;
+  data: TripDetails[];
 }
 
 export const getTrips = async (): Promise<APITripResponse> => {
-    try {
-        const response = await api.get('/api/v2/core/trips/');
-        return response.data;
-    } catch (error) {
-        throw ApiError.fromAxiosError(error, 'Failed to fetch trips');
-    }
+  try {
+    const response = await api.get('/api/v2/core/trips/');
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch trips');
+  }
 };
 
 export const logoutUser = async (): Promise<void> => {
   await api.post('/api/v2/users/logout/');
+};
+
+// Simple user creation for Super Users
+interface CreateSimpleUserData {
+  phone_number: string;
+  full_name: string;
+  email?: string;
+  role: number;
+  password: string;
+  is_active?: boolean;
+}
+
+export const createSimpleUser = async (data: CreateSimpleUserData): Promise<any> => {
+  try {
+    const response = await api.post('/api/v2/users/create_user/', {
+      ...data,
+      is_active: data.is_active ?? true
+    });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to create user');
+  }
+};
+
+// Get current user information from localStorage
+export const getCurrentUser = (): { role: string; id: string; full_name: string; email: string; phone_number: string } | null => {
+  const userStr = localStorage.getItem('user');
+  if (userStr) {
+    try {
+      return JSON.parse(userStr);
+    } catch (error) {
+      return null;
+    }
+  }
+  return null;
+};
+
+// Get just the user role
+export const getUserRole = (): string | null => {
+  const user = getCurrentUser();
+  return user?.role || null;
+};
+
+// Validate current token and get fresh user information
+export const getCurrentUserByToken = async (): Promise<ValidateTokenResponse | null> => {
+  const token = TokenService.getToken();
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const response = await validateToken(token);
+    return response;
+  } catch (error) {
+    // Token validation failed - likely expired or forbidden
+    return null;
+  }
+};
+
+// Get full user profile (fetches complete user details from API)
+export const getCurrentUserProfile = async (): Promise<User | null> => {
+  const currentUser = getCurrentUser();
+  if (!currentUser?.id) {
+    return null;
+  }
+
+  try {
+    const fullUserProfile = await getUser(currentUser.id);
+    return fullUserProfile;
+  } catch (error) {
+    return null;
+  }
+};
+
+// Comprehensive user profile with all available data
+export const getComprehensiveUserProfile = async (): Promise<{
+  basicInfo: ValidateTokenResponse['user'] | null;
+  fullProfile: User | null;
+  isValid: boolean;
+}> => {
+  try {
+    // Get basic info from token validation
+    const tokenValidation = await getCurrentUserByToken();
+
+    if (!tokenValidation?.valid) {
+      return {
+        basicInfo: null,
+        fullProfile: null,
+        isValid: false
+      };
+    }
+
+    // Get full profile details
+    let fullProfile: User | null = null;
+    try {
+      fullProfile = await getUser(tokenValidation.user.id);
+    } catch (error) {
+      // Continue with basic info even if full profile fails
+    }
+
+    return {
+      basicInfo: tokenValidation.user,
+      fullProfile,
+      isValid: true
+    };
+  } catch (error) {
+    return {
+      basicInfo: null,
+      fullProfile: null,
+      isValid: false
+    };
+  }
 };
 
 export const getVendorOnboardingById = async (id: string) => {
@@ -891,6 +1069,26 @@ export const getLockStatusByPhoneNumber = async (phone_number: string): Promise<
     return response.data;
   } catch (error) {
     throw ApiError.fromAxiosError(error, 'Failed to fetch lock status');
+  }
+};
+
+// Update lock with vehicle registration number
+export interface UpdateLockVehicleData {
+  vehicle_registration_number: string;
+}
+
+export interface UpdateLockVehicleResponse {
+  success: boolean;
+  message: string;
+  data?: any;
+}
+
+export const updateLockVehicle = async (phone_number: string, data: UpdateLockVehicleData): Promise<UpdateLockVehicleResponse> => {
+  try {
+    const response = await api.put<UpdateLockVehicleResponse>(`/api/v2/locks/lock-vehicles/${phone_number}/update/`, data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update lock vehicle');
   }
 };
 

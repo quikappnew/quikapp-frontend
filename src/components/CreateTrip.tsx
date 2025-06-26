@@ -55,7 +55,7 @@ const CreateTrip: React.FC = () => {
       const data = await response.json();
       setVendors(data);
     } catch (error) {
-      console.error('Error fetching vendors:', error);
+
     } finally {
       setIsLoadingVendors(false);
     }
@@ -71,7 +71,7 @@ const CreateTrip: React.FC = () => {
       const data = await response.json();
       setLocations(data);
     } catch (error) {
-      console.error('Error fetching locations:', error);
+
     } finally {
       setIsLoadingLocations(false);
     }
@@ -92,9 +92,9 @@ const CreateTrip: React.FC = () => {
       }
 
       // Handle success
-      console.log('Trip created successfully');
+
     } catch (error) {
-      console.error('Error creating trip:', error);
+
     }
   };
 

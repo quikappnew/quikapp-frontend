@@ -114,7 +114,7 @@ const VehicleDetails = () => {
     const formData = new FormData();
     formData.append('status', 'Completed');
     const response = await updateVehicleOnboarding(id!, formData);
-    console.log(response);
+    
     if (response.success) {
       toast.success('Vehicle approved successfully'); 
       setTimeout(() => {

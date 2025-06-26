@@ -10,7 +10,7 @@ interface DriverModalProps {
 
 const DriverModal: React.FC<DriverModalProps> = ({ open, onClose }) => {
     const handleFormSubmit = (data: any) => {
-        console.log('Driver Data:', data);
+    
         // Handle form submission logic here
         onClose(); // Close the modal after submission
       };

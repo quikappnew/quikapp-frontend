@@ -11,7 +11,7 @@ interface VendorModalProps {
 
 const VendorModal: React.FC<VendorModalProps> = ({ open, onClose }) => {
     const handleFormSubmit = (data: any) => {
-        console.log('Vendor Data:', data);
+    
         // Handle form submission logic here
         vendorOnboarding(data);
         onClose(); // Close the modal after submission

@@ -21,8 +21,8 @@ export interface TabItem {
   children?: TabItem[];
 }
 
-const getSidebarTabs = (): TabItem[] => {
-  return [
+const getSidebarTabs = (userRole?: number): TabItem[] => {
+  const allTabs = [
     // {
     //   key: 'dashboard',
     //   label: 'Dashboard & Analytics',
@@ -110,9 +110,9 @@ const getSidebarTabs = (): TabItem[] => {
           route: '/vendor/onboarding',
         },
         {
-          key:'vendor-onboarding-list',
-          label:'Vendor Onboarding List',
-          route:'/vendor/onboarding-list'
+          key: 'vendor-onboarding-list',
+          label: 'Vendor Onboarding List',
+          route: '/vendor/onboarding-list'
         },
         {
           key: 'vendor-list',
@@ -143,8 +143,8 @@ const getSidebarTabs = (): TabItem[] => {
     //       label: 'Driver Payment Reports',
     //       route: '/drivers',
     //     },
-        
-        
+
+
     //   ],
     // },
     {
@@ -182,7 +182,7 @@ const getSidebarTabs = (): TabItem[] => {
         //   label: 'Vehicles BL',
         //   route: '/dashboard/vehicle-details',
         // },
-        
+
       ],
     },
     {
@@ -198,6 +198,12 @@ const getSidebarTabs = (): TabItem[] => {
     //   route: '/users'
     // },
     {
+      key: 'manage-users',
+      label: 'User Management',
+      icon: ManageAccountsOutlinedIcon,
+      route: '/users'
+    },
+    {
       key: 'lock',
       label: 'Lock',
       icon: LockOutlinedIcon,
@@ -210,6 +216,14 @@ const getSidebarTabs = (): TabItem[] => {
       route: '/dashboard'
     },
   ];
+
+  // Filter tabs based on user role
+  // Only Super Users (role 1) can see User Management
+  if (userRole !== 1) {
+    return allTabs.filter(tab => tab.key !== 'manage-users');
+  }
+
+  return allTabs;
 };
 
 export default getSidebarTabs;

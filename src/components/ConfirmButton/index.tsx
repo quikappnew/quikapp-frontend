@@ -22,7 +22,7 @@ const ConfirmButton: FC<Props> = ({ children, onConfirm, loading, error }) => {
       await onConfirm();
       handleClose();
     } catch (err) {
-      console.error('Error in confirmation:', err);
+
     }
   };
 

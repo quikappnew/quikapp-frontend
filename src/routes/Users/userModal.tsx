@@ -11,7 +11,7 @@ interface UserModalProps {
 
 const UserModal: React.FC<UserModalProps> = ({ open, onClose, user }) => {
   const handleFormSubmit = (data: any) => {
-    console.log('User Data:', data);
+
     // Handle form submission logic here
     onClose(); // Close the modal after submission
   };

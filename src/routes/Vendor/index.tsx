@@ -34,7 +34,7 @@ const Vendor = () => {
       setError(null);
     } catch (err) {
       setError('Failed to fetch vendors. Please try again.');
-      console.error('Error fetching vendors:', err);
+
     } finally {
       setLoading(false);
     }

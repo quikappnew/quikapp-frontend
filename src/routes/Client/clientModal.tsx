@@ -10,7 +10,7 @@ interface ClientModalProps {
 
 const ClientModal: React.FC<ClientModalProps> = ({ open, onClose }) => {
     const handleFormSubmit = (data: any) => {
-        console.log('Client Data:', data);
+      
         // Handle form submission logic here
         onClose(); // Close the modal after submission
       };

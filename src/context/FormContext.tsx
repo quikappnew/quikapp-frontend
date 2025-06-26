@@ -7,9 +7,17 @@ interface FormState {
   error: Error | null;
   loading: boolean;
   showOTP: boolean;
-  isRegistering: boolean;
-  fullName: string;
-  email: string;
+  authOptions?: {
+    otp_enabled: boolean;
+    password_enabled: boolean;
+    show_password_option: boolean;
+  };
+  uiMarkers?: {
+    allow_otp_login: boolean;
+    allow_password_login: boolean;
+    display_auth_choice: boolean;
+  };
+  selectedAuthMethod: 'otp' | 'password';
 }
 
 const initialState: FormState = {
@@ -18,22 +26,19 @@ const initialState: FormState = {
   error: null,
   loading: false,
   showOTP: false,
-  isRegistering: false,
-  fullName: '',
-  email: '',
+  selectedAuthMethod: 'otp',
 };
 
 // Define action types
 type ActionType =
   | { type: 'SET_PHONE_NUMBER'; payload: string }
-  | { type: 'SET_FULL_NAME'; payload: string }
-  | { type: 'SET_EMAIL'; payload: string }
-  | { type: 'SET_IS_REGISTERING'; payload: boolean }
   | { type: 'SET_OTP'; payload: string }
   | { type: 'SET_ERROR'; payload: Error | null }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SHOW_OTP' }
-  | { type: 'HIDE_OTP' };
+  | { type: 'HIDE_OTP' }
+  | { type: 'SET_AUTH_OPTIONS'; payload: { authOptions: any; uiMarkers: any } }
+  | { type: 'SET_AUTH_METHOD'; payload: 'otp' | 'password' };
 
 // Create a reducer function
 const reducer = (state: FormState, action: ActionType) => {
@@ -50,12 +55,14 @@ const reducer = (state: FormState, action: ActionType) => {
       return { ...state, showOTP: true };
     case 'HIDE_OTP':
       return { ...state, showOTP: false };
-    case 'SET_FULL_NAME':
-      return { ...state, fullName: action.payload };
-    case 'SET_EMAIL':
-      return { ...state, email: action.payload };
-    case 'SET_IS_REGISTERING':
-      return { ...state, isRegistering: action.payload };
+    case 'SET_AUTH_OPTIONS':
+      return { 
+        ...state, 
+        authOptions: action.payload.authOptions,
+        uiMarkers: action.payload.uiMarkers 
+      };
+    case 'SET_AUTH_METHOD':
+      return { ...state, selectedAuthMethod: action.payload };
     default:
       return state;
   }

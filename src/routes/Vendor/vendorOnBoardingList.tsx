@@ -63,7 +63,7 @@ const VendorOnBoardingList: React.FC = () => {
       setError(null);
     } catch (err) {
       setError('Failed to fetch vendor onboarding list. Please try again.');
-      console.error(err);
+
     } finally {
       setLoading(false);
     }
