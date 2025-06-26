@@ -197,11 +197,12 @@ const LockPage = () => {
                                     marginTop: { xs: 2, md: 10, lg:10, xl: 10 },
                                 }}
                             >
-                                {selectedLockStatus && selectedLockStatus.latitude && selectedLockStatus.longitude ? (
+                                {selectedLockStatus && selectedLockStatus.latitude && selectedLockStatus.longitude && selectedLock?.lock_phone_number ? (
                                     <OpenStreetMapComponent
                                         lat={Number(selectedLockStatus.latitude)}
                                         lng={Number(selectedLockStatus.longitude)}
                                         height={isMobile ? 160 : 350}
+                                        phoneNumber={selectedLock.lock_phone_number}
                                     />
                                 ) : (
                                     <Typography color="text.secondary">No location data</Typography>
