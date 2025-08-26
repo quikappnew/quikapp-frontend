@@ -1,6 +1,7 @@
 // src/components/ClientForm.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, Typography, Select, MenuItem, TextareaAutosize, FormControl, InputLabel } from '@mui/material';
+import { getVendors } from 'services/api';
 
 interface VehicleFormProps {
   onSubmit: (data: any) => void;
@@ -9,20 +10,38 @@ interface VehicleFormProps {
 
 const VehicleForm: React.FC<VehicleFormProps> = ({ onSubmit, disabled = false }) => {
   const [vehicleNumber, setVehicleNumber] = useState('');
-  const [model, setModel] = useState('');
-  const [capacity, setCapacity] = useState('');
-  const [chassisNumber, setChassisNumber] = useState('');
+  const [length, setLength] = useState('');
+  const [vendorId, setVendorId] = useState('');
   const [remarks, setRemarks] = useState('');
   const [vehicleType, setVehicleType] = useState('');
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [loadingVendors, setLoadingVendors] = useState(false);
+
+  const fetchVendors = async () => {
+    try {
+      setLoadingVendors(true);
+      const response = await getVendors({ page_size: 100 });
+      if (response?.data) {
+        setVendors(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch vendors:', error);
+    } finally {
+      setLoadingVendors(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchVendors();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!disabled) {
       onSubmit({ 
         vehicle_number: vehicleNumber,
-        vehicle_model: model,
-        capacity,
-        chassis_number: chassisNumber,
+        length,
+        vendor_id: vendorId,
         remarks,
         vehicle_type: vehicleType
       });
@@ -44,34 +63,33 @@ const VehicleForm: React.FC<VehicleFormProps> = ({ onSubmit, disabled = false })
       />
       <TextField
         fullWidth
-        label="Model"
+        label="Length"
         variant="outlined"
-        value={model}
-        onChange={(e) => setModel(e.target.value)}
+        value={length}
+        onChange={(e) => setLength(e.target.value)}
         required
         disabled={disabled}
         sx={{ mb: 2 }}
       />
-      <TextField
-        fullWidth
-        label="Capacity"
-        variant="outlined"
-        value={capacity}
-        onChange={(e) => setCapacity(e.target.value)}
-        required
-        disabled={disabled}
-        sx={{ mb: 2 }}
-      />
-      <TextField
-        fullWidth
-        label="Chassis Number"
-        variant="outlined"
-        value={chassisNumber}
-        onChange={(e) => setChassisNumber(e.target.value)}
-        required
-        disabled={disabled}
-        sx={{ mb: 2 }}
-      />
+      <FormControl fullWidth variant="outlined">
+        <InputLabel id="vendor-label">Vendor</InputLabel>
+        <Select
+          fullWidth
+          labelId="vendor-label"
+          label="Vendor"
+          value={vendorId}
+          onChange={(e) => setVendorId(e.target.value)}
+          disabled={disabled || loadingVendors}
+          sx={{ mb: 2 }}
+          required
+        >
+          {vendors.map((vendor) => (
+            <MenuItem key={vendor.id} value={vendor.id}>
+              {vendor.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       <TextField
         fullWidth
         label="Remarks"

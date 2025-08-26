@@ -78,27 +78,43 @@ export const useAuth = (redirectTo: string | null, navigate: (path: string) => v
         use_password: false
       });
 
-      if (response.user.token) {
-
-        const token = response.user.token;
-        TokenService.setToken(token);
-        localStorage.setItem('user', JSON.stringify(response.user));
 
 
-        // Verify token was set
-        const storedToken = TokenService.getToken();
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        if (TokenService.isAuthenticated()) {
-          navigate(redirectTo || '/orders/get-orders');
-        } else {
-          throw new Error('Failed to store token');
-        }
-
-      } else {
-        setError(new Error('Invalid OTP or missing token'));
+      // Check if response has the expected structure
+      if (!response) {
+        throw new Error('No response received from server');
       }
+
+      // Handle the actual API response structure: response.data.user
+      const userData = response.data?.user;
+
+
+      if (!userData) {
+        console.error('Response missing user property:', response);
+        throw new Error('Invalid response format: missing user data');
+      }
+
+      if (!userData.token) {
+        console.error('Response missing token:', response);
+        throw new Error('Invalid response format: missing token');
+      }
+
+      const token = userData.token;
+      TokenService.setToken(token);
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      // Verify token was set
+      const storedToken = TokenService.getToken();
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      if (TokenService.isAuthenticated()) {
+        navigate(redirectTo || '/orders/get-orders');
+      } else {
+        throw new Error('Failed to store token');
+      }
+
     } catch (err) {
+
       setError(err as Error);
     } finally {
       setLoading(false);
@@ -117,23 +133,38 @@ export const useAuth = (redirectTo: string | null, navigate: (path: string) => v
         use_password: true
       });
 
-      if (response.user.token) {
-        const token = response.user.token;
-        TokenService.setToken(token);
-        localStorage.setItem('user', JSON.stringify(response.user));
+      // Check if response has the expected structure
+      if (!response) {
+        throw new Error('No response received from server');
+      }
 
-        // Verify token was set
-        await new Promise(resolve => setTimeout(resolve, 100));
+      // Handle the actual API response structure: response.data.user
+      const userData = response.data?.user;
 
-        if (TokenService.isAuthenticated()) {
-          navigate(redirectTo || '/orders/get-orders');
-        } else {
-          throw new Error('Failed to store token');
-        }
+      if (!userData) {
+        console.error('Response missing user property:', response);
+        throw new Error('Invalid response format: missing user data');
+      }
+
+      if (!userData.token) {
+        console.error('Response missing token:', response);
+        throw new Error('Invalid response format: missing token');
+      }
+
+      const token = userData.token;
+      TokenService.setToken(token);
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      // Verify token was set
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      if (TokenService.isAuthenticated()) {
+        navigate(redirectTo || '/orders/get-orders');
       } else {
-        setError(new Error('Invalid password or missing token'));
+        throw new Error('Failed to store token');
       }
     } catch (err) {
+
       setError(err as Error);
     } finally {
       setLoading(false);

@@ -89,7 +89,7 @@ const UploadDocuments: FC<UploadDocumentsProps> = ({ open, onClose, onSubmit }) 
                     type="file"
                     hidden
                     onChange={handleFileChange(key)}
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    accept=".pdf"
                   />
                 </Button>
                 <Typography variant="body2" color="text.secondary">

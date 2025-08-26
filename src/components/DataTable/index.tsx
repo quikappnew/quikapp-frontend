@@ -63,6 +63,7 @@ interface PaginationProps {
   totalRows: number;
   onPageChange: (newPage: number) => void;
   onRowsPerPageChange: (newRowsPerPage: number) => void;
+  serverSide?: boolean; // when true, do not slice locally
 }
 
 const DataTableHead: FC<{
@@ -331,7 +332,7 @@ const DataTable: FC<DataTableProps> = ({
     });
   });
 
-  const paginatedData = pagination
+  const paginatedData = pagination && !pagination.serverSide
     ? filteredData.slice(
         pagination.page * pagination.rowsPerPage,
         pagination.page * pagination.rowsPerPage + pagination.rowsPerPage
@@ -485,7 +486,7 @@ const DataTable: FC<DataTableProps> = ({
         <TablePagination
           rowsPerPageOptions={[5, 10, 25, 50]}
           component="div"
-          count={filteredData.length}
+          count={pagination.serverSide ? pagination.totalRows : filteredData.length}
           rowsPerPage={pagination.rowsPerPage}
           page={pagination.page}
           onPageChange={handleChangePage}

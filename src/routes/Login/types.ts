@@ -36,14 +36,17 @@ export interface LoginResponse {
 
 // src/routes/Login/types.ts
 export interface VerifyOTPResponse {
+  success: boolean;
   message: string;
-  user: {
-    id: string;
-    phone_number: string;
-    full_name: string;
-    email: string;
-    role: string;
-    token: string;
+  data: {
+    user: {
+      id: string;
+      phone_number: string;
+      full_name: string;
+      email: string;
+      role: number;
+      token: string;
+    };
   };
 };
 

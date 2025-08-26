@@ -1,16 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Button, Typography, CircularProgress, Card } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Box, Typography, CircularProgress, Card } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
 import { getVendors } from 'services/api';
 import { useNavigate } from 'react-router-dom';
 import type { APIVendorResponse } from 'services/api';
+import debounce from 'utils/debounce';
 
 const Vendor = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [vendors, setVendors] = useState<APIVendorResponse['data']>([]);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState<string>('');
+  const [page, setPage] = useState<number>(0); // zero-based for UI
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [total, setTotal] = useState<number>(0);
 
   const columns = [
     { label: 'Vendor', fieldName: 'name', width: 200 },
@@ -24,13 +29,18 @@ const Vendor = () => {
 
   useEffect(() => {
     fetchVendors();
-  }, []);
+  }, [page, rowsPerPage, search]);
 
   const fetchVendors = async () => {
     try {
       setLoading(true);
-      const response = await getVendors();
+      const response = await getVendors({
+        search: search || undefined,
+        page: page + 1, // backend is 1-based
+        page_size: rowsPerPage,
+      });
       setVendors(response.data || []);
+      setTotal(response.count ?? (response.data?.length || 0));
       setError(null);
     } catch (err) {
       setError('Failed to fetch vendors. Please try again.');
@@ -39,6 +49,11 @@ const Vendor = () => {
       setLoading(false);
     }
   };
+
+  const debouncedSetSearch = useMemo(() => debounce((value: string) => {
+    setPage(0);
+    setSearch(value);
+  }, 400), []);
 
   return (
     <SidebarLayout>
@@ -53,6 +68,21 @@ const Vendor = () => {
         >
           <h4 className="text-xl font-bold mb-2 text-gray-500"> Vendors</h4>
 
+          {/* External search input for server-side search */}
+          <Box sx={{ mb: 2 }}>
+            <input
+              type="text"
+              placeholder="Search vendors..."
+              onChange={(e) => debouncedSetSearch(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: '1px solid #ccc',
+                borderRadius: '8px'
+              }}
+            />
+          </Box>
+
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
               <CircularProgress />
@@ -65,7 +95,14 @@ const Vendor = () => {
             <DataTable
               data={vendors}
               columns={columns}
-              searchFields={['name', 'gst', 'pan', 'spoc_name']}
+              pagination={{
+                page: page,
+                rowsPerPage: rowsPerPage,
+                totalRows: total,
+                onPageChange: (newPage) => setPage(newPage),
+                onRowsPerPageChange: (newRowsPerPage) => { setRowsPerPage(newRowsPerPage); setPage(0); },
+                serverSide: true,
+              }}
             />
           )}
         </Card>

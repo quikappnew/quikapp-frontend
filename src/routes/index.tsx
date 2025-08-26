@@ -23,11 +23,18 @@ import VendorOnboarding from './Vendor/vendorOnBoardingForm';
 import Client from './Client';
 import Drivers from './Drivers';
 import AdministrationUsers from './Users';
+import UserManagementRoute from './Users/UserManagementRoute';
+import UserRoleDebug from './Users/UserRoleDebug';
+import ForceRefreshUser from './Users/ForceRefreshUser';
+import SidebarLayout from 'layouts/SidebarLayout';
 import VendorOnBoardingForm from './Vendor/vendorOnBoardingForm';
 import Lock from './Lock';
 import VendorOnBoardingList from './Vendor/vendorOnBoardingList';
+import VendorBankDetails from './Vendor/BankDetails';
 import ClientDetail from './Client/ClientDetail';
 import VehicleOnboarding from './VehicleOnboarding';
+import Reports from './Reports';
+import AccountsPayable from './AccountsPayable';
 import VehicleOnboardingList from './VehicleOnboarding/vehicleOnboarding';
 import VehicleOnboardingDetails from './VehicleOnboarding/vehicleDetails';
 import UpdateVehicleOnboardingForm from './VehicleOnboarding/updateVehicleOnboardingForm';
@@ -36,6 +43,7 @@ import GetOrders from './Orders';
 import OrderDetails from './Orders/orderDetails';
 import UpdateOrder from './Orders/updateOrder';
 import VendorDetails from './Vendor/onboarding/[id]';
+import CreatePayment from './Payments/CreatePayment';
 const App: React.FC = () => {
   const router = createBrowserRouter([
     {
@@ -143,30 +151,35 @@ const App: React.FC = () => {
         }
       ],
     },
-    // {
-    //   path: '/reports',
-    //   element: (
-    //     <ProtectedRoute>
-    //       <Reports />
-    //     </ProtectedRoute>
-    //   ),
-    // },
-    // {
-    //   path: '/driver-payment-requests',
-    //   element: (
-    //     <ProtectedRoute>
-    //       <DriverPaymentRequests />
-    //     </ProtectedRoute>
-    //   ),
-    // },
-    // {
-    //   path: '/accounts-payable',
-    //   element: (
-    //     <ProtectedRoute>
-    //       <AccountsPayable />
-    //     </ProtectedRoute>
-    //   ),
-    // },
+    {
+      path: '/reports',
+      element: (
+        <ProtectedRoute>
+          <Reports />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/accounts-payable',
+      element: (
+        <ProtectedRoute>
+          <AccountsPayable />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/payments',
+      children: [
+        {
+          path: 'create',
+          element: (
+            <ProtectedRoute>
+              <CreatePayment />
+            </ProtectedRoute>
+          ),
+        },
+      ],
+    },
     {
       path: '/vendor',
       children: [
@@ -199,6 +212,14 @@ const App: React.FC = () => {
           element: (
             <ProtectedRoute>
               <VendorDetails />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: ':vendorId/bank-details',
+          element: (
+            <ProtectedRoute>
+              <VendorBankDetails />
             </ProtectedRoute>
           ),
         },
@@ -236,6 +257,34 @@ const App: React.FC = () => {
           element: (
             <ProtectedRoute>
               <AdministrationUsers />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'management',
+          element: (
+            <ProtectedRoute>
+              <UserManagementRoute />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'debug',
+          element: (
+            <ProtectedRoute>
+              <SidebarLayout>
+                <UserRoleDebug />
+              </SidebarLayout>
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'refresh',
+          element: (
+            <ProtectedRoute>
+              <SidebarLayout>
+                <ForceRefreshUser />
+              </SidebarLayout>
             </ProtectedRoute>
           ),
         },

@@ -23,12 +23,12 @@ export interface TabItem {
 
 const getSidebarTabs = (userRole?: number): TabItem[] => {
   const allTabs = [
-    // {
-    //   key: 'dashboard',
-    //   label: 'Dashboard & Analytics',
-    //   icon: DashboardOutlinedIcon,
-    //   route: '/dashboard',
-    // },
+    {
+      key: 'dashboard',
+      label: 'Dashboard & Analytics',
+      icon: DashboardOutlinedIcon,
+      route: '/dashboard',
+    },
     {
       key: 'orders',
       label: 'Orders',
@@ -191,17 +191,23 @@ const getSidebarTabs = (userRole?: number): TabItem[] => {
       icon: LocationOnOutlinedIcon,
       route: '/locations'
     },
-    // {
-    //   key: 'manage-users',
-    //   label: 'Manage Users',
-    //   icon: ManageAccountsOutlinedIcon,
-    //   route: '/users'
-    // },
     {
       key: 'manage-users',
       label: 'User Management',
       icon: ManageAccountsOutlinedIcon,
-      route: '/users'
+      route: '/users',
+      children: [
+        {
+          key: 'users-list',
+          label: 'Users List',
+          route: '/users',
+        },
+        {
+          key: 'user-management',
+          label: 'User Management',
+          route: '/users/management',
+        },
+      ],
     },
     {
       key: 'lock',

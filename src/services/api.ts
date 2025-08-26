@@ -12,13 +12,36 @@ import type {
   UserStatusEnum,
   Address,
   IdentityCard,
-  DocumentTypeEnum
+  DocumentTypeEnum,
+  Trip,
+  CreateTripData,
+  UpdateTripData,
+  Payment,
+  CreatePaymentData,
+  UpdatePaymentData,
+  VendorBankAccount,
+  CreateBankAccountData,
+  UpdateBankAccountData,
+  PaymentAnalytics,
+  VendorPaymentSummary,
+  TripFinancialSummary,
+  OutstandingBalance,
+  TrendData,
+  TripsResponse,
+  PaymentsResponse,
+  VendorBankAccountsResponse,
+  PaymentAnalyticsResponse,
+  VendorPaymentSummaryResponse,
+  TripFinancialSummaryResponse,
+  OutstandingBalancesResponse,
+  TrendsResponse
 } from 'types/api';
+import { TripStatusEnum, PaymentTypeEnum, PaymentModeEnum } from 'types/api';
 import { VerifyOTPResponse } from 'routes/Login/types';
 import { TokenService } from './tokenService';
 
 const api: AxiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_BACKEND,
+  baseURL: process.env.REACT_APP_BACKEND || 'http://localhost:8000/api/v2',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -79,6 +102,23 @@ api.interceptors.response.use(
       setTimeout(() => {
         window.location.href = '/login';
       }, 1500);
+    }
+
+    // Centralized handling for 400 Bad Request
+    if (error.response?.status === 400) {
+      try {
+        const data: any = error.response?.data || {};
+        // Prefer explicit backend message fields
+        const backendMessage =
+          data?.message ||
+          data?.details ||
+          data?.error ||
+          (Array.isArray(data?.errors) ? data.errors.join(', ') : undefined) ||
+          'Request failed. Please check your input and try again.';
+        toast.error(backendMessage);
+      } catch (_) {
+        toast.error('Request failed. Please check your input and try again.');
+      }
     }
     return Promise.reject(error);
   }
@@ -532,11 +572,19 @@ export interface Vendor {
   pan: string;
   spoc_name: string;
   created_at: string;
+  spoc_email?: string;
+  spoc_phone?: string;
+  alternate_contact_number?: string;
 }
 
 export interface APIVendorResponse {
   success: boolean;
   data: Vendor[];
+  count?: number; // total items
+  page?: number; // current page (1-based)
+  page_size?: number; // items per page
+  next_page?: number | null;
+  previous_page?: number | null;
 }
 
 export const getVendorOnboarding = async (): Promise<APIVendorResponse> => {
@@ -547,9 +595,11 @@ export const getVendorOnboarding = async (): Promise<APIVendorResponse> => {
     throw ApiError.fromAxiosError(error, 'Failed to fetch vendors');
   }
 };
-export const getVendors = async (): Promise<APIVendorResponse> => {
+export const getVendors = async (
+  params?: { search?: string; page?: number; page_size?: number }
+): Promise<APIVendorResponse> => {
   try {
-    const response = await api.get('/api/v2/core/vendors/');
+    const response = await api.get('/api/v2/core/vendors/', { params });
     return response.data;
   } catch (error) {
     throw ApiError.fromAxiosError(error, 'Failed to fetch vendors');
@@ -770,14 +820,25 @@ export interface Order {
   order_id: string;
   order_date: string;
   order_pricing: number;
-  from_location: string;
+  from_location?: string;
   from_location_name: string;
-  to_location: string;
+  to_location?: string;
   to_location_name: string;
-  client: string;
+  client?: string;
   client_name: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
+  order_status?: {
+    has_trips: boolean;
+    trip_count: number;
+    status: string;
+  };
+  order_created_by?: {
+    id?: string;
+    username?: string;
+    full_name?: string;
+    phone_number?: string;
+  };
 }
 
 export const createOrder = async (orderData: OrderData) => {
@@ -785,8 +846,26 @@ export const createOrder = async (orderData: OrderData) => {
   return response.data;
 };
 
-export const getOrders = async (): Promise<{ success: boolean; data: Order[] }> => {
-  const response = await api.get('/api/v2/core/orders/');
+export interface APIOrderResponse {
+  success: boolean;
+  data: Order[];
+  count?: number;
+  page?: number;
+  page_size?: number;
+  next_page?: number | null;
+  previous_page?: number | null;
+}
+
+export const getOrders = async (
+  params?: {
+    search?: string;
+    page?: number;
+    page_size?: number;
+    start_date?: string;
+    end_date?: string;
+  }
+): Promise<APIOrderResponse> => {
+  const response = await api.get('/api/v2/core/orders/', { params });
   return response.data;
 };
 export const getOrderById = async (id: string): Promise<{ success: boolean; data: Order }> => {
@@ -809,14 +888,14 @@ export enum PaymentStatusEnum {
   OVERDUE = 3
 }
 
-interface Trip {
+interface LegacyTrip {
   vendor_id: string;
   order_id: string;
   reference_id: string;
   payment_status: PaymentStatusEnum;
 }
 
-export const createTrip = async (tripData: Trip) => {
+export const createLegacyTrip = async (tripData: LegacyTrip) => {
   const response = await api.post('/api/v2/core/trips/', tripData);
   return response.data;
 };
@@ -874,11 +953,16 @@ export const createSimpleUser = async (data: CreateSimpleUserData): Promise<any>
 };
 
 // Get current user information from localStorage
-export const getCurrentUser = (): { role: string; id: string; full_name: string; email: string; phone_number: string } | null => {
+export const getCurrentUser = (): { role: number; id: string; full_name: string; email: string; phone_number: string } | null => {
   const userStr = localStorage.getItem('user');
   if (userStr) {
     try {
-      return JSON.parse(userStr);
+      const user = JSON.parse(userStr);
+      // Convert role to number if it's a string
+      if (user && typeof user.role === 'string') {
+        user.role = parseInt(user.role, 10);
+      }
+      return user;
     } catch (error) {
       return null;
     }
@@ -887,7 +971,7 @@ export const getCurrentUser = (): { role: string; id: string; full_name: string;
 };
 
 // Get just the user role
-export const getUserRole = (): string | null => {
+export const getUserRole = (): number | null => {
   const user = getCurrentUser();
   return user?.role || null;
 };
@@ -1089,6 +1173,657 @@ export const updateLockVehicle = async (phone_number: string, data: UpdateLockVe
     return response.data;
   } catch (error) {
     throw ApiError.fromAxiosError(error, 'Failed to update lock vehicle');
+  }
+};
+
+// Trip Management API Functions
+export const getTripsWithFilters = async (params?: {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  status?: string;
+  vendor?: string;
+  client?: string;
+  payment_status?: string;
+  startDate?: string;
+  endDate?: string;
+}): Promise<{ data: Trip[], pagination: any }> => {
+  try {
+    // Transform parameters to match API expectations
+    const apiParams: any = {};
+    if (params?.page) apiParams.page = params.page;
+    if (params?.page_size) apiParams.page_size = params.page_size;
+    if (params?.search) apiParams.search = params.search;
+    if (params?.status) apiParams.status = params.status;
+    if (params?.vendor) apiParams.vendor = params.vendor;
+    if (params?.client) apiParams.client = params.client;
+    if (params?.payment_status) apiParams.payment_status = params.payment_status;
+    if (params?.startDate) apiParams.start_date = params.startDate;
+    if (params?.endDate) apiParams.end_date = params.endDate;
+
+    const response = await api.get('/api/v2/core/trips', { params: apiParams });
+
+    // Transform the data to match the Trip interface
+    const transformedData = response.data.data ?
+      response.data.data.map(transformTripData) :
+      response.data.map(transformTripData);
+
+    return {
+      data: transformedData,
+      pagination: response.data.pagination || response.data
+    };
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch trips');
+  }
+};
+
+// Data transformation function to map API response to Trip interface
+const transformTripData = (apiData: any): Trip => {
+  return {
+    id: apiData.id,
+    referenceId: apiData.reference_id,
+    status: apiData.latest_status as TripStatusEnum || TripStatusEnum.SCHEDULED,
+    scheduledDate: apiData.scheduled_date || new Date().toISOString(),
+    startDate: apiData.start_date,
+    endDate: apiData.end_date,
+    fromLocation: apiData.from_location,
+    toLocation: apiData.to_location,
+    distance: apiData.distance || 0,
+    duration: apiData.duration || 0,
+    specialInstructions: apiData.special_instructions,
+    vehicleId: apiData.vehicle_id || '',
+    vehicleNumber: apiData.vehicle_number,
+    driverId: apiData.driver_id || '',
+    driverName: apiData.driver_name || '',
+    vendorId: apiData.vendor?.id || apiData.vendor_id || '',
+    vendorName: apiData.vendor?.name || apiData.vendor_name || '',
+    vendor: apiData.vendor ? {
+      id: apiData.vendor.id,
+      name: apiData.vendor.name,
+      gst: apiData.vendor.gst,
+      pan: apiData.vendor.pan,
+      spoc_name: apiData.vendor.spoc_name,
+      spoc_email: apiData.vendor.spoc_email,
+      spoc_phone: apiData.vendor.spoc_phone,
+      alternate_contact_number: apiData.vendor.alternate_contact_number,
+    } : undefined,
+    clientId: apiData.client_id || '',
+    clientName: apiData.client_name,
+    totalAmount: apiData.pricing || apiData.order_prize || 0,
+    paidAmount: apiData.paid_amount || 0,
+    outstandingAmount: apiData.outstanding_amount || 0,
+    payment_status: apiData.payment_status || 0,
+    completionPercentage: apiData.completion_percentage || 0,
+    documents: apiData.documents || [],
+    internalNotes: apiData.latest_notes || apiData.internal_notes,
+    createdAt: apiData.created_at || new Date().toISOString(),
+    updatedAt: apiData.updated_at || new Date().toISOString(),
+  };
+};
+
+export const getTripById = async (id: string): Promise<Trip> => {
+  try {
+    const response = await api.get(`/api/v2/core/trips/${id}`);
+    return transformTripData(response.data);
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch trip details');
+  }
+};
+
+export const createTrip = async (data: CreateTripData): Promise<Trip> => {
+  try {
+    const response = await api.post('/api/v2/core/trips', data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to create trip');
+  }
+};
+
+export const updateTrip = async (id: string, data: UpdateTripData): Promise<Trip> => {
+  try {
+    const response = await api.put(`/api/v2/core/trips/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update trip');
+  }
+};
+
+export const deleteTrip = async (id: string): Promise<void> => {
+  try {
+    await api.delete(`/api/v2/core/trips/${id}`);
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to delete trip');
+  }
+};
+
+export const updateTripStatus = async (id: string, status: TripStatusEnum): Promise<Trip> => {
+  try {
+    const response = await api.patch(`/api/v2/core/trips/${id}/status`, { status });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update trip status');
+  }
+};
+
+// Payment Management API Functions
+export const getPayments = async (params?: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  type?: string;
+  mode?: string;
+  vendorId?: string;
+  tripId?: string;
+  startDate?: string;
+  endDate?: string;
+}): Promise<PaymentsResponse> => {
+  try {
+    const response = await api.get('/api/v2/core/payment', { params });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch payments');
+  }
+};
+
+export const getPaymentById = async (id: string): Promise<Payment> => {
+  try {
+    const response = await api.get(`/api/v2/core/payment/${id}`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch payment details');
+  }
+};
+
+export const createPayment = async (data: CreatePaymentData): Promise<Payment> => {
+  try {
+    // Transform the data to match the API structure
+    const apiData = {
+      trip_id: data.tripId,
+      amount: data.amount,
+      payment_type: data.type.toLowerCase(),
+      payment_mode: data.mode.toLowerCase(),
+      utr_number: data.utrNumber,
+      payment_date: data.transactionDate,
+      notes: data.notes || data.description || ''
+    };
+
+    const response = await api.post('/api/v2/core/vendor-payment-logs/', apiData);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to create payment');
+  }
+};
+
+export const updatePayment = async (id: string, data: UpdatePaymentData): Promise<Payment> => {
+  try {
+    const response = await api.put(`/api/v2/core/payment/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update payment');
+  }
+};
+
+export const deletePayment = async (id: string): Promise<void> => {
+  try {
+    await api.delete(`/api/v2/core/payment/${id}`);
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to delete payment');
+  }
+};
+
+// Data transformation function to map API response to Payment interface
+const transformPaymentData = (apiData: any): Payment => {
+
+
+  const transformed = {
+    id: apiData.id,
+    tripId: apiData.trip_id || '',
+    tripReferenceId: apiData.trip_reference_id || '',
+    vendorId: apiData.vendor_id || '',
+    vendorName: apiData.vendor_name || '',
+    type: apiData.payment_type?.toUpperCase() as PaymentTypeEnum || 'ADVANCE' as PaymentTypeEnum,
+    mode: apiData.payment_mode?.toUpperCase() as PaymentModeEnum || 'BANK_TRANSFER' as PaymentModeEnum,
+    amount: parseFloat(apiData.amount) || 0,
+    utrNumber: apiData.utr_number || '',
+    transactionDate: apiData.payment_date || apiData.transaction_date || new Date().toISOString(),
+    description: apiData.description || '',
+    status: 'CONFIRMED' as 'PENDING' | 'CONFIRMED' | 'FAILED', // Default status since it's not in the API response
+    receiptUrl: apiData.receipt_url || '',
+    notes: apiData.notes || '',
+    createdAt: apiData.created_at || new Date().toISOString(),
+    updatedAt: apiData.updated_at || new Date().toISOString(),
+  };
+
+
+  return transformed;
+};
+
+export const getPaymentsByTrip = async (tripId: string): Promise<Payment[]> => {
+  try {
+    const response = await api.get(`/api/v2/core/vendor-payment-logs/`, {
+      params: { trip_id: tripId }
+    });
+
+    // Handle the actual API response structure
+    if (response.data && response.data.success && response.data.data && response.data.data.payment_logs) {
+      return response.data.data.payment_logs.map(transformPaymentData);
+    } else if (response.data && Array.isArray(response.data)) {
+      return response.data.map(transformPaymentData);
+    } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+      return response.data.data.map(transformPaymentData);
+    } else if (response.data && response.data.results && Array.isArray(response.data.results)) {
+      return response.data.results.map(transformPaymentData);
+    }
+
+    // If no payments found, return empty array
+    return [];
+  } catch (error) {
+    // If API returns 404 or no payments found, return empty array instead of throwing error
+    if (error && typeof error === 'object' && 'response' in error && (error as any).response?.status === 404) {
+      return [];
+    }
+    throw ApiError.fromAxiosError(error, 'Failed to fetch trip payments');
+  }
+};
+
+export const getPaymentsByVendor = async (vendorId: string): Promise<Payment[]> => {
+  try {
+    const response = await api.get(`/api/v2/core/payment/vendor/${vendorId}`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch vendor payments');
+  }
+};
+
+// Vendor Bank Details API Functions
+export const getVendorBankAccounts = async (vendorId: string): Promise<VendorBankAccountsResponse> => {
+  try {
+    const response = await api.get(`/api/v2/core/vendor-bank-details`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch vendor bank accounts');
+  }
+};
+
+export const createVendorBankAccount = async (vendorId: string, data: CreateBankAccountData): Promise<VendorBankAccount> => {
+  try {
+    const response = await api.post(`/api/v2/core/vendor-bank-details`, data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to create bank account');
+  }
+};
+
+export const updateVendorBankAccount = async (vendorId: string, bankId: string, data: UpdateBankAccountData): Promise<VendorBankAccount> => {
+  try {
+    const response = await api.put(`/api/v2/core/vendor-bank-details/${bankId}`, data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update bank account');
+  }
+};
+
+export const deleteVendorBankAccount = async (vendorId: string, bankId: string): Promise<void> => {
+  try {
+    await api.delete(`/api/v2/core/vendor-bank-details/${bankId}`);
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to delete bank account');
+  }
+};
+
+export const setPrimaryBankAccount = async (vendorId: string, bankId: string): Promise<VendorBankAccount> => {
+  try {
+    const response = await api.patch(`/api/v2/core/vendor-bank-details/${bankId}/primary`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to set primary bank account');
+  }
+};
+
+// Analytics & Reporting API Functions
+export const getOrdersAnalytics = async (params?: {
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}): Promise<any> => {
+  try {
+    const response = await api.get('/api/v2/core/analytics/orders/', { params });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch orders analytics');
+  }
+};
+
+export const getTripsAnalytics = async (params?: {
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: string;
+}): Promise<any> => {
+  try {
+    const response = await api.get('/api/v2/core/analytics/trips/', { params });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch trips analytics');
+  }
+};
+
+export const getVendorsAnalytics = async (params?: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}): Promise<any> => {
+  try {
+    const response = await api.get('/api/v2/core/analytics/vendors/', { params });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch vendors analytics');
+  }
+};
+
+export const getOutstandingBalances = async (params?: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}): Promise<OutstandingBalancesResponse> => {
+  try {
+    const response = await api.get('/api/v2/core/analytics/outstanding/', { params });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch outstanding balances');
+  }
+};
+
+export const getTripFinancials = async (params?: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  vendorId?: string;
+}): Promise<TripFinancialSummaryResponse> => {
+  try {
+    const response = await api.get('/api/v2/core/analytics/trip_financials/', { params });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch trip financials');
+  }
+};
+
+export const getVendorPaymentSummary = async (params?: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}): Promise<VendorPaymentSummaryResponse> => {
+  try {
+    const response = await api.get('/api/v2/core/analytics/vendor_payment_summary/', { params });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch vendor payment summary');
+  }
+};
+
+export const getTrends = async (params?: {
+  period?: 'daily' | 'weekly' | 'monthly';
+  startDate?: string;
+  endDate?: string;
+}): Promise<TrendsResponse> => {
+  try {
+    const response = await api.get('/api/v2/core/analytics/trends', { params });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch trends');
+  }
+};
+
+export const exportReport = async (format: 'pdf' | 'excel' | 'csv', params?: {
+  type?: 'payments' | 'trips' | 'vendors' | 'outstanding';
+  startDate?: string;
+  endDate?: string;
+  vendorId?: string;
+}): Promise<Blob> => {
+  try {
+    const response = await api.get(`/api/v2/core/analytics/export`, {
+      params: { format, ...params },
+      responseType: 'blob'
+    });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to export report');
+  }
+};
+
+// Search API Functions
+export const searchTrips = async (params: {
+  q: string;
+  status?: string;
+  dateRange?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<TripsResponse> => {
+  try {
+    const response = await api.get('/api/v2/core/trips', { params });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to search trips');
+  }
+};
+
+export const searchPayments = async (params: {
+  q: string;
+  status?: string;
+  dateRange?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<PaymentsResponse> => {
+  try {
+    const response = await api.get('/api/v2/core/payment', { params });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to search payments');
+  }
+};
+
+export const searchVendors = async (params: {
+  q: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<any> => {
+  try {
+    const response = await api.get('/api/v2/core/vendors', { params });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to search vendors');
+  }
+};
+
+// ============================================================================
+// USER MANAGEMENT API FUNCTIONS (Super User Only)
+// ============================================================================
+
+// User Management Interfaces
+export interface UserManagementUser {
+  id: string;
+  phone_number: string;
+  full_name: string;
+  email: string;
+  role: number;
+  role_display: string;
+  is_active: boolean;
+  date_joined: string;
+  last_login: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateUserRequest {
+  phone_number: string;
+  full_name: string;
+  email: string;
+  role: number;
+  password: string;
+  is_active?: boolean;
+}
+
+export interface UpdateUserRequest {
+  phone_number?: string;
+  full_name?: string;
+  email?: string;
+  role?: number;
+  is_active?: boolean;
+}
+
+export interface GetUserRequest {
+  user_id: string;
+}
+
+export interface ListUsersRequest {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  role?: number;
+  is_active?: boolean;
+  date_joined_after?: string;
+  date_joined_before?: string;
+}
+
+export interface DeleteUserRequest {
+  user_id: string;
+}
+
+export interface UpdateUserRoleRequest {
+  user_id: string;
+  role: number;
+}
+
+export interface ChangePasswordRequest {
+  user_id: string;
+  new_password: string;
+}
+
+export interface Role {
+  id: number;
+  name: string;
+  display_name: string;
+  description?: string;
+}
+
+export interface UserManagementResponse<T> {
+  success: boolean;
+  message?: string;
+  data: T;
+  errors?: string[];
+}
+
+export interface PaginatedUserResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    users: UserManagementUser[];
+    total_users: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+    has_next: boolean;
+    has_previous: boolean;
+  };
+}
+
+// 1. Create new user
+export const createUserManagement = async (data: CreateUserRequest): Promise<UserManagementResponse<UserManagementUser>> => {
+  try {
+    const response = await api.post('/api/users/create_user/', data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to create user');
+  }
+};
+
+// 2. Get user by ID
+export const getUserManagement = async (data: GetUserRequest): Promise<UserManagementResponse<UserManagementUser>> => {
+  try {
+    const response = await api.post('/api/users/get_user/', data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to get user');
+  }
+};
+
+// 3. Update user information
+export const updateUserManagement = async (data: UpdateUserRequest & { user_id: string }): Promise<UserManagementResponse<UserManagementUser>> => {
+  try {
+    const response = await api.post('/api/users/update_user/', data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update user');
+  }
+};
+
+// 4. List users with pagination/filters
+export const listUsersManagement = async (data: ListUsersRequest = {}): Promise<PaginatedUserResponse> => {
+  try {
+    const response = await api.post('/api/users/list_users/', data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to list users');
+  }
+};
+
+// 5. Delete user
+export const deleteUserManagement = async (data: DeleteUserRequest): Promise<UserManagementResponse<{ deleted: boolean }>> => {
+  try {
+    const response = await api.post('/api/users/delete_user/', data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to delete user');
+  }
+};
+
+// 6. Get all available roles
+export const getRolesManagement = async (): Promise<UserManagementResponse<Role[]>> => {
+  try {
+    const response = await api.post('/api/users/get_roles/');
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to get roles');
+  }
+};
+
+// 7. Update user role
+export const updateUserRoleManagement = async (data: UpdateUserRoleRequest): Promise<UserManagementResponse<UserManagementUser>> => {
+  try {
+    const response = await api.post('/api/users/update_user_role/', data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update user role');
+  }
+};
+
+// 8. Change password
+export const changePasswordManagement = async (data: ChangePasswordRequest): Promise<UserManagementResponse<{ changed: boolean }>> => {
+  try {
+    const response = await api.post('/api/users/change_password/', data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to change password');
+  }
+};
+
+// Helper function to check if current user is super user
+export const isSuperUser = (): boolean => {
+  const currentUser = getCurrentUser();
+  if (!currentUser) return false;
+
+  // Role should now always be a number from getCurrentUser
+  return currentUser.role === 1; // Super User role
+};
+
+// Helper function to require super user access
+export const requireSuperUser = (): void => {
+  if (!isSuperUser()) {
+    throw new ApiError('Access denied. Super user privileges required.', 'FORBIDDEN', 403);
   }
 };
 
