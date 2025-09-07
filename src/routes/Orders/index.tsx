@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { getOrders, Order, APIOrderResponse } from 'services/api';
+import { getOrdersWithVendorInterests, Order, APIOrderResponse } from 'services/api';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
 import { useNavigate } from 'react-router-dom';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import debounce from 'utils/debounce';
-import { Box, Card, Typography, TextField, Grid, Tabs, Tab } from '@mui/material';
+import { Box, Card, Typography, TextField, Grid, Tabs, Tab, Modal, Button, Chip } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -27,8 +27,37 @@ export default function GetOrders() {
   const [endDate, setEndDate] = useState<dayjs.Dayjs | null>(dayjs());
   const [activeTab, setActiveTab] = useState(0);
   const [allOrders, setAllOrders] = useState<Order[]>([]);
+  const [vendorInterestsModal, setVendorInterestsModal] = useState<{
+    open: boolean;
+    orderId: string;
+    orderData: any;
+    vendorInterests: any[];
+  }>({
+    open: false,
+    orderId: '',
+    orderData: null,
+    vendorInterests: []
+  });
 
   const navigate = useNavigate();
+
+  const handleVendorInterestsClick = (order: any) => {
+    setVendorInterestsModal({
+      open: true,
+      orderId: order.order_id,
+      orderData: order,
+      vendorInterests: order.vendor_interests || []
+    });
+  };
+
+  const handleCloseVendorInterestsModal = () => {
+    setVendorInterestsModal({
+      open: false,
+      orderId: '',
+      orderData: null,
+      vendorInterests: []
+    });
+  };
 
 const columns = [
   { label: 'Order ID', fieldName: 'order_id', width: 150 },
@@ -37,6 +66,7 @@ const columns = [
   { label: 'From Location', fieldName: 'from_location_name', width: 180 },
   { label: 'To Location', fieldName: 'to_location_name', width: 180 },
   { label: 'Client', fieldName: 'client_name', width: 120 },
+  { label: 'Vendor Interests', fieldName: 'vendor_interests', width: 200 },
   { label: 'Trip Status', fieldName: 'status', width: 120 },
   { label: 'Created By', fieldName: 'created_by', width: 150 },
   { label: 'Actions', fieldName: 'actions', width: 200 },
@@ -50,7 +80,7 @@ const columns = [
     setLoading(true);
     setError('');
     try {
-      const response = await getOrders({ 
+      const response = await getOrdersWithVendorInterests({ 
         search: search || undefined, 
         page: page + 1, 
         page_size: rowsPerPage,
@@ -58,12 +88,49 @@ const columns = [
         end_date: endDate?.format('YYYY-MM-DD')
       });
       const processedOrders = (response.data || []).map((order: any) => ({
-        ...order,
+          ...order,
+          // Map the nested location and client data to the expected field names
+          from_location_name: order.from_location?.name || 'N/A',
+          to_location_name: order.to_location?.name || 'N/A',
+          client_name: order.client?.name || 'N/A',
         created_at: new Date(order.created_at).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
         }),
+        vendor_interests: order.vendor_interests && order.vendor_interests.length > 0 ? (
+          <div 
+            className="flex flex-col gap-1 cursor-pointer hover:bg-blue-50 p-2 rounded transition-colors"
+            onClick={() => handleVendorInterestsClick(order)}
+            title="Click to view all vendor interests"
+          >
+            <div className="flex items-center gap-1">
+              <span className="text-blue-600">👥</span>
+              <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                {order.interest_count} vendor{order.interest_count !== 1 ? 's' : ''}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1 ml-5">
+              {order.vendor_interests.slice(0, 2).map((interest: any, index: number) => (
+                <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                  {interest.vendor.name}
+                </span>
+              ))}
+              {order.vendor_interests.length > 2 && (
+                <span className="text-xs text-blue-600 font-medium">
+                  +{order.vendor_interests.length - 2} more
+                </span>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1">
+            <span className="text-gray-400">👥</span>
+            <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+              No interests
+            </span>
+          </div>
+        ),
         status: order.order_status?.has_trips ? (
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-1">
@@ -87,7 +154,10 @@ const columns = [
         created_by: (
           <div className="flex flex-col">
             <span className="font-medium">
-              {order.order_created_by?.full_name || order.order_created_by?.username || 'Unknown User'}
+              {order.order_created_by?.full_name || 
+               order.order_created_by?.username || 
+               order.order_created_by?.name || 
+               (order.order_created_by?.id ? `User ${order.order_created_by.id.slice(0, 8)}` : 'Unknown User')}
             </span>
             {order.order_created_by?.phone_number && (
               <span className="text-xs text-gray-500">{order.order_created_by.phone_number}</span>
@@ -133,7 +203,7 @@ const columns = [
 
       setOrders(processedOrders);
       setAllOrders(response.data || []); // Store raw data for analytics
-      setTotal(response.count ?? (response.data?.length || 0));
+      setTotal(response.pagination?.total_count ?? (response.data?.length || 0));
     } catch (err: any) {
       setError('Failed to fetch orders');
     } finally {
@@ -270,6 +340,85 @@ const columns = [
           )}
         </div>
       </div>
+
+      {/* Vendor Interests Modal */}
+      <Modal
+        open={vendorInterestsModal.open}
+        onClose={handleCloseVendorInterestsModal}
+        aria-labelledby="vendor-interests-modal-title"
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: { xs: '90%', sm: '600px' },
+            maxHeight: '80vh',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            borderRadius: 2,
+            p: 3,
+            overflow: 'auto'
+          }}
+        >
+          <Typography id="vendor-interests-modal-title" variant="h6" component="h2" sx={{ mb: 2 }}>
+            Vendor Interests - {vendorInterestsModal.orderId}
+          </Typography>
+          
+          {vendorInterestsModal.vendorInterests.length > 0 ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {vendorInterestsModal.vendorInterests.map((interest: any, index: number) => (
+                <Card key={index} sx={{ p: 2, border: '1px solid #e0e0e0' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                      {interest.vendor.name}
+                    </Typography>
+                    <Chip 
+                      label={interest.status} 
+                      color={interest.status === 'PENDING' ? 'warning' : 'success'}
+                      size="small"
+                    />
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>SPOC:</strong> {interest.vendor.spoc_name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Phone:</strong> {interest.vendor.spoc_phone}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Email:</strong> {interest.vendor.spoc_email}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Bid Amount:</strong> ₹{interest.bid_amount?.toLocaleString()}
+                    </Typography>
+                    {interest.notes && (
+                      <Typography variant="body2" color="text.secondary">
+                        <strong>Notes:</strong> {interest.notes}
+                      </Typography>
+                    )}
+                    <Typography variant="caption" color="text.secondary">
+                      <strong>Expressed:</strong> {new Date(interest.created_at).toLocaleString()}
+                    </Typography>
+                  </Box>
+                </Card>
+              ))}
+            </Box>
+          ) : (
+            <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+              No vendor interests found for this order.
+            </Typography>
+          )}
+          
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+            <Button onClick={handleCloseVendorInterestsModal} variant="contained">
+              Close
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </SidebarLayout>
   );
 }

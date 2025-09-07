@@ -868,6 +868,19 @@ export const getOrders = async (
   const response = await api.get('/api/v2/core/orders/', { params });
   return response.data;
 };
+
+export const getOrdersWithVendorInterests = async (
+  params?: {
+    search?: string;
+    page?: number;
+    page_size?: number;
+    start_date?: string;
+    end_date?: string;
+  }
+): Promise<any> => {
+  const response = await api.get('/api/v2/core/orders/with_vendor_interests/', { params });
+  return response.data;
+};
 export const getOrderById = async (id: string): Promise<{ success: boolean; data: Order }> => {
   const response = await api.get(`/api/v2/core/orders/${id}`);
   return response.data;
