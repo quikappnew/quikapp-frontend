@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Typography, CircularProgress, Card } from '@mui/material';
+import { Box, Typography, CircularProgress, Card, IconButton, Tooltip } from '@mui/material';
+import { Edit as EditIcon } from '@mui/icons-material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
 import { getVendors } from 'services/api';
 import { useNavigate } from 'react-router-dom';
 import type { APIVendorResponse } from 'services/api';
 import debounce from 'utils/debounce';
+import VendorEditModal from './vendorEditModal';
 
 const Vendor = () => {
   const navigate = useNavigate();
@@ -16,6 +18,22 @@ const Vendor = () => {
   const [page, setPage] = useState<number>(0); // zero-based for UI
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [total, setTotal] = useState<number>(0);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedVendorId, setSelectedVendorId] = useState<string>('');
+
+  const handleEditVendor = (vendorId: string) => {
+    setSelectedVendorId(vendorId);
+    setEditModalOpen(true);
+  };
+
+  const handleEditModalClose = () => {
+    setEditModalOpen(false);
+    setSelectedVendorId('');
+  };
+
+  const handleEditSuccess = () => {
+    fetchVendors(); // Refresh the vendor list
+  };
 
   const columns = [
     { label: 'Vendor', fieldName: 'name', width: 200 },
@@ -25,6 +43,22 @@ const Vendor = () => {
     { label: 'Email', fieldName: 'spoc_email', width: 130 },
     { label: 'Phone', fieldName: 'spoc_phone', width: 130 },
     { label: 'Alternate', fieldName: 'alternate_contact_number', width: 100 },
+    { 
+      label: 'Actions', 
+      fieldName: 'actions', 
+      width: 100,
+      render: (row: any) => (
+        <Tooltip title="Edit Vendor">
+          <IconButton
+            size="small"
+            onClick={() => handleEditVendor(row.id)}
+            sx={{ color: 'primary.main' }}
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )
+    },
   ];
 
   useEffect(() => {
@@ -107,6 +141,13 @@ const Vendor = () => {
           )}
         </Card>
       </Box>
+      
+      <VendorEditModal
+        open={editModalOpen}
+        onClose={handleEditModalClose}
+        vendorId={selectedVendorId}
+        onSuccess={handleEditSuccess}
+      />
     </SidebarLayout>
   );
 };

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Paper, Link as MuiLink, Button, Stack, Divider, Grid, Chip } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
-import { getVendorOnboardingById, updateVendorOnboarding } from 'services/api';
+import { getVendorOnboardingById, updateVendorOnboardingStatus } from 'services/api';
 import { getAbsoluteUrl } from 'utils/commonFunctions';
 
 
@@ -52,7 +52,7 @@ const VendorDetails: React.FC = () => {
 
   const handleApprove = async () => {
     try {
-      await updateVendorOnboarding(id!, { status: 'Completed' });
+      await updateVendorOnboardingStatus(id!, 'Completed');
       alert('Vendor approved successfully!');
       fetchVendor();
       navigate('/vendor/list');
@@ -63,7 +63,7 @@ const VendorDetails: React.FC = () => {
 
   const handleReject = async () => {
     try {
-      await updateVendorOnboarding(id!, { status: 'Rejected' });
+      await updateVendorOnboardingStatus(id!, 'Rejected');
       alert('Vendor rejected successfully!');
       fetchVendor();
       navigate(-1);

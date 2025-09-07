@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, CircularProgress, Button, Paper, InputBase, IconButton, Card } from '@mui/material';
+import { Box, Typography, CircularProgress, Button, Paper, InputBase, IconButton, Card, Tooltip } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
 import { getVendorOnboarding } from 'services/api';
@@ -8,6 +8,7 @@ import type { Vendor } from 'services/api';
 import SearchIcon from '@mui/icons-material/Search';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
+import VendorOnboardingEditModal from './vendorOnboardingEditModal';
 
 
 const VendorOnBoardingList: React.FC = () => {
@@ -15,6 +16,22 @@ const VendorOnBoardingList: React.FC = () => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedOnboardingId, setSelectedOnboardingId] = useState<string>('');
+
+  const handleEditOnboarding = (onboardingId: string) => {
+    setSelectedOnboardingId(onboardingId);
+    setEditModalOpen(true);
+  };
+
+  const handleEditModalClose = () => {
+    setEditModalOpen(false);
+    setSelectedOnboardingId('');
+  };
+
+  const handleEditSuccess = () => {
+    fetchVendors(); // Refresh the vendor onboarding list
+  };
 
   const columns = [
     { label: 'Vendor Name', fieldName: 'name', width: 200 },
@@ -37,25 +54,28 @@ const VendorOnBoardingList: React.FC = () => {
           ...vendor,
           action: (
             <>
-              <IconButton
-                sx={{ color: "#72787e" }}
-                onClick={e => {
-                  e.stopPropagation();
-                  navigate(`/vendor/onboarding/${vendor.id}`);
-                }}
-              >
-                <VisibilityIcon />
-              </IconButton>
-              {/* <IconButton
-                color="warning"
-                sx={{ color: "#f9a825", ml: 1 }}
-                onClick={e => {
-                  e.stopPropagation();
-                  navigate(`/vendor/onboarding/${vendor.id}/edit`);
-                }}
-              >
-                <EditIcon />
-              </IconButton> */}
+              <Tooltip title="View Details">
+                <IconButton
+                  sx={{ color: "#72787e" }}
+                  onClick={e => {
+                    e.stopPropagation();
+                    navigate(`/vendor/onboarding/${vendor.id}`);
+                  }}
+                >
+                  <VisibilityIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Edit Onboarding">
+                <IconButton
+                  sx={{ color: "#f9a825", ml: 1 }}
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleEditOnboarding(vendor.id);
+                  }}
+                >
+                  <EditIcon />
+                </IconButton>
+              </Tooltip>
             </>
           ),
         }))
@@ -100,6 +120,13 @@ const VendorOnBoardingList: React.FC = () => {
           )}
         </Card>
       </Box>
+      
+      <VendorOnboardingEditModal
+        open={editModalOpen}
+        onClose={handleEditModalClose}
+        onboardingId={selectedOnboardingId}
+        onSuccess={handleEditSuccess}
+      />
     </SidebarLayout>
   );
 };

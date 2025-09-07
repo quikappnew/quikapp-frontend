@@ -55,6 +55,7 @@ interface Column {
     | 'FILE'
     | 'TRIP_STATUS';
   width: number;
+  render?: (row: any) => React.ReactNode;
 }
 
 interface PaginationProps {
@@ -118,7 +119,18 @@ const DataTableCell: FC<{
     | 'TRIP_STATUS';
   onSelect?: (value: any) => void;
   isActionCell?: boolean;
-}> = ({ value, type, onSelect = () => {}, isActionCell = false }) => {
+  render?: (row: any) => React.ReactNode;
+  row?: any;
+}> = ({ value, type, onSelect = () => {}, isActionCell = false, render, row }) => {
+  // If render function is provided, use it
+  if (render && row) {
+    return (
+      <TableCell align="left" onClick={(e) => e.stopPropagation()}>
+        {render(row)}
+      </TableCell>
+    );
+  }
+
   if (isActionCell) {
     return (
       <TableCell align="left" onClick={(e) => e.stopPropagation()}>
@@ -391,6 +403,8 @@ const DataTable: FC<DataTableProps> = ({
                           value={getValueByFieldName(column.fieldName, row)}
                           type={column.type}
                           isActionCell={column.fieldName === 'action'}
+                          render={column.render}
+                          row={row}
                         />
                       ))}
                     </TableRow>

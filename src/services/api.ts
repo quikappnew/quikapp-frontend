@@ -642,6 +642,49 @@ export const getVendorOnboardingList = async (): Promise<any> => {
   }
 };
 
+export const updateVendor = async (vendorId: string, data: {
+  name: string;
+  pan: string;
+  spoc_name: string;
+}): Promise<any> => {
+  try {
+    const response = await api.put(`/api/v2/core/vendors/${vendorId}/`, data, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update vendor');
+  }
+};
+
+export const updateVendorOnboarding = async (onboardingId: string, formData: FormData): Promise<any> => {
+  try {
+    const response = await api.put(`/api/v2/core/vendor-onboarding/${onboardingId}/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update vendor onboarding');
+  }
+};
+
+export const updateVendorOnboardingStatus = async (onboardingId: string, status: string): Promise<any> => {
+  try {
+    const response = await api.put(`/api/v2/core/vendor-onboarding/${onboardingId}/`, { status }, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update vendor onboarding status');
+  }
+};
+
 export const getLocationList = async (): Promise<{ success: boolean; data: Location[] }> => {
   try {
     const response = await api.get('api/v2/core/locations/');
@@ -1069,14 +1112,6 @@ export const getVendorOnboardingById = async (id: string) => {
   }
 };
 
-export const updateVendorOnboarding = async (id: string, data: any) => {
-  try {
-    const response = await api.put(`/api/v2/core/vendor-onboarding/${id}/`, data);
-    return response.data;
-  } catch (error) {
-    throw ApiError.fromAxiosError(error, 'Failed to update vendor onboarding');
-  }
-};
 
 // Add Lock interfaces based on API response
 export interface Lock {
