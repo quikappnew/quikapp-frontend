@@ -7,7 +7,6 @@ import ErrorMessage from 'components/ErrorMessage';
 
 const ClientDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [client, setClient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

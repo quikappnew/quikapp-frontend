@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getOrderById, Order, getTrips } from 'services/api';
 import SidebarLayout from 'layouts/SidebarLayout';
+import OrderAuditLogs from 'components/OrderAuditLogs';
+import OrderAuditSummary from 'components/OrderAuditLogs/OrderAuditSummary';
 import {
   Card,
   CardContent,
@@ -11,7 +13,6 @@ import {
   Button,
   Alert,
   CircularProgress,
-  Divider,
   Chip,
   Table,
   TableBody,
@@ -279,6 +280,19 @@ export default function OrderDetails() {
                   </Card>
                 </Grid>
               )}
+
+              {/* Order Audit Summary */}
+              <Grid item xs={12}>
+                <OrderAuditSummary orderId={order.id} />
+              </Grid>
+
+              {/* Order Audit Logs */}
+              <Grid item xs={12}>
+                <OrderAuditLogs 
+                  orderId={order.id} 
+                  orderReferenceId={order.order_id}
+                />
+              </Grid>
             </Grid>
           ) : (
             <Typography align="center" color="text.secondary" sx={{ py: 4 }}>

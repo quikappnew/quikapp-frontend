@@ -3,7 +3,6 @@ import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
 import ExploreOutlinedIcon from '@mui/icons-material/ExploreOutlined';
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
-import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';

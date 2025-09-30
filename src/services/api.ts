@@ -6,7 +6,6 @@ import type {
   CategoryEnum,
   IdentityCardStatusEnum,
   Document as DocumentType,
-  PaginatedResponse,
   User,
   Province,
   UserStatusEnum,
@@ -22,15 +21,9 @@ import type {
   VendorBankAccount,
   CreateBankAccountData,
   UpdateBankAccountData,
-  PaymentAnalytics,
-  VendorPaymentSummary,
-  TripFinancialSummary,
-  OutstandingBalance,
-  TrendData,
   TripsResponse,
   PaymentsResponse,
   VendorBankAccountsResponse,
-  PaymentAnalyticsResponse,
   VendorPaymentSummaryResponse,
   TripFinancialSummaryResponse,
   OutstandingBalancesResponse,
@@ -530,9 +523,6 @@ export const verifyOTP = async (data: VerifyOTPData): Promise<VerifyOTPResponse>
   return response.data;
 };
 
-interface ValidateTokenData {
-  token: string;
-}
 
 interface ValidateTokenResponse {
   valid: boolean;
@@ -766,17 +756,6 @@ export const updateClient = async (id: string, client: Partial<Client>): Promise
 };
 
 //vehicle onboarding
-interface Vehicle {
-  client: string;
-  vehicle_number: string;
-  vehicle_type: string;
-  vehicle_model: string;
-  vehicle_color: string;
-  vehicle_image: File;
-  vehicle_registration_certificate: File;
-  vehicle_insurance_certificate: File;
-  vehicle_fitment_certificate: File;
-}
 
 export const vehicleOnboarding = async (formData: FormData): Promise<any> => {
   try {
@@ -1274,13 +1253,13 @@ const transformTripData = (apiData: any): Trip => {
     scheduledDate: apiData.scheduled_date || new Date().toISOString(),
     startDate: apiData.start_date,
     endDate: apiData.end_date,
-    fromLocation: apiData.from_location,
-    toLocation: apiData.to_location,
+    fromLocation: apiData.from_location_name || apiData.from_location || '',
+    toLocation: apiData.to_location_name || apiData.to_location || '',
     distance: apiData.distance || 0,
     duration: apiData.duration || 0,
     specialInstructions: apiData.special_instructions,
     vehicleId: apiData.vehicle_id || '',
-    vehicleNumber: apiData.vehicle_number,
+    vehicleNumber: apiData.vehicle_number || '',
     driverId: apiData.driver_id || '',
     driverName: apiData.driver_name || '',
     vendorId: apiData.vendor?.id || apiData.vendor_id || '',
@@ -1296,7 +1275,7 @@ const transformTripData = (apiData: any): Trip => {
       alternate_contact_number: apiData.vendor.alternate_contact_number,
     } : undefined,
     clientId: apiData.client_id || '',
-    clientName: apiData.client_name,
+    clientName: apiData.client_name || '',
     totalAmount: apiData.pricing || apiData.order_prize || 0,
     paidAmount: apiData.paid_amount || 0,
     outstandingAmount: apiData.outstanding_amount || 0,
@@ -1350,6 +1329,108 @@ export const updateTripStatus = async (id: string, status: TripStatusEnum): Prom
     return response.data;
   } catch (error) {
     throw ApiError.fromAxiosError(error, 'Failed to update trip status');
+  }
+};
+
+// New Trip Status & Vehicle Management API Functions
+export const getTripStatusChoices = async (): Promise<{
+  success: boolean;
+  data: {
+    status_choices: Array<{
+      value: number;
+      label: string;
+    }>;
+  };
+}> => {
+  try {
+    const response = await api.get('/api/v2/core/trips/status_choices/');
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch status choices');
+  }
+};
+
+export const getAvailableVehicles = async (): Promise<{
+  success: boolean;
+  data: {
+    vehicles: Array<{
+      id: string;
+      vehicle_number: string;
+      truck_length: string;
+      truck_length_value: string;
+      vehicle_owner: string;
+      vendor_name: string | null;
+      vendor_id: string | null;
+    }>;
+  };
+}> => {
+  try {
+    const response = await api.get('/api/v2/core/trips/available_vehicles/');
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch available vehicles');
+  }
+};
+
+export const addTripStatus = async (
+  tripId: string,
+  status: number,
+  notes?: string
+): Promise<{
+  success: boolean;
+  data: {
+    id: string;
+    trip_id: string;
+    status: number;
+    status_label: string;
+    notes: string;
+    created_at: string;
+    vehicle: {
+      id: string;
+      vehicle_number: string;
+      truck_length: string;
+      vehicle_owner: string;
+      vendor_name: string | null;
+    } | null;
+  };
+}> => {
+  try {
+    const response = await api.post(`/api/v2/core/trips/${tripId}/add_status/`, {
+      status,
+      notes
+    });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to add trip status');
+  }
+};
+
+export const getTripStatusHistory = async (tripId: string): Promise<{
+  success: boolean;
+  data: {
+    trip_id: string;
+    reference_id: string;
+    vehicle: {
+      id: string;
+      vehicle_number: string;
+      truck_length: string;
+      vehicle_owner: string;
+      vendor_name: string | null;
+    } | null;
+    statuses: Array<{
+      id: string;
+      status: number;
+      status_label: string;
+      notes: string;
+      created_at: string;
+    }>;
+  };
+}> => {
+  try {
+    const response = await api.get(`/api/v2/core/trips/${tripId}/status_history/`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch trip status history');
   }
 };
 
@@ -1643,6 +1724,22 @@ export const exportReport = async (format: 'pdf' | 'excel' | 'csv', params?: {
   }
 };
 
+// Specific CSV export for trips with date range
+export const exportTripsCSV = async (params: {
+  date_from: string;
+  date_to: string;
+}): Promise<Blob> => {
+  try {
+    const response = await api.get('/api/v2/core/trips/export_csv/', {
+      params,
+      responseType: 'blob'
+    });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to export trips CSV');
+  }
+};
+
 // Search API Functions
 export const searchTrips = async (params: {
   q: string;
@@ -1872,6 +1969,260 @@ export const isSuperUser = (): boolean => {
 export const requireSuperUser = (): void => {
   if (!isSuperUser()) {
     throw new ApiError('Access denied. Super user privileges required.', 'FORBIDDEN', 403);
+  }
+};
+
+// ============================================================================
+// TRIP AUDIT LOGGING API FUNCTIONS
+// ============================================================================
+
+export interface TripAuditLog {
+  id: string;
+  action: 'CREATE' | 'UPDATE' | 'DELETE' | 'STATUS_CHANGE' | 'PAYMENT_UPDATE' | 'SUMMARY_UPDATE';
+  action_display: string;
+  field_changes: {
+    [fieldName: string]: {
+      old: string | number | boolean;
+      new: string | number | boolean;
+    };
+  };
+  changes_summary: string;
+  user: {
+    id: string;
+    username: string;
+    full_name: string;
+    email?: string;
+  };
+  ip_address: string;
+  user_agent: string;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TripAuditLogResponse {
+  success: boolean;
+  data: {
+    trip_id: string;
+    trip_reference_id: string;
+    audit_logs: TripAuditLog[];
+    pagination: {
+      current_page: number;
+      total_pages: number;
+      total_records: number;
+      page_size: number;
+      has_next: boolean;
+      has_previous: boolean;
+    };
+  };
+}
+
+export interface TripAuditSummaryResponse {
+  success: boolean;
+  data: {
+    trip_id: string;
+    trip_reference_id: string;
+    summary: {
+      total_changes: number;
+      actions_breakdown: {
+        [action: string]: number;
+      };
+      users_breakdown: {
+        [username: string]: number;
+      };
+      first_change: string;
+      last_change: string;
+    };
+    recent_changes: Array<{
+      id: string;
+      action: string;
+      user: string;
+      changes_summary: string;
+      created_at: string;
+    }>;
+  };
+}
+
+// Get trip audit logs with filtering and pagination
+export const getTripAuditLogs = async (params: {
+  trip_id: string;
+  action?: string;
+  user_id?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<TripAuditLogResponse> => {
+  try {
+    const response = await api.get('/api/v2/core/trip-audit-logs/', { params });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch trip audit logs');
+  }
+};
+
+// Get specific trip audit log by ID
+export const getTripAuditLogById = async (auditLogId: string): Promise<{
+  success: boolean;
+  data: TripAuditLog & {
+    trip: {
+      id: string;
+      reference_id: string;
+    };
+  };
+}> => {
+  try {
+    const response = await api.get(`/api/v2/core/trip-audit-logs/${auditLogId}/`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch trip audit log details');
+  }
+};
+
+// Get trip audit summary
+export const getTripAuditSummary = async (tripId: string): Promise<TripAuditSummaryResponse> => {
+  try {
+    const response = await api.get('/api/v2/core/trip-audit-logs/summary/', {
+      params: { trip_id: tripId }
+    });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch trip audit summary');
+  }
+};
+
+// Enhanced trip update function that triggers audit logging
+export const updateTripWithAudit = async (id: string, data: UpdateTripData): Promise<Trip> => {
+  try {
+    const response = await api.put(`/api/v2/core/trips/${id}/`, data);
+    return transformTripData(response.data);
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update trip');
+  }
+};
+
+// ============================================================================
+// ORDER AUDIT LOGGING API FUNCTIONS
+// ============================================================================
+
+export interface OrderAuditLog {
+  id: string;
+  action: 'CREATE' | 'UPDATE' | 'DELETE';
+  action_display: string;
+  field_changes: {
+    [fieldName: string]: {
+      old: string | number | boolean;
+      new: string | number | boolean;
+    };
+  };
+  changes_summary: string;
+  user: {
+    id: string;
+    username: string;
+    full_name: string;
+    email?: string;
+  };
+  ip_address: string;
+  user_agent: string;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrderAuditLogResponse {
+  success: boolean;
+  data: {
+    order_id: string;
+    order_reference_id: string;
+    audit_logs: OrderAuditLog[];
+    pagination: {
+      current_page: number;
+      total_pages: number;
+      total_records: number;
+      page_size: number;
+      has_next: boolean;
+      has_previous: boolean;
+    };
+  };
+}
+
+export interface OrderAuditSummaryResponse {
+  success: boolean;
+  data: {
+    order_id: string;
+    order_reference_id: string;
+    summary: {
+      total_changes: number;
+      actions_breakdown: {
+        [action: string]: number;
+      };
+      users_breakdown: {
+        [username: string]: number;
+      };
+      first_change: string;
+      last_change: string;
+    };
+    recent_changes: Array<{
+      id: string;
+      action: string;
+      user: string;
+      changes_summary: string;
+      created_at: string;
+    }>;
+  };
+}
+
+// Get order audit logs with filtering and pagination
+export const getOrderAuditLogs = async (params: {
+  order_id: string;
+  action?: string;
+  user_id?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<OrderAuditLogResponse> => {
+  try {
+    const response = await api.get('/api/v2/core/order-audit-logs/', { params });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch order audit logs');
+  }
+};
+
+// Get specific order audit log by ID
+export const getOrderAuditLogById = async (auditLogId: string): Promise<{
+  success: boolean;
+  data: OrderAuditLog & {
+    order: {
+      id: string;
+      order_id: string;
+    };
+  };
+}> => {
+  try {
+    const response = await api.get(`/api/v2/core/order-audit-logs/${auditLogId}/`);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch order audit log details');
+  }
+};
+
+// Get order audit summary
+export const getOrderAuditSummary = async (orderId: string): Promise<OrderAuditSummaryResponse> => {
+  try {
+    const response = await api.get('/api/v2/core/order-audit-logs/summary/', {
+      params: { order_id: orderId }
+    });
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to fetch order audit summary');
+  }
+};
+
+// Enhanced order update function that triggers audit logging
+export const updateOrderWithAudit = async (orderId: string, data: OrderData): Promise<Order> => {
+  try {
+    const response = await api.put(`/api/v2/core/orders/${orderId}/`, data);
+    return response.data;
+  } catch (error) {
+    throw ApiError.fromAxiosError(error, 'Failed to update order');
   }
 };
 

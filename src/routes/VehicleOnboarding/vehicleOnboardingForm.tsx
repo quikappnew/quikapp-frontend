@@ -6,19 +6,12 @@ import {
   TextField,
   Typography,
   CircularProgress,
-  Card,
-  CardContent,
-  CardHeader,
   Alert,
-  Chip,
-  Divider,
   InputLabel,
   MenuItem,
   Select,
   FormControl,
 } from '@mui/material';
-import { CloudUpload } from '@mui/icons-material';
-import SidebarLayout from 'layouts/SidebarLayout';
 import { getVendors, vehicleOnboarding } from 'services/api';
 import { useNavigate } from 'react-router-dom';
 import SelectInput from 'react-select';

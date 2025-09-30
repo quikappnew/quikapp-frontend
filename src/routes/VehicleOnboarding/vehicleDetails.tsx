@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Card, CardContent, Typography, CircularProgress, Alert, Grid, Button,  Link as MuiLink, Divider } from '@mui/material';
+import { Box, Card, Typography, CircularProgress, Alert, Grid, Button,  Link as MuiLink, Divider } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import SidebarLayout from 'layouts/SidebarLayout';
 import { getVehicleOnboardingDetails, updateVehicleOnboarding } from 'services/api';
@@ -79,8 +79,8 @@ const VehicleDetailsComponent = ({ vehicle, onApprove, onReject }: any) => {
           </Grid>
         </Grid>
         <Box mt={4} display="flex" justifyContent="flex-end" gap={2}>
-          <Button variant="contained" color="success" sx={{ background: '#388e3c', fontWeight: 600, px: 4, borderRadius: 2 }} onClick={onApprove} disabled={vehicle.status == 'approved'}>Approve</Button>
-          <Button variant="contained" color="error" sx={{ background: '#d32f2f', fontWeight: 600, px: 4, borderRadius: 2 }} onClick={onReject} disabled={vehicle.status == 'rejected'}>Reject</Button>
+          <Button variant="contained" color="success" sx={{ background: '#388e3c', fontWeight: 600, px: 4, borderRadius: 2 }} onClick={onApprove} disabled={vehicle.status === 'approved'}>Approve</Button>
+          <Button variant="contained" color="error" sx={{ background: '#d32f2f', fontWeight: 600, px: 4, borderRadius: 2 }} onClick={onReject} disabled={vehicle.status === 'rejected'}>Reject</Button>
         </Box>
       </Card>
     </Box>

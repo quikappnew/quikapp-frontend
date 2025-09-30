@@ -1,14 +1,9 @@
 import { Box, Button, Grid } from "@mui/material";
-import Navbar from "components/Navbar";
 import SidebarLayout from "layouts/SidebarLayout"
-import { useState, Fragment, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import ClientModal from "./clientModal";
 import BasicCard from "components/Card";
 import DataTable from "components/DataTable";
-import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { TableRow, TableCell } from "@mui/material";
-import { getRandomColor } from "utils/randomColorGenerator";
 import { getClients as fetchClients } from "services/api";
 import { useNavigate } from 'react-router-dom';
 
@@ -29,20 +24,12 @@ const initialList = [
 const Client = () => {
     const client = "Sowmya";
     const [modalOpen, setModalOpen] = useState(false);
-    const [expandedRows, setExpandedRows] = useState<number[]>([]);
     const [clients, setClients] = useState<any[]>([]);
     const navigate = useNavigate();
 
     const handleOpen = () => setModalOpen(true);
     const handleClose = () => setModalOpen(false);
 
-    const handleRowClick = (rowId: number) => {
-        setExpandedRows(prev => 
-            prev.includes(rowId) 
-                ? prev.filter(id => id !== rowId)
-                : [...prev, rowId]
-        );
-    };
 
     // Memoize the list with random colors
     const listWithColors = useMemo(() => {
@@ -53,9 +40,7 @@ const Client = () => {
         }));
     }, []); // Empty dependency array means this runs once
 
-    const handleViewTrips = (clientName: string) => {
-    
-    };
+
 
     const handleViewDetails = (clientId: string) => {
         navigate(`/clients/${clientId}`);
@@ -90,56 +75,7 @@ const Client = () => {
         ),
     }));
 
-    // const customRowRender = (row: any) => {
-    //     const isExpanded = expandedRows.includes(row.id);
-        
-    //     return (
-    //         <Fragment key={row.id}>
-    //             <TableRow
-    //                 hover
-    //                 onClick={() => handleRowClick(row.id)}
-    //                 sx={{ cursor: 'pointer' }}
-    //             >
-    //                 {columns.map(column => (
-    //                     <TableCell 
-    //                         key={column.fieldName} 
-    //                         onClick={(e) => {
-    //                             if (column.fieldName !== 'action') {
-    //                                 e.stopPropagation();
-    //                                 handleRowClick(row.id);
-    //                             }
-    //                         }}
-    //                     >
-    //                         {column.fieldName === 'action' ? row.action : row[column.fieldName]}
-    //                     </TableCell>
-    //                 ))}
-    //                 <TableCell align="right">
-    //                     <ExpandMoreIcon 
-    //                         sx={{ 
-    //                             transform: isExpanded ? 'rotate(180deg)' : 'none',
-    //                             transition: 'transform 0.2s'
-    //                         }} 
-    //                     />
-    //                 </TableCell>
-    //             </TableRow>
-    //             {isExpanded && (
-    //                 <TableRow>
-    //                     <TableCell colSpan={columns.length + 1} sx={{ py: 0, borderBottom: 'none' }}>
-    //                         <Box sx={{ p: 2, bgcolor: '#f9f9f9' }}>
-    //                             <h4>Client Details</h4>
-    //                             <p>Client ID: {row.id}</p>
-    //                             <p>Client Name: {row.clientName}</p>
-    //                             <p>GST Number: {row.gstNumber}</p>
-    //                             <p>PAN Number: {row.panNumber}</p>
-    //                             <p>SPOC Name: {row.spocName}</p>
-    //                             <p>Created Date: {new Date().toLocaleDateString()}</p>
-    //                         </Box>
-    //                     </TableCell>
-    //                 </TableRow>
-    //             )}
-    //         </Fragment>
-    //     );
-    // };
+   
   
     return (
         <SidebarLayout>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Box, Typography, Paper, Grid, Divider, Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +9,6 @@ interface LocationState {
 }
 
 const LocationDetails: React.FC = () => {
-  const { locationId } = useParams<{ locationId: string }>();
   const { state } = useLocation() as { state: LocationState };
   const location = state?.location;
   const navigate = useNavigate();

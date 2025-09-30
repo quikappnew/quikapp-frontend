@@ -8,7 +8,7 @@ import {
   CardContent,
   CircularProgress
 } from '@mui/material';
-import { getCurrentUserByToken, getCurrentUser, isSuperUser } from 'services/api';
+import { getCurrentUserByToken, getCurrentUser } from 'services/api';
 
 const ForceRefreshUser: React.FC = () => {
   const [loading, setLoading] = useState(false);

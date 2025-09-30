@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from 'react';
+import React, { useState, useEffect, FC, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -12,8 +12,7 @@ import {
   Grid,
   Alert,
   CircularProgress,
-  IconButton,
-  Chip
+  IconButton
 } from '@mui/material';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
@@ -42,13 +41,7 @@ const CreatePayment: FC = () => {
     notes: ''
   });
 
-  useEffect(() => {
-    if (tripId) {
-      fetchTripDetails();
-    }
-  }, [tripId]);
-
-  const fetchTripDetails = async () => {
+  const fetchTripDetails = useCallback(async () => {
     try {
       setLoading(true);
       const tripData = await getTripById(tripId!);
@@ -59,7 +52,13 @@ const CreatePayment: FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tripId]);
+
+  useEffect(() => {
+    if (tripId) {
+      fetchTripDetails();
+    }
+  }, [tripId, fetchTripDetails]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

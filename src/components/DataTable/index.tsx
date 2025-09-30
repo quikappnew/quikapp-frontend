@@ -11,7 +11,6 @@ import {
   TableRow,
   TextField,
   Accordion,
-  AccordionSummary,
   AccordionDetails,
   Paper,
   TablePagination,
@@ -19,22 +18,20 @@ import {
 } from '@mui/material';
 import dayjs from 'dayjs';
 import { FC, Fragment, ReactNode, useState } from 'react';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
 
 import Button from 'components/Button';
 import ErrorMessage from 'components/ErrorMessage';
 import LoadingIndicator from 'components/LoadingIndicator';
 import { ApiError } from '../../types/api';
-import ConfirmButton from '../ConfirmButton';
 
 import binocularsIcon from 'media/icons/binoculars.svg';
-import searchOutline from 'media/icons/search-outline.svg';
 
 import countryCodeToReadable from 'utils/country-code-to-readable';
 // import fundingSourceToReadable from 'utils/funding-source-to-readable';
 import statusEnumToReadable from 'utils/status-enum-to-readable';
 import tripStatusToReadable from 'utils/trip-status-to-readable';
+import paymentStatusToReadable from 'utils/payment-status-to-readable';
 
 import theme from './theme.module.scss';
 
@@ -53,7 +50,8 @@ interface Column {
     | 'SELECT'
     | 'COUNTRY'
     | 'FILE'
-    | 'TRIP_STATUS';
+    | 'TRIP_STATUS'
+    | 'PAYMENT_STATUS';
   width: number;
   render?: (row: any) => React.ReactNode;
 }
@@ -116,7 +114,8 @@ const DataTableCell: FC<{
     | 'FUNDING_SOURCE'
     | 'COUNTRY'
     | 'FILE'
-    | 'TRIP_STATUS';
+    | 'TRIP_STATUS'
+    | 'PAYMENT_STATUS';
   onSelect?: (value: any) => void;
   isActionCell?: boolean;
   render?: (row: any) => React.ReactNode;
@@ -228,6 +227,25 @@ const DataTableCell: FC<{
             sx={{
               backgroundColor: `${tripColor}20`,
               color: tripColor,
+              fontSize: '12px',
+              padding: '4px 8px',
+              fontWeight: 500,
+              '& .MuiChip-label': {
+                px: 1,
+              },
+            }}
+          />
+        </TableCell>
+      );
+    case 'PAYMENT_STATUS':
+      const { label: paymentLabel, color: paymentColor } = paymentStatusToReadable(value);
+      return (
+        <TableCell align="left">
+          <Chip
+            label={paymentLabel}
+            sx={{
+              backgroundColor: `${paymentColor}20`,
+              color: paymentColor,
               fontSize: '12px',
               padding: '4px 8px',
               fontWeight: 500,

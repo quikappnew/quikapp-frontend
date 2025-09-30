@@ -1,6 +1,7 @@
-import { Box, Button, Card, Grid, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Typography, Paper, LinearProgress, List, ListItem, ListItemText, Divider, Avatar } from "@mui/material";
-import { useState, FC, useEffect } from "react";
+import { Box, Button, Card, Grid, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Typography, Paper, LinearProgress, TextField, Tabs, Tab, Divider } from "@mui/material";
+import { useState, FC, useEffect, useCallback } from "react";
 import DataTable from "components/DataTable";
+import TripAuditLogs from "components/TripAuditLogs";
 import { useNavigate, useParams } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
@@ -8,7 +9,10 @@ import {
   getTripById,
   getPaymentsByTrip,
   updateTripStatus,
-  getOrderById
+  getOrderById,
+  getTripStatusChoices,
+  addTripStatus,
+  getTripStatusHistory
 } from 'services/api';
 import type {
   Payment,
@@ -32,9 +36,10 @@ import {
   Business as BusinessIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
-  Receipt as ReceiptIcon,
   DirectionsCar as DirectionsCarIcon,
-  AccountCircle as AccountCircleIcon
+  AccountCircle as AccountCircleIcon,
+  History as HistoryIcon,
+  Assignment as AssignmentIcon
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
@@ -48,9 +53,28 @@ const TripDetails: FC = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [order, setOrder] = useState<any>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
-  const [newStatus, setNewStatus] = useState<TripStatusEnum | ''>('');
+  const [newStatus, setNewStatus] = useState<number | ''>('');
+  const [statusNotes, setStatusNotes] = useState<string>('');
+  const [statusChoices, setStatusChoices] = useState<Array<{value: number; label: string}>>([]);
+  const [statusHistory, setStatusHistory] = useState<Array<{
+    id: string;
+    status: number;
+    status_label: string;
+    notes: string;
+    created_at: string;
+  }>>([]);
+  const [vehicleInfo, setVehicleInfo] = useState<{
+    id: string;
+    vehicle_number: string;
+    truck_length: string;
+    vehicle_owner: string;
+    vendor_name: string | null;
+  } | null>(null);
+  
+  // Tab state for different sections
+  const [currentTab, setCurrentTab] = useState(0);
 
-  const fetchTripDetails = async () => {
+  const fetchTripDetails = useCallback(async () => {
     if (!tripId) return;
     
     try {
@@ -98,22 +122,97 @@ const TripDetails: FC = () => {
     } finally {
       setLoading(false);
     }
+  }, [tripId]);
+
+  const fetchStatusChoices = async () => {
+    try {
+      const response = await getTripStatusChoices();
+      if (response.success) {
+        setStatusChoices(response.data.status_choices);
+      }
+    } catch (error) {
+      console.error('Failed to fetch status choices:', error);
+      // Fallback to hardcoded status choices if API fails
+      setStatusChoices([
+        { value: 0, label: 'Initiated' },
+        { value: 1, label: 'Loading' },
+        { value: 2, label: 'Waiting for load' },
+        { value: 3, label: 'Intrans' },
+        { value: 4, label: 'In Transit' },
+        { value: 5, label: 'Unloading' },
+        { value: 6, label: 'Waiting for unloading' },
+        { value: 7, label: 'Vehicle unloaded' },
+        { value: 8, label: 'Completed' }
+      ]);
+    }
   };
+
+  const fetchStatusHistory = useCallback(async () => {
+    if (!tripId) return;
+    try {
+      const response = await getTripStatusHistory(tripId);
+      if (response.success) {
+        setStatusHistory(response.data.statuses);
+        setVehicleInfo(response.data.vehicle);
+      }
+    } catch (error) {
+      console.error('Failed to fetch status history:', error);
+    }
+  }, [tripId]);
 
   useEffect(() => {
     fetchTripDetails();
-  }, [tripId]);
+    fetchStatusChoices();
+    fetchStatusHistory();
+  }, [fetchTripDetails, fetchStatusHistory]);
 
   const handleStatusUpdate = async () => {
-    if (!tripId || !newStatus) return;
+    if (!tripId || newStatus === '') return;
 
+    setLoading(true);
     try {
-      await updateTripStatus(tripId, newStatus as TripStatusEnum);
-      toast.success('Trip status updated successfully');
-      setStatusDialogOpen(false);
-      fetchTripDetails();
+      // Try the new API first
+      const response = await addTripStatus(tripId, newStatus as number, statusNotes);
+      if (response.success) {
+        toast.success('Trip status updated successfully');
+        setStatusDialogOpen(false);
+        setNewStatus('');
+        setStatusNotes('');
+        // Refresh data
+        fetchTripDetails();
+        fetchStatusHistory();
+      }
     } catch (error) {
-      toast.error('Failed to update trip status');
+      console.error('New API failed, trying fallback:', error);
+      
+      // Fallback to old API if new one fails
+      try {
+        // Map numeric status to enum for old API
+        const statusMapping: { [key: number]: TripStatusEnum } = {
+          0: TripStatusEnum.SCHEDULED,
+          1: TripStatusEnum.ONGOING,
+          2: TripStatusEnum.ONGOING,
+          3: TripStatusEnum.ONGOING,
+          4: TripStatusEnum.ONGOING,
+          5: TripStatusEnum.ONGOING,
+          6: TripStatusEnum.ONGOING,
+          7: TripStatusEnum.ONGOING,
+          8: TripStatusEnum.COMPLETED
+        };
+        
+        const mappedStatus = statusMapping[newStatus as number] || TripStatusEnum.SCHEDULED;
+        await updateTripStatus(tripId, mappedStatus);
+        toast.success('Trip status updated successfully');
+        setStatusDialogOpen(false);
+        setNewStatus('');
+        setStatusNotes('');
+        fetchTripDetails();
+      } catch (fallbackError) {
+        console.error('Both APIs failed:', fallbackError);
+        toast.error('Failed to update trip status');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -383,8 +482,16 @@ const TripDetails: FC = () => {
                     <Typography variant="body2" color="text.secondary">Vehicle</Typography>
                     <Typography variant="body1" sx={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1 }}>
                       <DirectionsCarIcon fontSize="small" />
-                      {trip.vehicleNumber || (trip as any).vehicle_number || 'N/A'}
+                      {vehicleInfo?.vehicle_number || trip.vehicleNumber || (trip as any).vehicle_number || 'N/A'}
                     </Typography>
+                    {vehicleInfo && (
+                      <Box sx={{ mt: 1 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          Length: {vehicleInfo.truck_length} | Owner: {vehicleInfo.vehicle_owner}
+                          {vehicleInfo.vendor_name && ` | Vendor: ${vehicleInfo.vendor_name}`}
+                        </Typography>
+                      </Box>
+                    )}
                   </Box>
                 </Box>
               </Grid>
@@ -423,7 +530,7 @@ const TripDetails: FC = () => {
           )}
 
           {/* Payment History */}
-          <Card sx={{ p: 3, borderRadius: 3, boxShadow: 2, background: "#fff" }}>
+          <Card sx={{ p: 3, borderRadius: 3, boxShadow: 2, background: "#fff", mb: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
                 <PaymentIcon color="primary" />
@@ -451,6 +558,86 @@ const TripDetails: FC = () => {
               columns={paymentColumns}
               searchFields={['utrNumber', 'notes']}
             />
+          </Card>
+
+          {/* Tabbed Content for History and Audit Logs */}
+          <Card sx={{ borderRadius: 3, boxShadow: 2, background: "#fff" }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs 
+                value={currentTab} 
+                onChange={(event, newValue) => setCurrentTab(newValue)}
+                sx={{ px: 3 }}
+              >
+                <Tab 
+                  label="Status History" 
+                  icon={<HistoryIcon />}
+                  iconPosition="start"
+                />
+                <Tab 
+                  label="Audit Trail" 
+                  icon={<AssignmentIcon />}
+                  iconPosition="start"
+                />
+              </Tabs>
+            </Box>
+
+            {/* Status History Tab */}
+            {currentTab === 0 && (
+              <Box sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+                  <HistoryIcon color="primary" />
+                  Status History
+                </Typography>
+                
+                {statusHistory.length > 0 ? (
+                  <Box>
+                    {statusHistory.map((status, index) => (
+                      <Box key={status.id} sx={{ mb: 2 }}>
+                        <Paper 
+                          elevation={1} 
+                          sx={{ 
+                            p: 3, 
+                            borderLeft: '4px solid',
+                            borderLeftColor: index === 0 ? 'primary.main' : 'grey.300',
+                            backgroundColor: index === 0 ? 'primary.50' : 'grey.50'
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 600, color: index === 0 ? 'primary.main' : 'text.primary' }}>
+                              {status.status_label}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {dayjs(status.created_at).format('DD MMM YYYY, HH:mm')}
+                            </Typography>
+                          </Box>
+                          {status.notes && (
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                              {status.notes}
+                            </Typography>
+                          )}
+                        </Paper>
+                      </Box>
+                    ))}
+                  </Box>
+                ) : (
+                  <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+                    No status history available
+                  </Typography>
+                )}
+              </Box>
+            )}
+
+            {/* Audit Trail Tab */}
+            {currentTab === 1 && (
+              <Box sx={{ p: 3 }}>
+                {tripId && (
+                  <TripAuditLogs 
+                    tripId={tripId} 
+                    tripReferenceId={trip?.referenceId || (trip as any)?.reference_id}
+                  />
+                )}
+              </Box>
+            )}
           </Card>
         </Grid>
 
@@ -544,25 +731,43 @@ const TripDetails: FC = () => {
       <Dialog open={statusDialogOpen} onClose={() => setStatusDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Update Trip Status</DialogTitle>
         <DialogContent>
-          <FormControl fullWidth sx={{ mt: 2 }}>
+          <FormControl fullWidth sx={{ mt: 2, mb: 2 }}>
             <InputLabel>New Status</InputLabel>
             <Select
               value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value as TripStatusEnum)}
+              onChange={(e) => setNewStatus(e.target.value as number)}
               label="New Status"
             >
-              {Object.values(TripStatusEnum).map((status) => (
-                <MenuItem key={status} value={status}>
-                  {status}
+              {statusChoices.map((choice) => (
+                <MenuItem key={choice.value} value={choice.value}>
+                  {choice.label}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            label="Notes (Optional)"
+            value={statusNotes}
+            onChange={(e) => setStatusNotes(e.target.value)}
+            placeholder="Add any additional notes about this status update..."
+            sx={{ mt: 1 }}
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setStatusDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleStatusUpdate} variant="contained" disabled={!newStatus}>
-            Update Status
+          <Button onClick={() => {
+            setStatusDialogOpen(false);
+            setNewStatus('');
+            setStatusNotes('');
+          }}>Cancel</Button>
+          <Button 
+            onClick={handleStatusUpdate} 
+            variant="contained" 
+            disabled={newStatus === '' || loading}
+          >
+            {loading ? 'Updating...' : 'Update Status'}
           </Button>
         </DialogActions>
       </Dialog>

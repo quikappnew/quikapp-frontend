@@ -6,10 +6,8 @@ import CreateOrder from 'routes/Orders/CreateOrder';
 import CreateUserPage from './CreateUser';
 import Login from './Login';
 import RouteNotFound from './RouteNotFound';
-import Settings from './Settings';
 import User from './User';
 import UserDocuments from './User/Documents';
-import UserCards from './User/IdentityCards';
 import UserInformation from './User/Information';
 import Vehicle from './Vehicle';
 import VehicleDetails from './Vehicle/vehicleDetails';
@@ -19,7 +17,6 @@ import LocationDetails from './Locations/locationDetails';
 import Trips from './Trips';
 import ViewTrip from './Trips/ViewTrip';
 import Vendor from './Vendor';
-import VendorOnboarding from './Vendor/vendorOnBoardingForm';
 import Client from './Client';
 import Drivers from './Drivers';
 import AdministrationUsers from './Users';
@@ -39,6 +36,7 @@ import VehicleOnboardingList from './VehicleOnboarding/vehicleOnboarding';
 import VehicleOnboardingDetails from './VehicleOnboarding/vehicleDetails';
 import UpdateVehicleOnboardingForm from './VehicleOnboarding/updateVehicleOnboardingForm';
 import CreateTrip from './Trips/CreateTrip/CreateTrip';
+import EditTrip from './Trips/EditTrip';
 import GetOrders from './Orders';
 import OrderDetails from './Orders/orderDetails';
 import UpdateOrder from './Orders/updateOrder';
@@ -138,6 +136,14 @@ const App: React.FC = () => {
           element: (
             <ProtectedRoute>
               <ViewTrip />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: ':tripId/edit',
+          element: (
+            <ProtectedRoute>
+              <EditTrip />
             </ProtectedRoute>
           ),
         },

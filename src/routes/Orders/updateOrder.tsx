@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getOrderById, updateOrder, getClients, getLocationList, OrderData } from 'services/api';
+import { getOrderById, updateOrderWithAudit, getClients, getLocationList, OrderData } from 'services/api';
 import SidebarLayout from 'layouts/SidebarLayout';
 import { Controller, useForm, SubmitHandler } from 'react-hook-form';
 import Select from 'react-select';
@@ -61,11 +61,18 @@ export default function UpdateOrder() {
     setSuccessMessage('');
     setError('');
     try {
-      await updateOrder(id!, data);
+      await updateOrderWithAudit(id!, data);
       setSuccessMessage('Order updated successfully!');
       setTimeout(() => navigate('/orders/get-orders'), 1500);
     } catch (err: any) {
-      setError('Failed to update order');
+      // Extract specific error message from backend response
+      const errorMessage = err?.response?.data?.message || 
+                          err?.response?.data?.error || 
+                          err?.response?.data?.details ||
+                          err?.message || 
+                          'Failed to update order';
+      setError(errorMessage);
+      console.error('Order update error:', err);
     }
   };
 
@@ -89,16 +96,40 @@ export default function UpdateOrder() {
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div>
+                <label className="block text-base font-medium text-gray-800 mb-2">Order ID</label>
+                <Controller
+                  name="order_id"
+                  control={control}
+                  rules={{ required: 'Order ID is required' }}
+                  render={({ field }) => (
+                    <input
+                      type="text"
+                      {...field}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                      placeholder="Enter order ID"
+                    />
+                  )}
+                />
+                {errors.order_id && (
+                  <p className="text-red-500 text-sm mt-1">{errors.order_id.message}</p>
+                )}
+              </div>
+              <div>
                 <label className="block text-base font-medium text-gray-800 mb-2">Order Pricing</label>
                 <Controller
                   name="order_pricing"
                   control={control}
-                  rules={{ required: 'Order pricing is required' }}
+                  rules={{ 
+                    required: 'Order pricing is required',
+                    min: { value: 0.01, message: 'Order pricing must be greater than 0' }
+                  }}
                   render={({ field }) => (
                     <input
                       type="number"
+                      step="0.01"
                       {...field}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                      placeholder="Enter order pricing"
                     />
                   )}
                 />

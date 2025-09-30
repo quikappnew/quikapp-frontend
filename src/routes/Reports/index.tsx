@@ -1,7 +1,6 @@
-import { Box, Button, Card, Grid, TextField, Typography, Paper, LinearProgress, Tabs, Tab } from "@mui/material";
-import { useState, FC, useEffect } from "react";
+import { Box, Button, Card, Grid, TextField, Typography, Paper, Tabs, Tab } from "@mui/material";
+import { useState, FC, useEffect, useCallback } from "react";
 import DataTable from "components/DataTable";
-import { useNavigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import { 
@@ -76,7 +75,7 @@ const Reports: FC = () => {
   const [outstandingBalances, setOutstandingBalances] = useState<OutstandingBalance[]>([]);
   const [trends, setTrends] = useState<TrendData[]>([]);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -129,11 +128,11 @@ const Reports: FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dateRange]);
 
   useEffect(() => {
     fetchAnalytics();
-  }, [dateRange]);
+  }, [fetchAnalytics]);
 
   const handleExport = async (type: 'payments' | 'trips' | 'vendors' | 'outstanding', format: 'pdf' | 'excel' | 'csv') => {
     try {

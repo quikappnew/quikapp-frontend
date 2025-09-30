@@ -1,7 +1,6 @@
-import React, { FC, useContext } from 'react';
+import React, { FC } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
-import { FormContext } from 'context/FormContext';
 import { LoginForm, OTPForm, AuthMethodSelector, PasswordForm } from './component';
 import { useAuth } from './hooks';
 
@@ -12,7 +11,6 @@ const Login: FC = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const redirectTo = searchParams.get('redirectTo');
-  const { dispatch } = useContext(FormContext);
 
   const { formState, handleLogin, handleOTPVerification, handlePasswordLogin } = 
     useAuth(redirectTo, navigate);

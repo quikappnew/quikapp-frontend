@@ -19,7 +19,6 @@ import {
   InputAdornment,
   TableRow,
   TableCell,
-  TablePagination,
   Paper
 } from '@mui/material';
 import { 
@@ -33,7 +32,6 @@ import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
 import { toast } from 'react-toastify';
 import { getUsers, createSimpleUser, deleteUser, getCurrentUser } from 'services/api';
-import type { User, PaginatedResponse } from 'types/api';
 
 // Interface for user list API response
 interface UserListItem {
@@ -62,7 +60,6 @@ const UserManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserListItem | null>(null);
   const [createUserData, setCreateUserData] = useState<CreateUserFormData>({
     phone_number: '',
     full_name: '',
@@ -337,7 +334,6 @@ const UserManagement: React.FC = () => {
             color="primary"
             onClick={(e) => {
               e.stopPropagation();
-              setSelectedUser(user);
               setEditModalOpen(true);
             }}
             title="Edit User"

@@ -1,6 +1,6 @@
 // src/components/ClientForm.tsx
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography, Select, MenuItem, TextareaAutosize, FormControl, InputLabel } from '@mui/material';
+import { Box, TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { getVendors } from 'services/api';
 
 interface VehicleFormProps {

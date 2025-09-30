@@ -1,7 +1,6 @@
 import EditIcon from '@mui/icons-material/Edit';
 import {
   Autocomplete,
-  Box,
   Checkbox,
   FormControlLabel,
   IconButton,

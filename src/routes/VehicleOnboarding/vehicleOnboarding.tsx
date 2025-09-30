@@ -1,33 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box,
-  Typography,
   CircularProgress,
   Alert,
   Button,
-  Chip,
   Card,
-  TableCell,
 } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import { getOnboardedVehicles } from 'services/api';
-import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import DataTable from 'components/DataTable';
 import IconButton from '@mui/material/IconButton';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import EditIcon from '@mui/icons-material/Edit';
 
-const statusColor = (status: string) => {
-  switch (status) {
-    case 'COMPLETED':
-      return 'success';
-    case 'DOCUMENTS_SUBMITTED':
-      return 'warning';
-    default:
-      return 'default';
-  }
-};
 
 const VehicleOnboardingList = () => {
   const [vehicles, setVehicles] = useState<any[]>([]);

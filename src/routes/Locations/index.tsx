@@ -8,7 +8,7 @@ import DataTable from 'components/DataTable';
 import ConfirmationModal from './confrimationModal';
 import ConfirmButton from 'components/ConfirmButton';
 import { getRandomColor } from 'utils/randomColorGenerator';
-import api, { deleteLocation, getLocationList } from 'services/api';
+import { deleteLocation, getLocationList } from 'services/api';
 import dayjs from 'dayjs';
 
 export interface Order {
@@ -26,7 +26,6 @@ const Locations = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isDetailsView = location.pathname.includes('/locations/') && location.pathname !== '/locations';
-  const client = 'Sowmya';
   const [locationList, setLocationList] = useState<any[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
@@ -55,7 +54,7 @@ const Locations = () => {
   // Memoize the generated colors
   const cardColors = useMemo(() => {
     return list.map(() => getRandomColor());
-  }, []); // Empty dependency array ensures colors are generated only once
+  }, [list]); // Include list dependency
 
   const handleDelete = async (locationName: string, id: string) => {
     try {

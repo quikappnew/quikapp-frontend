@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Button, Grid, CircularProgress, Typography, Card } from '@mui/material';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Box, Button, CircularProgress, Typography, Card } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
 import VehicleModal from './vehicalModal';
@@ -22,7 +22,7 @@ const Vehicle = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const fetchVehicles = async () => {
+  const fetchVehicles = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getVehicles();
@@ -46,11 +46,11 @@ const Vehicle = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchVehicles();
-  }, [navigate]);
+  }, [fetchVehicles]);
 
   const handleModalSuccess = () => {
     fetchVehicles(); // Refresh the vehicles list

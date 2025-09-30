@@ -104,7 +104,6 @@ export const useAuth = (redirectTo: string | null, navigate: (path: string) => v
       localStorage.setItem('user', JSON.stringify(userData));
 
       // Verify token was set
-      const storedToken = TokenService.getToken();
       await new Promise(resolve => setTimeout(resolve, 100));
 
       if (TokenService.isAuthenticated()) {

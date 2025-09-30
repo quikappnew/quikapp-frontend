@@ -24,19 +24,13 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  Divider,
-  Paper,
-  IconButton,
-  Tooltip
+
 } from '@mui/material';
 import { 
   TrendingUp, 
-  TrendingDown, 
   LocalShipping, 
   Assignment,
   Payment,
-  AccountBalance,
-  Warning,
   CheckCircle,
   Schedule,
   Cancel,
@@ -46,8 +40,6 @@ import {
   Business,
   Receipt,
   Timeline,
-  BarChart,
-  PieChart
 } from '@mui/icons-material';
 import { TripStatusEnum } from 'types/api';
 import { PaymentStatusEnum } from 'services/api';

@@ -1,8 +1,8 @@
 import SidebarLayout from 'layouts/SidebarLayout';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Controller, useForm, SubmitHandler } from 'react-hook-form';
 import Select from 'react-select';
-import { createTrip, getVendors, getOrders, getOnboardedVehicles } from 'services/api';
+import { createTrip, getVendors, getOrders, getOnboardedVehicles, getAvailableVehicles } from 'services/api';
 import type { CreateTripData } from 'types/api';
 
 interface VendorOption {
@@ -50,6 +50,7 @@ export default function CreateTrip() {
   const [isLoadingVendors, setIsLoadingVendors] = useState(false);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
   const [isLoadingVehicles, setIsLoadingVehicles] = useState(false);
+  const [useNewVehicleAPI, setUseNewVehicleAPI] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -59,12 +60,6 @@ export default function CreateTrip() {
     { value: 'PARTIALLY_PAID', label: 'Partially Paid' },
     { value: 'OVERDUE', label: 'Overdue' }
   ];
-
-  useEffect(() => {
-    fetchVendors();
-    fetchOrders();
-    fetchVehicles();
-  }, []);
 
   const fetchVendors = async () => {
     try {
@@ -108,36 +103,65 @@ export default function CreateTrip() {
     }
   };
 
-  const fetchVehicles = async () => {
+  const fetchVehicles = useCallback(async () => {
     try {
       setIsLoadingVehicles(true);
-      const response = await getOnboardedVehicles();
       
-      if (response?.data) {
-        const vehicleData = response.data;
+      if (useNewVehicleAPI) {
+        // Use new available vehicles API
+        const response = await getAvailableVehicles();
         
-        if (vehicleData.length === 0) {
+        if (response.success && response.data.vehicles) {
+          const vehicleData = response.data.vehicles;
+          
+          if (vehicleData.length === 0) {
+            setVehicleOptions([]);
+            return;
+          }
+          
+          const mappedVehicles = vehicleData.map((vehicle: any) => {
+            const ownerLabel = vehicle.vehicle_owner === 'OWN_VEHICLE' ? 'Own' : 'Rented';
+            const vendorInfo = vehicle.vendor_name ? ` (${vehicle.vendor_name})` : '';
+            return {
+              value: vehicle.id?.toString() || '',
+              label: `${vehicle.vehicle_number || 'N/A'} - ${vehicle.truck_length || 'N/A'} - ${ownerLabel}${vendorInfo}`
+            };
+          });
+          
+          setVehicleOptions(mappedVehicles);
+        } else {
           setVehicleOptions([]);
-          return;
         }
-        
-        const mappedVehicles = vehicleData.map((vehicle: any) => {
-          return {
-            value: vehicle.id?.toString() || '',
-            label: `${vehicle.vehicle_number || 'N/A'} - ${vehicle.truck_length_feet || 'N/A'}`
-          };
-        });
-        
-        setVehicleOptions(mappedVehicles);
       } else {
-        setVehicleOptions([]);
+        // Use existing onboarded vehicles API
+        const response = await getOnboardedVehicles();
+        
+        if (response?.data) {
+          const vehicleData = response.data;
+          
+          if (vehicleData.length === 0) {
+            setVehicleOptions([]);
+            return;
+          }
+          
+          const mappedVehicles = vehicleData.map((vehicle: any) => {
+            return {
+              value: vehicle.id?.toString() || '',
+              label: `${vehicle.vehicle_number || 'N/A'} - ${vehicle.truck_length_feet || 'N/A'}`
+            };
+          });
+          
+          setVehicleOptions(mappedVehicles);
+        } else {
+          setVehicleOptions([]);
+        }
       }
     } catch (error) {
       setErrorMessage('Failed to fetch vehicles.');
     } finally {
       setIsLoadingVehicles(false);
     }
-  };
+  }, [useNewVehicleAPI]);
 
   const onSubmit: SubmitHandler<CreateTripData> = async (data) => {
     setSuccessMessage('');
@@ -150,6 +174,16 @@ export default function CreateTrip() {
       setErrorMessage(error?.message || 'Failed to create trip.');
     }
   };
+
+  useEffect(() => {
+    fetchVendors();
+    fetchOrders();
+    fetchVehicles();
+  }, [fetchVehicles]);
+
+  useEffect(() => {
+    fetchVehicles();
+  }, [fetchVehicles]);
 
   return (
     <SidebarLayout>
@@ -218,7 +252,20 @@ export default function CreateTrip() {
             </div>
 
             <div>
-              <label className="block text-base font-medium text-gray-800 mb-2">Vehicle</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-base font-medium text-gray-800">Vehicle</label>
+                <button
+                  type="button"
+                  onClick={() => setUseNewVehicleAPI(!useNewVehicleAPI)}
+                  className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                    useNewVehicleAPI 
+                      ? 'bg-blue-100 text-blue-800 border border-blue-300' 
+                      : 'bg-gray-100 text-gray-600 border border-gray-300'
+                  }`}
+                >
+                  {useNewVehicleAPI ? 'Enhanced View' : 'Standard View'}
+                </button>
+              </div>
               <Controller
                 name="vehicleId"
                 control={control}
@@ -231,13 +278,18 @@ export default function CreateTrip() {
                     isLoading={isLoadingVehicles}
                     className="react-select-container"
                     classNamePrefix="react-select"
-                    placeholder="Search and select vehicle..."
+                    placeholder={useNewVehicleAPI ? "Search available vehicles..." : "Search and select vehicle..."}
                     isClearable
                   />
                 )}
               />
               {errors.vehicleId && (
                 <p className="text-red-500 text-sm mt-1">{errors.vehicleId.message}</p>
+              )}
+              {useNewVehicleAPI && (
+                <p className="text-xs text-blue-600 mt-1">
+                  Enhanced view shows vehicle ownership and vendor information
+                </p>
               )}
             </div>
 

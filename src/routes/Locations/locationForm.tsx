@@ -29,7 +29,7 @@ const LocationForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit })
       created_at: new Date().toISOString(),
     };
     try {
-      const response = await addLocation(location);
+      await addLocation(location);
       
       setSnackbar({ 
         open: true,

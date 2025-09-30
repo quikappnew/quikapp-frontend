@@ -1,6 +1,6 @@
 // src/components/ClientModal.tsx
 import React from 'react';
-import { Modal, Box, Button, Typography } from '@mui/material';
+import { Modal, Box, Typography } from '@mui/material';
 import ClientForm from './clientForm';
 
 interface ClientModalProps {

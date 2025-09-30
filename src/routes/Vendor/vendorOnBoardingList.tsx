@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, CircularProgress, Button, Paper, InputBase, IconButton, Card, Tooltip } from '@mui/material';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Box, Typography, CircularProgress, IconButton, Card, Tooltip } from '@mui/material';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
 import { getVendorOnboarding } from 'services/api';
 import { useNavigate } from 'react-router-dom';
 import type { Vendor } from 'services/api';
-import SearchIcon from '@mui/icons-material/Search';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import VendorOnboardingEditModal from './vendorOnboardingEditModal';
@@ -41,11 +40,7 @@ const VendorOnBoardingList: React.FC = () => {
     { label: 'Action', fieldName: 'action', width: 120 },
   ];
 
-  useEffect(() => {
-    fetchVendors();
-  }, []);
-
-  const fetchVendors = async () => {
+  const fetchVendors = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getVendorOnboarding();
@@ -87,7 +82,11 @@ const VendorOnBoardingList: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchVendors();
+  }, [fetchVendors]);
 
   return (
     <SidebarLayout>

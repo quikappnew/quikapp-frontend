@@ -1,5 +1,5 @@
-import { Box, Button, Card, Grid, IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, FormControl, InputLabel, Select, MenuItem, Typography, Paper, LinearProgress } from "@mui/material";
-import { useState, FC, useEffect } from "react";
+import { Box, Button, Card, Grid, IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, FormControl, InputLabel, Select, MenuItem, Typography, Paper } from "@mui/material";
+import { useState, FC, useEffect, useCallback } from "react";
 import DataTable from "components/DataTable";
 import { useNavigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -51,7 +51,26 @@ const AccountsPayable: FC = () => {
     endDate: ''
   });
 
-  const fetchPayments = async () => {
+  const handleViewPayment = useCallback((paymentId: string) => {
+    navigate(`/payments/${paymentId}/view`);
+  }, [navigate]);
+
+  const handleEditPayment = useCallback((paymentId: string) => {
+    navigate(`/payments/${paymentId}/edit`);
+  }, [navigate]);
+
+  const handleDeletePayment = useCallback(async (paymentId: string) => {
+    try {
+      await deletePayment(paymentId);
+      toast.success('Payment deleted successfully');
+      // Refresh data by updating filters to trigger useEffect
+      setFilters(prev => ({ ...prev }));
+    } catch (error) {
+      toast.error('Failed to delete payment');
+    }
+  }, []);
+
+  const fetchPayments = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getPayments({
@@ -111,9 +130,9 @@ const AccountsPayable: FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, handleViewPayment, handleEditPayment, handleDeletePayment]);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       const [ordersRes, tripsRes, vendorsRes, outstandingRes] = await Promise.all([
         getOrdersAnalytics({
@@ -145,31 +164,13 @@ const AccountsPayable: FC = () => {
     } catch (err) {
 
     }
-  };
+  }, [filters]);
 
   useEffect(() => {
     fetchPayments();
     fetchAnalytics();
-  }, [filters]);
+  }, [fetchPayments, fetchAnalytics]);
 
-  const handleViewPayment = (paymentId: string) => {
-    navigate(`/payments/${paymentId}/view`);
-  };
-
-  const handleEditPayment = (paymentId: string) => {
-    navigate(`/payments/${paymentId}/edit`);
-  };
-
-  const handleDeletePayment = async (paymentId: string) => {
-    try {
-      await deletePayment(paymentId);
-      toast.success('Payment deleted successfully');
-      fetchPayments();
-      fetchAnalytics();
-    } catch (error) {
-      toast.error('Failed to delete payment');
-    }
-  };
 
 
 

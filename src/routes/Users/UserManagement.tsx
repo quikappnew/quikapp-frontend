@@ -24,16 +24,12 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  Paper,
   Switch,
   FormControlLabel,
   Grid,
   Card,
   CardContent,
-  CardActions,
-  Divider,
   Tooltip,
-  Snackbar
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -50,7 +46,6 @@ import {
 import { toast } from 'react-toastify';
 import {
   createUserManagement,
-  getUserManagement,
   updateUserManagement,
   listUsersManagement,
   deleteUserManagement,
@@ -58,7 +53,6 @@ import {
   updateUserRoleManagement,
   changePasswordManagement,
   isSuperUser,
-  requireSuperUser,
   type UserManagementUser,
   type CreateUserRequest,
   type UpdateUserRequest,

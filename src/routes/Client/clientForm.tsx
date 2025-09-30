@@ -1,6 +1,6 @@
 // src/components/ClientForm.tsx
 import React, { useState } from 'react';
-import { Box, TextField, Button, Typography } from '@mui/material';
+import { Box, TextField, Button } from '@mui/material';
 import { addClient } from 'services/api';
 
 const ClientForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) => {

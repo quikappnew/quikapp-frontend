@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { getOrdersWithVendorInterests, Order, APIOrderResponse } from 'services/api';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { getOrdersWithVendorInterests, Order } from 'services/api';
 import SidebarLayout from 'layouts/SidebarLayout';
 import DataTable from 'components/DataTable';
 import { useNavigate } from 'react-router-dom';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import debounce from 'utils/debounce';
-import { Box, Card, Typography, TextField, Grid, Tabs, Tab, Modal, Button, Chip } from '@mui/material';
+import { Box, Card, Typography, Grid, Tabs, Tab, Modal, Button, Chip } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -72,11 +72,7 @@ const columns = [
   { label: 'Actions', fieldName: 'actions', width: 200 },
 ];
 
-  useEffect(() => {
-    fetchOrders();
-  }, [search, page, rowsPerPage, startDate, endDate]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -209,7 +205,11 @@ const columns = [
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, page, rowsPerPage, startDate, endDate]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const debouncedSetSearch = useMemo(() => debounce((value: string) => {
     setPage(0);

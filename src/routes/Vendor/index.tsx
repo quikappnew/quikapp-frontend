@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { Box, Typography, CircularProgress, Card, IconButton, Tooltip } from '@mui/material';
 import { Edit as EditIcon } from '@mui/icons-material';
 import SidebarLayout from 'layouts/SidebarLayout';
@@ -10,7 +10,6 @@ import debounce from 'utils/debounce';
 import VendorEditModal from './vendorEditModal';
 
 const Vendor = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [vendors, setVendors] = useState<APIVendorResponse['data']>([]);
   const [error, setError] = useState<string | null>(null);
@@ -61,11 +60,7 @@ const Vendor = () => {
     },
   ];
 
-  useEffect(() => {
-    fetchVendors();
-  }, [page, rowsPerPage, search]);
-
-  const fetchVendors = async () => {
+  const fetchVendors = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getVendors({
@@ -82,7 +77,11 @@ const Vendor = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, page, rowsPerPage]);
+
+  useEffect(() => {
+    fetchVendors();
+  }, [fetchVendors]);
 
   const debouncedSetSearch = useMemo(() => debounce((value: string) => {
     setPage(0);

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import SidebarLayout from 'layouts/SidebarLayout';
 import UserManagement from './UserManagement';
 import { isSuperUser, getCurrentUser } from 'services/api';
-import { Navigate } from 'react-router-dom';
 import { Alert, Box, Typography } from '@mui/material';
 
 const UserManagementRoute: React.FC = () => {
