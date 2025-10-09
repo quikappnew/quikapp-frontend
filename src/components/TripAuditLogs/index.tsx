@@ -112,14 +112,14 @@ const TripAuditLogs: FC<TripAuditLogsProps> = ({ tripId, tripReferenceId }) => {
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Avatar sx={{ width: 32, height: 32, fontSize: '0.875rem' }}>
-                          {log.user.username.charAt(0).toUpperCase()}
+                          {log.user ? log.user.username.charAt(0).toUpperCase() : 'S'}
                         </Avatar>
                         <Box>
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {log.user.full_name || log.user.username}
+                            {log.user ? (log.user.full_name || log.user.username) : 'System'}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {log.user.username}
+                            {log.user ? log.user.username : 'Automated action'}
                           </Typography>
                         </Box>
                       </Box>

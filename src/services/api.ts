@@ -1992,7 +1992,7 @@ export interface TripAuditLog {
     username: string;
     full_name: string;
     email?: string;
-  };
+  } | null;
   ip_address: string;
   user_agent: string;
   notes: string;
@@ -2119,7 +2119,7 @@ export interface OrderAuditLog {
     username: string;
     full_name: string;
     email?: string;
-  };
+  } | null;
   ip_address: string;
   user_agent: string;
   notes: string;

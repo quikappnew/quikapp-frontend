@@ -40,3 +40,4 @@ export const PaymentStatusEnum = {
     PARTIALLY_PAID: 2,
     OVERDUE: 3,
 } as const;
+

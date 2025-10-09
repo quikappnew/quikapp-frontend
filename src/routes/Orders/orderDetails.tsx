@@ -190,25 +190,27 @@ export default function OrderDetails() {
                        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                          Created By
                        </Typography>
-                       {order.order_created_by ? (
-                         <>
-                           <Typography variant="body1" fontWeight={500}>
-                             {order.order_created_by.full_name || order.order_created_by.username || 'Unknown User'}
-                           </Typography>
-                           {order.order_created_by.phone_number && (
-                             <Typography variant="body2" color="text.secondary">
-                               {order.order_created_by.phone_number}
-                             </Typography>
-                           )}
-                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem', mt: 0.5 }}>
-                             ID: {order.order_created_by.id}
-                           </Typography>
-                         </>
-                       ) : (
-                         <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                           Creator information not available
-                         </Typography>
-                       )}
+                      {order.order_created_by ? (
+                        <>
+                          <Typography variant="body1" fontWeight={500}>
+                            {order.order_created_by?.full_name || order.order_created_by?.username || 'Unknown User'}
+                          </Typography>
+                          {order.order_created_by?.phone_number && (
+                            <Typography variant="body2" color="text.secondary">
+                              {order.order_created_by.phone_number}
+                            </Typography>
+                          )}
+                          {order.order_created_by?.id && (
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem', mt: 0.5 }}>
+                              ID: {order.order_created_by.id}
+                            </Typography>
+                          )}
+                        </>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                          Creator information not available
+                        </Typography>
+                      )}
                      </Box>
                   </CardContent>
                 </Card>

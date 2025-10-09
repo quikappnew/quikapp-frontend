@@ -51,7 +51,6 @@ const Dashboard = () => {
     const [vendorsData, setVendorsData] = useState<any[]>([]);
     const [vendorSummary, setVendorSummary] = useState<any[]>([]);
     const [tripSummary, setTripSummary] = useState<any[]>([]);
-    const [outstandingBalances, setOutstandingBalances] = useState<any[]>([]);
     const [error, setError] = useState('');
 
     useEffect(() => {
@@ -89,7 +88,6 @@ const Dashboard = () => {
             setVendorsData(vendorsResponse.data || []);
             setVendorSummary(vendorSummaryResponse.data || []);
             setTripSummary(tripSummaryResponse.data || []);
-            setOutstandingBalances(outstandingResponse.data || []);
 
         } catch (err: any) {
 
@@ -138,49 +136,7 @@ const Dashboard = () => {
 
     const stats = calculateStats();
 
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'SCHEDULED':
-            case 'scheduled':
-                return <Schedule color="info" />;
-            case 'ONGOING':
-            case 'ongoing':
-                return <LocalShipping color="primary" />;
-            case 'COMPLETED':
-            case 'completed':
-                return <CheckCircle color="success" />;
-            case 'CANCELLED':
-            case 'cancelled':
-                return <Cancel color="error" />;
-            case 'DELAYED':
-            case 'delayed':
-                return <Pause color="warning" />;
-            default:
-                return <Schedule color="info" />;
-        }
-    };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'SCHEDULED':
-            case 'scheduled':
-                return 'info';
-            case 'ONGOING':
-            case 'ongoing':
-                return 'primary';
-            case 'COMPLETED':
-            case 'completed':
-                return 'success';
-            case 'CANCELLED':
-            case 'cancelled':
-                return 'error';
-            case 'DELAYED':
-            case 'delayed':
-                return 'warning';
-            default:
-                return 'info';
-        }
-    };
 
     const StatCard = ({ title, value, icon, color, subtitle }: any) => (
         <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%' }}>
